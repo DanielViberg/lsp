@@ -626,13 +626,15 @@ def TextdocDidChange(lspserver: dict<any>, bnr: number, start: number,
         contentChanges: changeset
       }
 
-      if true
+      if lspserver.caps.textDocumentSync == 1 || 
+          ( start == 0 && end == 0 && added == 0 )
         changeset = [{
          text: bnr->getbufline(1, '$')->join("\n") .. "\n"
         }]
       endif
       
-      if false 
+      if lspserver.caps.textDocumentSync == 2 &&
+          !(start == 0 && end == 0 && added == 0)
         var startpos = start > 1 ? (added < 0 ? start - 1 : start - 2) : 0
         var lines: string = added < 0 ? '' : bnr->getbufline(start - 1, end - 1 + added)->join("\n") .. "\n"
         var range: dict<dict<number>> = {
