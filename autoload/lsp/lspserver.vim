@@ -644,9 +644,7 @@ def TextdocDidChange(lspserver: dict<any>, bnr: number, start: number,
         changeset->add({range: range, text: lines})
       endif
 
-      echomsg 'start: ' .. start .. ' end: ' .. end .. ' added: ' .. added
-      echomsg json_encode(changeset)
-      echomsg '####'
+      echomsg 'start: ' .. start .. ' end: ' .. end .. ' added: ' .. added .. ' changes: ' .. changes->len()
 
       params.contentChanges = changeset
       if lspserver.caps.textDocumentSync != 0
