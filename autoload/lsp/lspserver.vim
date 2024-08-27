@@ -616,6 +616,7 @@ def TextdocDidChange(lspserver: dict<any>, bnr: number, start: number,
  if lspserver.caps->has_key('textDocumentSync')
     if lspserver.caps.textDocumentSync->type() == v:t_number
 
+
       var changeset: list<dict<any>>
       var params = {
         textDocument: {
@@ -625,7 +626,7 @@ def TextdocDidChange(lspserver: dict<any>, bnr: number, start: number,
       },
         contentChanges: changeset
       }
-
+      
       if lspserver.caps.textDocumentSync == 1 || 
           ( start == 0 && end == 0 && added == 0 )
         changeset = [{
@@ -635,16 +636,48 @@ def TextdocDidChange(lspserver: dict<any>, bnr: number, start: number,
       
       if lspserver.caps.textDocumentSync == 2 &&
           !(start == 0 && end == 0 && added == 0)
-        var startpos = start > 1 ? (added < 0 ? start - 1 : start - 2) : 0
-        var lines: string = added < 0 ? '' : bnr->getbufline(start - 1, end - 1 + added)->join("\n") .. "\n"
-        var range: dict<dict<number>> = {
-          start: {line: startpos, character: 0},
-          end: {line: end - 1, character: 0}
-        }
-        changeset->add({range: range, text: lines})
-      endif
 
-      echomsg 'start: ' .. start .. ' end: ' .. end .. ' added: ' .. added .. ' changes: ' .. changes->len()
+        var nchanges: list<any>
+        for change in changes 
+          nchanges->add({
+            lnum: change.lnum,
+            end: change.end,
+            lines: getbufline(bnr, change.lnum, change.end - 1 + change.added)
+          })
+        endfor
+
+        var contents = bnr->getbufline(1, '$')
+        for c in nchanges 
+          var newcontents: list<string> = []
+          var change = {
+            range: {
+              start: {
+                line: c.lnum - 1, 
+                character: 0
+              },
+              end: {}
+            },
+            text: '',
+          }
+          newcontents += contents[ : c.lnum - 1]
+
+          for l in c.lines 
+            newcontents += [l]
+          endfor
+
+          if c.lines->len() > 0 
+            change.text = c.lines->join("\n") .. "\n"
+          endif
+
+          newcontents += contents[c.end - 1 : ]
+          change.range.end = {
+            line: c.end - 1,
+            character: 0
+          }
+          contents = newcontents
+          changeset->add(change)
+        endfor
+      endif
 
       params.contentChanges = changeset
       if lspserver.caps.textDocumentSync != 0
