@@ -646,37 +646,43 @@ def TextdocDidChange(lspserver: dict<any>, bnr: number, start: number,
           })
         endfor
 
-        var contents = bnr->getbufline(1, '$')
-        for c in nchanges 
-          var newcontents: list<string> = []
-          var change = {
-            range: {
-              start: {
-                line: c.lnum - 1, 
-                character: 0
+        if nchanges->len() > 1
+          changeset = [{
+           text: bnr->getbufline(1, '$')->join("\n") .. "\n"
+          }]
+        else
+          var contents = bnr->getbufline(1, '$')
+          for c in nchanges 
+            var newcontents: list<string> = []
+            var change = {
+              range: {
+                start: {
+                  line: c.lnum - 1, 
+                  character: 0
+                },
+                end: {}
               },
-              end: {}
-            },
-            text: '',
-          }
-          newcontents += contents[ : c.lnum - 1]
+              text: '',
+            }
+            newcontents += contents[ : c.lnum - 1]
 
-          for l in c.lines 
-            newcontents += [l]
+            for l in c.lines 
+              newcontents += [l]
+            endfor
+
+            if c.lines->len() > 0 
+              change.text = c.lines->join("\n") .. "\n"
+            endif
+
+            newcontents += contents[c.end - 1 : ]
+            change.range.end = {
+              line: c.end - 1,
+              character: 0
+            }
+            contents = newcontents
+            changeset->add(change)
           endfor
-
-          if c.lines->len() > 0 
-            change.text = c.lines->join("\n") .. "\n"
-          endif
-
-          newcontents += contents[c.end - 1 : ]
-          change.range.end = {
-            line: c.end - 1,
-            character: 0
-          }
-          contents = newcontents
-          changeset->add(change)
-        endfor
+        endif
       endif
 
       params.contentChanges = changeset
