@@ -616,7 +616,6 @@ def TextdocDidChange(lspserver: dict<any>, bnr: number, start: number,
  if lspserver.caps->has_key('textDocumentSync')
     if lspserver.caps.textDocumentSync->type() == v:t_number
 
-
       var changeset: list<dict<any>>
       var params = {
         textDocument: {
@@ -636,50 +635,22 @@ def TextdocDidChange(lspserver: dict<any>, bnr: number, start: number,
       
       if lspserver.caps.textDocumentSync == 2 &&
           !(start == 0 && end == 0 && added == 0)
-
-        var nchanges: list<any>
-        for change in changes 
-          nchanges->add({
-            lnum: change.lnum,
-            end: change.end,
-            lines: getbufline(bnr, change.lnum, change.end - 1 + change.added)
-          })
-        endfor
-
-        if nchanges->len() > 1
+        if changes->len() > 1
+          ## TODO: handle multiple changes to, only single line change currently supported
           changeset = [{
            text: bnr->getbufline(1, '$')->join("\n") .. "\n"
           }]
         else
-          var contents = bnr->getbufline(1, '$')
-          for c in nchanges 
-            var newcontents: list<string> = []
+          for c in changes 
+            var lines = getbufline(bnr, c.lnum, c.end - 1 + c.added)
+            var text = lines->len() > 0 ? lines->join("\n") .. "\n" : ''
             var change = {
-              range: {
-                start: {
-                  line: c.lnum - 1, 
-                  character: 0
-                },
-                end: {}
-              },
-              text: '',
-            }
-            newcontents += contents[ : c.lnum - 1]
-
-            for l in c.lines 
-              newcontents += [l]
-            endfor
-
-            if c.lines->len() > 0 
-              change.text = c.lines->join("\n") .. "\n"
-            endif
-
-            newcontents += contents[c.end - 1 : ]
-            change.range.end = {
-              line: c.end - 1,
-              character: 0
-            }
-            contents = newcontents
+                  range: { 
+                    start: { line: c.lnum - 1, character: 0 },
+                    end: { line: c.end - 1, character: 0 }
+                  },
+                text: text 
+              }
             changeset->add(change)
           endfor
         endif
