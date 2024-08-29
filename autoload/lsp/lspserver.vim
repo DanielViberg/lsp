@@ -644,14 +644,9 @@ def TextdocDidChange(lspserver: dict<any>, bnr: number, start: number,
           for c in changes 
             var lines = getbufline(bnr, c.lnum, c.end - 1 + c.added)
             var text = lines->len() > 0 ? lines->join("\n") .. "\n" : ''
-            var change = {
-                  range: { 
-                    start: { line: c.lnum - 1, character: 0 },
-                    end: { line: c.end - 1, character: 0 }
-                  },
-                text: text 
-              }
-            changeset->add(change)
+            changeset->add({range: { start: { line: c.lnum - 1, character: 0 },
+                                     end: { line: c.end - 1, character: 0 }},
+                            text: text })
           endfor
         endif
       endif
