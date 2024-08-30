@@ -100,7 +100,7 @@ def ServerInitReply(lspserver: dict<any>, initResult: dict<any>): void
   if initResult->empty()
     return
   endif
-
+  
   var caps: dict<any> = initResult.capabilities
   lspserver.caps = caps
 
@@ -636,7 +636,6 @@ def TextdocDidChange(lspserver: dict<any>, bnr: number, start: number,
       if lspserver.caps.textDocumentSync == 2 &&
           !(start == 0 && end == 0 && added == 0)
         if changes->len() > 1
-          ## TODO: handle multiple changes to, only single line change currently supported
           changeset = [{
            text: bnr->getbufline(1, '$')->join("\n") .. "\n"
           }]
@@ -687,7 +686,6 @@ def GetPosition(lspserver: dict<any>, find_ident: bool): dict<number>
   # characters
   var pos = {line: lnum, character: util.GetCharIdxWithCompChar(line, col)}
   lspserver.encodePosition(bufnr(), pos)
-
   return pos
 enddef
 
@@ -721,8 +719,15 @@ def GetCompletion(lspserver: dict<any>, triggerKind_arg: number, triggerChar: st
   #   interface CompletionContext
   params.context = {triggerKind: triggerKind_arg, triggerCharacter: triggerChar}
 
-  lspserver.rpc_a('textDocument/completion', params,
-			completion.CompletionReply)
+  # Check completion prefix, dont request if its empty
+  echomsg completion.GetCompletionPrefix()
+  if !completion.GetCompletionPrefix().prefix->empty()
+    # Run CompletionReply but with buffer completes before request
+    var items: list<dict<any>> 
+    completion.CompletionFromBuffer(items)
+    completion.CompletionReply(lspserver, { items: items })
+    lspserver.rpc_a('textDocument/completion', params, completion.CompletionReply)
+  endif
 enddef
 
 # Get lazy properties for a completion item.

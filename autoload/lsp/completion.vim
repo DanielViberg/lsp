@@ -116,7 +116,7 @@ def MakeValidWord(str_arg: string): string
 enddef
 
 # add completion from current buf
-def CompletionFromBuffer(items: list<dict<any>>)
+export def CompletionFromBuffer(items: list<dict<any>>)
   var words = {}
   var start = reltime()
   var timeout = opt.lspOptions.bufferCompletionTimeout
@@ -144,10 +144,23 @@ def CompletionFromBuffer(items: list<dict<any>>)
   endfor
 enddef
 
+# get completion prefix 
+export def GetCompletionPrefix(): dict<any>
+  var chcol = charcol('.')
+  var starttext = chcol == 1 ? '' : getline('.')[ : chcol - 2]
+  var [prefix, start_idx, end_idx] = starttext->matchstrpos('\k*$')
+  return {
+    prefix: prefix,
+    start_idx: start_idx,
+    end_idx: end_idx,
+    starttext: starttext,
+    chcol: chcol,
+  }
+enddef
+
 # process the 'textDocument/completion' reply from the LSP server
 # Result: CompletionItem[] | CompletionList | null
 export def CompletionReply(lspserver: dict<any>, cItems: any)
-  lspserver.completeItemsIsIncomplete = false
   if cItems->empty()
     if lspserver.omniCompletePending
       lspserver.completeItems = []
@@ -167,9 +180,17 @@ export def CompletionReply(lspserver: dict<any>, cItems: any)
   var lspOpts = opt.lspOptions
 
   # Get the keyword prefix before the current cursor column.
-  var chcol = charcol('.')
-  var starttext = chcol == 1 ? '' : getline('.')[ : chcol - 2]
-  var [prefix, start_idx, end_idx] = starttext->matchstrpos('\k*$')
+  var compprefix = GetCompletionPrefix()
+  var prefix = compprefix.prefix
+  var start_idx = compprefix.start_idx
+  var end_idx = compprefix.end_idx
+  var starttext = compprefix.starttext
+  var chcol = compprefix.chcol
+
+  if prefix->empty()
+    return
+  endif
+
   if lspOpts.completionMatcherValue == opt.COMPLETIONMATCHER_ICASE
     prefix = prefix->tolower()
   endif
@@ -186,6 +207,13 @@ export def CompletionReply(lspserver: dict<any>, cItems: any)
     CompletionFromBuffer(items)
   endif
 
+  var start_charcol: number
+  if !prefix->empty()
+    start_charcol = charidx(starttext, start_idx) + 1
+  else
+    start_charcol = chcol
+  endif
+
   var completeItems: list<dict<any>> = []
   var itemsUsed: list<string> = []
   for item in items
@@ -196,33 +224,31 @@ export def CompletionReply(lspserver: dict<any>, cItems: any)
     # way before the typed keyword.
     if item->has_key('textEdit') &&
 	lspOpts.completionMatcherValue != opt.COMPLETIONMATCHER_FUZZY
-      var start_charcol: number
-      if !prefix->empty()
-	start_charcol = charidx(starttext, start_idx) + 1
-      else
-	start_charcol = chcol
-      endif
       var textEdit = item.textEdit
       var textEditRange: dict<any> = {}
+
       if textEdit->has_key('range')
 	textEditRange = textEdit.range
       elseif textEdit->has_key('insert')
 	textEditRange = textEdit.insert
       endif
+
       var textEditStartCol =
 		util.GetCharIdxWithoutCompChar(bufnr(), textEditRange.start)
+
       if textEditStartCol != start_charcol
 	var offset = start_charcol - textEditStartCol - 1
 	d.word = textEdit.newText[offset : ]
       else
 	d.word = textEdit.newText
       endif
+
     elseif item->has_key('insertText')
       d.word = item.insertText
     else
       d.word = item.label
     endif
-
+    
     if item->get('insertTextFormat', 1) == 2
       # snippet completion.  Needs a snippet plugin to expand the snippet.
       # Remove all the snippet placeholders

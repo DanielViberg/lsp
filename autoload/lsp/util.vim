@@ -214,7 +214,7 @@ export def GetCharIdxWithoutCompChar(bnr: number, pos: dict<number>): number
     endif
   endif
 
-  return col
+  return col 
 enddef
 
 # Get the index of the character at [pos.line, pos.character] in buffer "bnr"
