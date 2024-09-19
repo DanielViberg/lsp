@@ -625,7 +625,7 @@ def TextdocDidChange(lspserver: dict<any>, bnr: number, start: number,
       },
         contentChanges: changeset
       }
-      
+
       if lspserver.caps.textDocumentSync == 1 || 
           ( start == 0 && end == 0 && added == 0 )
         changeset = [{
@@ -649,7 +649,6 @@ def TextdocDidChange(lspserver: dict<any>, bnr: number, start: number,
           endfor
         endif
       endif
-
       params.contentChanges = changeset
       if lspserver.caps.textDocumentSync != 0
         lspserver.sendNotification('textDocument/didChange', params)
@@ -720,7 +719,6 @@ def GetCompletion(lspserver: dict<any>, triggerKind_arg: number, triggerChar: st
   params.context = {triggerKind: triggerKind_arg, triggerCharacter: triggerChar}
 
   # Check completion prefix, dont request if its empty
-  echomsg completion.GetCompletionPrefix()
   if !completion.GetCompletionPrefix().prefix->empty()
     # Run CompletionReply but with buffer completes before request
     var items: list<dict<any>> 

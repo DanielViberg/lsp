@@ -255,9 +255,13 @@ export def CompletionReply(lspserver: dict<any>, cItems: any)
       d.word = MakeValidWord(d.word)
     elseif !lspserver.completeItemsIsIncomplete || lspOpts.useBufferCompletion
       # Filter items only when "isIncomplete" is set (otherwise server would
-      #   have done the filtering) or when buffer completion is enabled
-
+      # have done the filtering) or when buffer completion is enabled
       # plain text completion
+      # ----
+      # Not correct, isIncomplete has nothing to do with filtering. 
+      # Regarding filtering: 
+      # 'to achieve consistency across languages and to honor different clients 
+      # usually the client is responsible for filtering and sorting.'
       if !prefix->empty()
 	# If the completion item text doesn't start with the current (case
 	# ignored) keyword prefix, skip it.
