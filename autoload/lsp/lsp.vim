@@ -91,6 +91,10 @@ enddef
 # Add a LSP server for a filetype
 def LspAddServer(ftype: string, lspsrv: dict<any>)
   var lspsrvlst = ftypeServerMap->has_key(ftype) ? ftypeServerMap[ftype] : []
+  if util.Indexof(lspsrvlst, (_, v) => v.name == lspsrv.name) != -1
+      # LSP server already added for this file type
+      return
+  endif
   lspsrvlst->add(lspsrv)
   ftypeServerMap[ftype] = lspsrvlst
 enddef
@@ -335,7 +339,14 @@ def LspSavedFile(bnr: number)
   endif
 
   for lspserver in lspservers
-    lspserver.didSaveFile(bnr)
+    # TODO: implement `catch` block
+    # Wrap method with `try-finally` block to solve error: 
+    # `E716: Key not present in Dictionary: "supportsDidSave"`
+    try
+      lspserver.didSaveFile(bnr)
+    finally
+      return
+    endtry
   endfor
 enddef
 
@@ -471,9 +482,13 @@ export def AddFile(bnr: number): void
     if lspserver.ready
       BufferInit(lspserver.id, bnr)
     else
-      augroup LSPBufferAutocmds
-        exe $'autocmd User LspServerReady_{lspserver.id} ++once BufferInit({lspserver.id}, {bnr})'
-      augroup END
+      # Lsp server is not ready yet.  Initialize the lsp state for this buffer
+      # when the server is ready.
+      autocmd_add([{group: 'LSPBufferAutocmds',
+                   event: 'User',
+                   pattern: $'LspServerReady_{lspserver.id}',
+                   once: true,
+                   cmd: $'BufferInit({lspserver.id}, {bnr})'}])
     endif
   endfor
 enddef
@@ -543,7 +558,7 @@ enddef
 
 # Restart the LSP server for the current buffer
 def RestartServer()
-  var lspservers: list<dict<any>> = buf.CurbufGetServers()
+  var lspservers: list<dict<any>> = buf.CurbufGetServers()->copy()
   if lspservers->empty()
     util.WarnMsg($'No Lsp servers found for "{@%}"')
     return
@@ -794,6 +809,8 @@ export def InlayHints(ctl: string)
     inlayhints.InlayHintsEnable()
   elseif ctl == 'disable'
     inlayhints.InlayHintsDisable()
+  elseif ctl == 'toggle'
+    inlayhints.InlayHintsToggle()
   else
     util.ErrMsg($'LspInlayHints - Unsupported argument "{ctl}"')
   endif
@@ -801,7 +818,7 @@ enddef
 
 # Command-line completion for the ":LspInlayHints" command
 export def LspInlayHintsComplete(arglead: string, cmdline: string, cursorPos: number): list<string>
-  var l = ['enable', 'disable']
+  var l = ['enable', 'disable', 'toggle']
   return filter(l, (_, val) => val =~ $'^{arglead}')
 enddef
 
@@ -1124,6 +1141,12 @@ enddef
 export def FormatExpr(): number
   var lspserver: dict<any> = buf.CurbufGetServerChecked('documentFormatting')
   if lspserver->empty()
+    return 1
+  endif
+
+  if ['i', 'R', 'ic', 'ix']->index(mode()) != -1
+    # When 'formatexpr' is called in insert mode to format a line exceeding
+    # 'textwidth', use internal formatting.
     return 1
   endif
 
