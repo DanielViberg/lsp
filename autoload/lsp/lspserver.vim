@@ -613,46 +613,43 @@ def TextdocDidChange(lspserver: dict<any>, bnr: number, start: number,
 			changes: list<dict<number>>): void
   # Notification: 'textDocument/didChange'
   # Params: DidChangeTextDocumentParams
- if lspserver.caps->has_key('textDocumentSync')
-    if lspserver.caps.textDocumentSync->type() == v:t_number
+  if lspserver.textDocumentSync->type() == v:t_number
+    var changeset: list<dict<any>>
+    var params = {
+      textDocument: {
+      uri: util.LspBufnrToUri(bnr),
+      # Use Vim 'changedtick' as the LSP document version number
+      version: bnr->getbufvar('changedtick')
+    },
+      contentChanges: changeset
+    }
 
-      var changeset: list<dict<any>>
-      var params = {
-        textDocument: {
-        uri: util.LspBufnrToUri(bnr),
-        # Use Vim 'changedtick' as the LSP document version number
-        version: bnr->getbufvar('changedtick')
-      },
-        contentChanges: changeset
-      }
-
-      if lspserver.caps.textDocumentSync == 1 || 
-          ( start == 0 && end == 0 && added == 0 )
+    if lspserver.textDocumentSync == 1 || 
+        ( start == 0 && end == 0 && added == 0 )
+      changeset = [{
+       text: bnr->getbufline(1, '$')->join("\n") .. "\n"
+      }]
+    endif
+    
+    if lspserver.textDocumentSync == 2 &&
+        !(start == 0 && end == 0 && added == 0)
+      if changes->len() > 1
         changeset = [{
          text: bnr->getbufline(1, '$')->join("\n") .. "\n"
         }]
+      else
+        for c in changes 
+          var lines = getbufline(bnr, c.lnum, c.end - 1 + c.added)
+          var text = lines->len() > 0 ? lines->join("\n") .. "\n" : ''
+          changeset->add({range: { start: { line: c.lnum - 1, character: 0 },
+                                   end: { line: c.end - 1, character: 0 }},
+                          text: text })
+        endfor
       endif
-      
-      if lspserver.caps.textDocumentSync == 2 &&
-          !(start == 0 && end == 0 && added == 0)
-        if changes->len() > 1
-          changeset = [{
-           text: bnr->getbufline(1, '$')->join("\n") .. "\n"
-          }]
-        else
-          for c in changes 
-            var lines = getbufline(bnr, c.lnum, c.end - 1 + c.added)
-            var text = lines->len() > 0 ? lines->join("\n") .. "\n" : ''
-            changeset->add({range: { start: { line: c.lnum - 1, character: 0 },
-                                     end: { line: c.end - 1, character: 0 }},
-                            text: text })
-          endfor
-        endif
-      endif
-      params.contentChanges = changeset
-      if lspserver.caps.textDocumentSync != 0
-        lspserver.sendNotification('textDocument/didChange', params)
-      endif
+    endif
+    params.contentChanges = changeset
+    if lspserver.textDocumentSync != 0
+      lspserver.sendNotification('textDocument/didChange', params)
     endif
   endif
 enddef
@@ -722,8 +719,8 @@ def GetCompletion(lspserver: dict<any>, triggerKind_arg: number, triggerChar: st
   if !completion.GetCompletionPrefix().prefix->empty()
     # Run CompletionReply but with buffer completes before request
     var items: list<dict<any>> 
-    completion.CompletionFromBuffer(items)
-    completion.CompletionReply(lspserver, { items: items })
+    # completion.CompletionFromBuffer(items)
+    # completion.CompletionReply(lspserver, { items: items })
     lspserver.rpc_a('textDocument/completion', params, completion.CompletionReply)
   endif
 enddef
