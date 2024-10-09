@@ -253,7 +253,7 @@ export def CompletionReply(lspserver: dict<any>, cItems: any)
       # snippet completion.  Needs a snippet plugin to expand the snippet.
       # Remove all the snippet placeholders
       d.word = MakeValidWord(d.word)
-    elseif !lspserver.completeItemsIsIncomplete || lspOpts.useBufferCompletion
+    elseif lspserver->has_key('completeItemsIsIncomplete') || lspOpts.useBufferCompletion
       # Filter items only when "isIncomplete" is set (otherwise server would
       # have done the filtering) or when buffer completion is enabled
       # plain text completion
