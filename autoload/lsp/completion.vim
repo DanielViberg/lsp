@@ -249,11 +249,16 @@ export def CompletionReply(lspserver: dict<any>, cItems: any)
       d.word = item.label
     endif
     
+    var isIncomplete = false
+    if (lspserver->has_key('completeItemsIsIncomplete'))
+      isIncomplete = lspserver.completeItemsIsIncomplete
+    endif
+    
     if item->get('insertTextFormat', 1) == 2
       # snippet completion.  Needs a snippet plugin to expand the snippet.
       # Remove all the snippet placeholders
       d.word = MakeValidWord(d.word)
-    elseif lspserver->has_key('completeItemsIsIncomplete') || lspOpts.useBufferCompletion
+    elseif !isIncomplete || lspOpts.useBufferCompletion
       # Filter items only when "isIncomplete" is set (otherwise server would
       # have done the filtering) or when buffer completion is enabled
       # plain text completion
