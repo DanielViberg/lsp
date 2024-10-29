@@ -76,6 +76,7 @@ def StartServer(lspserver: dict<any>, bnr: number): number
   lspserver.completionLazyDoc = false
   lspserver.completionTriggerChars = []
   lspserver.signaturePopup = -1
+  lspserver.pending = false
 
   var job = cmd->job_start(opts)
   if job->job_status() == 'fail'
@@ -115,10 +116,8 @@ def ServerInitReply(lspserver: dict<any>, initResult: dict<any>): void
   capabilities.ProcessServerCaps(lspserver, caps)
 
   if caps->has_key('completionProvider')
-    lspserver.completionTriggerChars =
-			caps.completionProvider->get('triggerCharacters', [])
-    lspserver.completionLazyDoc =
-			caps.completionProvider->get('resolveProvider', false)
+    lspserver.completionTriggerChars = caps.completionProvider->get('triggerCharacters', [])
+    lspserver.completionLazyDoc = caps.completionProvider->get('resolveProvider', false)
   endif
 
   # send a "initialized" notification to server
@@ -712,19 +711,20 @@ def GetCompletion(lspserver: dict<any>, triggerKind_arg: number, triggerChar: st
   # interface CompletionParams
   #   interface TextDocumentPositionParams
   var params = lspserver.getTextDocPosition(false)
+
   #   interface CompletionContext
-  params.context = {triggerKind: triggerKind_arg, triggerCharacter: triggerChar}
+  params.context = {
+    triggerKind: triggerKind_arg, 
+    triggerCharacter: triggerChar == null_string ? null : triggerChar
+  }
 
-  # Check completion prefix, dont request if its empty
-  echomsg completion.GetCompletionPrefix().prefix
-  if !completion.GetCompletionPrefix().prefix->empty()
-    
-    # Cancel the previous completion request
-    #lspserver.sendNotification('$/cancelRequest', {
-    #  id: lspserver.nextID 
-    #})
-
-    var items: list<dict<any>> 
+  # Request either if triggerkind is 2 or if prefix is len > 0
+  if lspserver.pending
+    return
+  endif
+  if (triggerKind_arg == 2 && triggerChar != ' ') || 
+      !completion.GetCompletionPrefix().prefix->empty()
+    lspserver.pending = true
     lspserver.rpc_a('textDocument/completion', params, completion.CompletionReply)
   endif
 enddef
@@ -1131,6 +1131,7 @@ def TextDocFormat(lspserver: dict<any>, fname: string, rangeFormat: bool,
     param.range = r
   endif
 
+  # Get mili time
   var reply = lspserver.rpc(cmd, param)
 
   # result: TextEdit[] | null

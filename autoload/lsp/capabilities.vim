@@ -288,8 +288,7 @@ export def ProcessServerCaps(lspserver: dict<any>, caps: dict<any>)
 
   # clangdInlayHintsProvider
   if lspserver.caps->has_key('clangdInlayHintsProvider')
-    lspserver.isClangdInlayHintsProvider =
-					lspserver.caps.clangdInlayHintsProvider
+    lspserver.isClangdInlayHintsProvider = lspserver.caps.clangdInlayHintsProvider
   else
     lspserver.isClangdInlayHintsProvider = false
   endif
@@ -363,7 +362,8 @@ export def GetClientCaps(): dict<any>
 	},
 	completionItemKind: {
 	  valueSet: range(1, 25)
-	}
+	},
+        contextSupport: true 
       },
       declaration: {
 	dynamicRegistration: false,

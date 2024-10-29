@@ -161,7 +161,8 @@ enddef
 # process the 'textDocument/completion' reply from the LSP server
 # Result: CompletionItem[] | CompletionList | null
 export def CompletionReply(lspserver: dict<any>, cItems: any)
-  
+  lspserver.pending = false
+
   # Dont handle request if user is already scrolling pum
   var cInfo = complete_info()
   if cInfo->empty() || cInfo.selected != -1
@@ -190,10 +191,10 @@ export def CompletionReply(lspserver: dict<any>, cItems: any)
   var compprefix = GetCompletionPrefix()
   var prefix = compprefix.prefix
   var start_idx = compprefix.start_idx
-  var end_idx = compprefix.end_idx
   var starttext = compprefix.starttext
   var chcol = compprefix.chcol
 
+  # Dont go thur result if prefix is empty
   if prefix->empty()
     return
   endif
@@ -210,7 +211,7 @@ export def CompletionReply(lspserver: dict<any>, cItems: any)
     snippet.CompletionVsnip(items)
   endif
 
-  if lspOpts.useBufferCompletion
+  if lspOpts.useBufferCompletion && !prefix->empty()
     CompletionFromBuffer(items)
   endif
 
@@ -489,7 +490,7 @@ enddef
 # and not one of the triggerCharacters, return -1 for triggerKind.
 def GetTriggerAttributes(lspserver: dict<any>): list<any>
   var triggerKind: number = 1
-  var triggerChar: string = ''
+  var triggerChar: string = null_string
 
   # Trigger kind is 1 for keyword and 2 for trigger char initiated completion.
   var line: string = getline('.')
