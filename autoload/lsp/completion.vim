@@ -161,6 +161,13 @@ enddef
 # process the 'textDocument/completion' reply from the LSP server
 # Result: CompletionItem[] | CompletionList | null
 export def CompletionReply(lspserver: dict<any>, cItems: any)
+  
+  # Dont handle request if user is already scrolling pum
+  var cInfo = complete_info()
+  if cInfo->empty() || cInfo.selected != -1
+    return
+  endif
+  
   if cItems->empty()
     if lspserver.omniCompletePending
       lspserver.completeItems = []

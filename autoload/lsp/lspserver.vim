@@ -716,11 +716,15 @@ def GetCompletion(lspserver: dict<any>, triggerKind_arg: number, triggerChar: st
   params.context = {triggerKind: triggerKind_arg, triggerCharacter: triggerChar}
 
   # Check completion prefix, dont request if its empty
+  echomsg completion.GetCompletionPrefix().prefix
   if !completion.GetCompletionPrefix().prefix->empty()
-    # Run CompletionReply but with buffer completes before request
+    
+    # Cancel the previous completion request
+    #lspserver.sendNotification('$/cancelRequest', {
+    #  id: lspserver.nextID 
+    #})
+
     var items: list<dict<any>> 
-    # completion.CompletionFromBuffer(items)
-    # completion.CompletionReply(lspserver, { items: items })
     lspserver.rpc_a('textDocument/completion', params, completion.CompletionReply)
   endif
 enddef
