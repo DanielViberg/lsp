@@ -147,6 +147,12 @@ enddef
 # process the 'textDocument/completion' reply from the LSP server
 # Result: CompletionItem[] | CompletionList | null
 export def CompletionReply(lspserver: dict<any>, cItems: any)
+  # Dont handle response if user is already scrolling pum
+  var cInfo = complete_info()
+  if cInfo->empty() || cInfo.selected != -1
+    return
+  endif
+
   lspserver.completeItemsIsIncomplete = false
   if cItems->empty()
     if lspserver.omniCompletePending
@@ -468,113 +474,120 @@ enddef
 
 # omni complete handler
 def g:LspOmniFunc(findstart: number, base: string): any
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('completion')
-  if lspserver->empty()
-    return -2
-  endif
-
-  if findstart
-
-    var [triggerKind, triggerChar] = GetTriggerAttributes(lspserver)
-    if triggerKind < 0
-      # previous character is not a keyword character or a trigger character,
-      # so cancel omni completion.
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('completion')
+  for lspserver in lspservers
+    if lspserver->empty()
       return -2
     endif
 
-    # first send all the changes in the current buffer to the LSP server
-    listener_flush()
+    if findstart
 
-    lspserver.omniCompletePending = true
-    lspserver.completeItems = []
-
-    # initiate a request to LSP server to get list of completions
-    lspserver.getCompletion(triggerKind, triggerChar)
-
-    # locate the start of the word
-    var line = getline('.')->strpart(0, col('.') - 1)
-    var keyword = line->matchstr('\k\+$')
-    lspserver.omniCompleteKeyword = keyword
-    return line->len() - keyword->len()
-  else
-    # Wait for the list of matches from the LSP server
-    var count: number = 0
-    while lspserver.omniCompletePending && count < 1000
-      if complete_check()
-	return v:none
+      var [triggerKind, triggerChar] = GetTriggerAttributes(lspserver)
+      if triggerKind < 0
+        # previous character is not a keyword character or a trigger character,
+        # so cancel omni completion.
+        return -2
       endif
-      sleep 2m
-      count += 1
-    endwhile
 
-    if lspserver.omniCompletePending
-      return v:none
+      # first send all the changes in the current buffer to the LSP server
+      listener_flush()
+
+      lspserver.omniCompletePending = true
+      lspserver.completeItems = []
+
+      # initiate a request to LSP server to get list of completions
+      lspserver.getCompletion(triggerKind, triggerChar)
+
+      # locate the start of the word
+      var line = getline('.')->strpart(0, col('.') - 1)
+      var keyword = line->matchstr('\k\+$')
+      lspserver.omniCompleteKeyword = keyword
+      return line->len() - keyword->len()
+    else
+      # Wait for the list of matches from the LSP server
+      var count: number = 0
+      while lspserver.omniCompletePending && count < 1000
+        if complete_check()
+          return v:none
+        endif
+        sleep 2m
+        count += 1
+      endwhile
+
+      if lspserver.omniCompletePending
+        return v:none
+      endif
+
+      var res: list<dict<any>> = lspserver.completeItems
+      var prefix = lspserver.omniCompleteKeyword
+
+      # Don't attempt to filter on the items, when "isIncomplete" is set
+      if prefix->empty() || lspserver.completeItemsIsIncomplete
+        return res
+      endif
+
+      var lspOpts = opt.lspOptions
+      if lspOpts.completionMatcherValue == opt.COMPLETIONMATCHER_FUZZY
+        return res->matchfuzzy(prefix, { key: 'word' })
+      endif
+
+      if lspOpts.completionMatcherValue == opt.COMPLETIONMATCHER_ICASE
+        return res->filter((i, v) =>
+          v.word->tolower()->stridx(prefix->tolower()) == 0)
+      endif
+
+      return res->filter((i, v) => v.word->stridx(prefix) == 0)
     endif
-
-    var res: list<dict<any>> = lspserver.completeItems
-    var prefix = lspserver.omniCompleteKeyword
-
-    # Don't attempt to filter on the items, when "isIncomplete" is set
-    if prefix->empty() || lspserver.completeItemsIsIncomplete
-      return res
-    endif
-
-    var lspOpts = opt.lspOptions
-    if lspOpts.completionMatcherValue == opt.COMPLETIONMATCHER_FUZZY
-      return res->matchfuzzy(prefix, { key: 'word' })
-    endif
-
-    if lspOpts.completionMatcherValue == opt.COMPLETIONMATCHER_ICASE
-      return res->filter((i, v) =>
-	v.word->tolower()->stridx(prefix->tolower()) == 0)
-    endif
-
-    return res->filter((i, v) => v.word->stridx(prefix) == 0)
-  endif
+  endfor
 enddef
 
 # For plugins that implement async completion this function indicates if
 # omnifunc is waiting for LSP response.
 def g:LspOmniCompletePending(): bool
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('completion')
-  return !lspserver->empty() && lspserver.omniCompletePending
+  var lspservers: dict<any> = buf.CurbufGetServersChecked('completion')
+  # TODO
+  return !lspservers->empty() && 0 
 enddef
 
 # Insert mode completion handler. Used when 24x7 completion is enabled
 # (default).
 def LspComplete()
-  var lspserver: dict<any> = buf.CurbufGetServer('completion')
-  if lspserver->empty() || !lspserver.running || !lspserver.ready
-    return
-  endif
+  var lspservers: list<dict<any>> = buf.CurbufGetServers('completion')
+  for lspserver in lspservers
+    if lspserver->empty() || !lspserver.running || !lspserver.ready
+      return
+    endif
 
-  var [triggerKind, triggerChar] = GetTriggerAttributes(lspserver)
-  if triggerKind < 0
-    return
-  endif
+    var [triggerKind, triggerChar] = GetTriggerAttributes(lspserver)
+    if triggerKind < 0
+      return
+    endif
 
-  # first send all the changes in the current buffer to the LSP server
-  listener_flush()
+    # first send all the changes in the current buffer to the LSP server
+    listener_flush()
 
-  # initiate a request to LSP server to get list of completions
-  lspserver.getCompletion(triggerKind, triggerChar)
+    # initiate a request to LSP server to get list of completions
+    lspserver.getCompletion(triggerKind, triggerChar)
+  endfor
 enddef
 
 # Lazy complete documentation handler
 def LspResolve()
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('completion')
-  if lspserver->empty()
-    return
-  endif
+  var lspservers: dict<any> = buf.CurbufGetServersChecked('completion')
+  for lspserver in lspservers
+    if lspserver->empty()
+      return
+    endif
 
-  var item = v:event.completed_item
-  if item->has_key('user_data') && !item.user_data->empty()
-      if item.user_data->type() == v:t_dict && !item.user_data->has_key('documentation')
-	lspserver.resolveCompletion(item.user_data)
-      else
-	ShowCompletionDocumentation(item.user_data)
-      endif
-  endif
+    var item = v:event.completed_item
+    if item->has_key('user_data') && !item.user_data->empty()
+        if item.user_data->type() == v:t_dict && !item.user_data->has_key('documentation')
+          lspserver.resolveCompletion(item.user_data)
+        else
+          ShowCompletionDocumentation(item.user_data)
+        endif
+    endif
+  endfor
 enddef
 
 # If the completion popup documentation window displays "markdown" content,
@@ -601,7 +614,8 @@ enddef
 
 # complete done handler (LSP server-initiated actions after completion)
 def LspCompleteDone(bnr: number)
-  var lspserver: dict<any> = buf.BufLspServerGet(bnr, 'completion')
+  # TODO
+  var lspservers: dict<any> = buf.BufLspServersGet(bnr, 'completion')
   if lspserver->empty()
     return
   endif
@@ -668,6 +682,14 @@ export def BufferInit(lspserver: dict<any>, bnr: number, ftype: string)
 		event: 'TextChangedI',
 		group: 'LSPBufferAutocmds',
 		cmd: 'LspComplete()'})
+  
+    # Buffer completion pum blocks TextChangedI 
+    if opt.lspOptions.useBufferCompletion
+      acmds->add({bufnr: bnr,
+                  event: 'TextChangedP',
+                  group: 'LSPBufferAutocmds',
+                  cmd: 'LspComplete()'})
+    endif
   endif
 
   if LspOmniComplEnabled(ftype)

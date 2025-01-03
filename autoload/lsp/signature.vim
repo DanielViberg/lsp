@@ -15,7 +15,8 @@ def CloseSignaturePopup(lspserver: dict<any>)
 enddef
 
 def CloseCurBufSignaturePopup()
-  var lspserver: dict<any> = buf.CurbufGetServer('signatureHelp')
+  # TODO
+  var lspservers: dict<any> = buf.CurbufGetServers('signatureHelp')
   if lspserver->empty()
     return
   endif

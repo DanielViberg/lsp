@@ -12,10 +12,9 @@ var bufnrToServers: dict<list<dict<any>>> = {}
 
 # Add "lspserver" to "bufnrToServers" map for buffer "bnr".
 export def BufLspServerSet(bnr: number, lspserver: dict<any>)
-  if !bufnrToServers->has_key(bnr)
+  if !bufnrToServers->has_key(bnr) 
     bufnrToServers[bnr] = []
   endif
-
   bufnrToServers[bnr]->add(lspserver)
 enddef
 
@@ -63,7 +62,7 @@ var SupportedCheckFns = {
 # Returns the LSP server for the buffer "bnr".  If "feature" is specified,
 # then returns the LSP server that provides the "feature".
 # Returns an empty dict if the server is not found.
-export def BufLspServerGet(bnr: number, feature: string = null_string): dict<any>
+export def BufLspServersGet(bnr: number, feature: string = null_string): list<dict<any>>
   if !bufnrToServers->has_key(bnr)
     return {}
   endif
@@ -85,6 +84,7 @@ export def BufLspServerGet(bnr: number, feature: string = null_string): dict<any
   var SupportedCheckFn = SupportedCheckFns[feature]
 
   var possibleLSPs: list<dict<any>> = []
+  var featureLSPs: list<dict<any>> = []
 
   for lspserver in bufnrToServers[bnr]
     if !lspserver.ready || !SupportedCheckFn(lspserver)
@@ -102,7 +102,7 @@ export def BufLspServerGet(bnr: number, feature: string = null_string): dict<any
   for lspserver in possibleLSPs
     var has_feature: bool = lspserver.features->get(feature, false)
     if has_feature
-      return lspserver
+      featureLSPs->add(lspserver)
     endif
   endfor
 
@@ -110,16 +110,17 @@ export def BufLspServerGet(bnr: number, feature: string = null_string): dict<any
   # disabled
   for lspserver in possibleLSPs
     if lspserver.featureEnabled(feature)
-      return lspserver
+      featureLSPs->add(lspserver)
     endif
   endfor
 
-  return {}
+  return uniq(featureLSPs)
 enddef
 
 # Returns the LSP server for the buffer "bnr" and with ID "id". Returns an empty
 # dict if the server is not found.
 export def BufLspServerGetById(bnr: number, id: number): dict<any>
+  echomsg 'nr of servers' bufnrToServers->get(bnr)->len()
   if !bufnrToServers->has_key(bnr)
     return {}
   endif
@@ -145,8 +146,8 @@ enddef
 
 # Returns the LSP server for the current buffer with the optionally "feature".
 # Returns an empty dict if the server is not found.
-export def CurbufGetServer(feature: string = null_string): dict<any>
-  return BufLspServerGet(bufnr(), feature)
+export def CurbufGetServers(feature: string = null_string): list<dict<any>>
+  return BufLspServersGet(bufnr(), feature)
 enddef
 
 # Returns the LSP servers for the current buffer. Returns an empty list if the
@@ -155,40 +156,37 @@ export def CurbufGetServers(): list<dict<any>>
   return BufLspServersGet(bufnr())
 enddef
 
-export def BufHasLspServer(bnr: number): bool
-  var lspserver = BufLspServerGet(bnr)
-
-  return !lspserver->empty()
-enddef
-
 # Returns the LSP server for the current buffer with the optinally "feature" if
 # it is running and is ready.
 # Returns an empty dict if the server is not found or is not ready.
-export def CurbufGetServerChecked(feature: string = null_string): dict<any>
+export def CurbufGetServersChecked(feature: string = null_string): list<dict<any>>
   var fname: string = @%
   if fname->empty() || &filetype->empty()
     return {}
   endif
 
-  var lspserver: dict<any> = CurbufGetServer(feature)
-  if lspserver->empty()
-    if feature == null_string
-      util.ErrMsg($'Language server for "{&filetype}" file type is not found')
-    else
-      util.ErrMsg($'Language server for "{&filetype}" file type supporting "{feature}" feature is not found')
+  var lspservers: list<dict<any>> = CurbufGetServers(feature)
+  var rlspservers: list<dict<any>> = []
+  for lspserver in lspservers
+    if lspserver->empty()
+      if feature == null_string
+        util.ErrMsg($'Language server for "{&filetype}" file type is not found')
+      else
+        util.ErrMsg($'Language server for "{&filetype}" file type supporting "{feature}" feature is not found')
+      endif
+      return {}
     endif
-    return {}
-  endif
-  if !lspserver.running
-    util.ErrMsg($'Language server for "{&filetype}" file type is not running')
-    return {}
-  endif
-  if !lspserver.ready
-    util.ErrMsg($'Language server for "{&filetype}" file type is not ready')
-    return {}
-  endif
-
-  return lspserver
+    if !lspserver.running
+      util.ErrMsg($'Language server for "{&filetype}" file type is not running')
+      return {}
+    endif
+    if !lspserver.ready
+      util.ErrMsg($'Language server for "{&filetype}" file type is not ready')
+      return {}
+    endif
+      rlspservers->add(lspserver)
+  endfor
+  return rlspservers
 enddef
 
 # vim: tabstop=8 shiftwidth=2 softtabstop=2

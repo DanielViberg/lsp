@@ -279,53 +279,58 @@ enddef
 
 # Go to a definition using "textDocument/definition" LSP request
 export def GotoDefinition(peek: bool, cmdmods: string, count: number)
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('definition')
-  if lspserver->empty()
-    return
-  endif
-
-  lspserver.gotoDefinition(peek, cmdmods, count)
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('definition')
+  for lspserver in lspservers
+    if lspserver->empty()
+      return
+    endif
+    lspserver.gotoDefinition(peek, cmdmods, count)
+  endfor
 enddef
 
 # Go to a declaration using "textDocument/declaration" LSP request
 export def GotoDeclaration(peek: bool, cmdmods: string, count: number)
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('declaration')
-  if lspserver->empty()
-    return
-  endif
-
-  lspserver.gotoDeclaration(peek, cmdmods, count)
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('declaration')
+  for lspserver in lspservers
+    if lspserver->empty()
+      return
+    endif
+      lspserver.gotoDeclaration(peek, cmdmods, count)
+  endfor
 enddef
 
 # Go to a type definition using "textDocument/typeDefinition" LSP request
 export def GotoTypedef(peek: bool, cmdmods: string, count: number)
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('typeDefinition')
-  if lspserver->empty()
-    return
-  endif
-
-  lspserver.gotoTypeDef(peek, cmdmods, count)
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('typeDefinition')
+  for lspserver in lspservers
+    if lspserver->empty()
+      return
+    endif
+    lspserver.gotoTypeDef(peek, cmdmods, count)
+  endfor
 enddef
 
 # Go to a implementation using "textDocument/implementation" LSP request
 export def GotoImplementation(peek: bool, cmdmods: string, count: number)
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('implementation')
-  if lspserver->empty()
-    return
-  endif
-
-  lspserver.gotoImplementation(peek, cmdmods, count)
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('implementation')
+  for lspserver in lspservers
+    if lspserver->empty()
+      return
+    endif
+    lspserver.gotoImplementation(peek, cmdmods, count)
+  endfor
 enddef
 
 # Switch source header using "textDocument/switchSourceHeader" LSP request
 # (Clangd specifc extension)
 export def SwitchSourceHeader()
-  var lspserver: dict<any> = buf.CurbufGetServerChecked()
-  if lspserver->empty()
-    return
-  endif
-
-  lspserver.switchSourceHeader()
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked()
+  for lspserver in lspservers
+    if lspserver->empty()
+      return
+    endif
+    lspserver.switchSourceHeader()
+  endfor
 enddef
 
 # A buffer is saved. Send the "textDocument/didSave" LSP notification
@@ -397,6 +402,7 @@ def BufferInit(lspserverId: number, bnr: number): void
     return
   endif
 
+
   var ftype: string = bnr->getbufvar('&filetype')
   lspserver.textdocDidOpen(bnr, ftype)
 
@@ -423,22 +429,26 @@ def BufferInit(lspserverId: number, bnr: number): void
       # It's only possible to initialize the features when the server
       # capabilities of all the registered language servers for this file type
       # are known.
-      var completionServer = buf.BufLspServerGet(bnr, 'completion')
+      # TODO
+      var completionServers = buf.BufLspServersGet(bnr, 'completion')
       if !completionServer->empty() && lspsrv.id == completionServer.id
         completion.BufferInit(lspsrv, bnr, ftype)
       endif
 
-      var signatureServer = buf.BufLspServerGet(bnr, 'signatureHelp')
+      # TODO
+      var signatureServers = buf.BufLspServersGet(bnr, 'signatureHelp')
       if !signatureServer->empty() && lspsrv.id == signatureServer.id
 	signature.BufferInit(lspsrv)
       endif
 
-      var inlayHintServer = buf.BufLspServerGet(bnr, 'inlayHint')
+      # TODO
+      var inlayHintServers = buf.BufLspServersGet(bnr, 'inlayHint')
       if !inlayHintServer->empty() && lspsrv.id == inlayHintServer.id
 	inlayhints.BufferInit(lspsrv, bnr)
       endif
 
-      var semanticServer = buf.BufLspServerGet(bnr, 'semanticTokens')
+      # TODO
+      var semanticServers = buf.BufLspServersGet(bnr, 'semanticTokens')
       if !semanticServer->empty() && lspsrv.id == semanticServer.id
 	semantichighlight.BufferInit(lspserver, bnr)
       endif
@@ -452,31 +462,37 @@ enddef
 
 # A new buffer is opened. If LSP is supported for this buffer, then add it
 export def AddFile(bnr: number): void
-  if buf.BufHasLspServer(bnr)
-    # LSP server for this buffer is already initialized and running
-    return
-  endif
-
   # Skip remote files
   if util.LspUriRemote(bnr->bufname()->fnamemodify(':p'))
     return
   endif
-
+  
   var ftype: string = bnr->getbufvar('&filetype')
+
   if ftype->empty()
     return
   endif
+
   var lspservers: list<dict<any>> = LspGetServers(bnr, ftype)
+  var bufservers: list<dict<any>> = buf.BufLspServersGet(bnr)
+
   if lspservers->empty()
     return
   endif
+
   for lspserver in lspservers
+    # Dont include this server if it already exists in the buffer
+    if !empty(filter(bufservers, (_, bs) => bs.name == lspserver.name))
+      continue
+    endif
+
     if !lspserver.running
       if !lspInitializedOnce
         LspInitOnce()
       endif
       lspserver.startServer(bnr)
     endif
+
     buf.BufLspServerSet(bnr, lspserver)
 
     if lspserver.ready
@@ -530,7 +546,8 @@ export def BufferLoadedInWin(bnr: number)
 
   # Refresh the semantic highlights
   if opt.lspOptions.semanticHighlight
-    var semanticServer = buf.BufLspServerGet(bnr, 'semanticTokens')
+    # TODO
+    var semanticServers = buf.BufLspServersGet(bnr, 'semanticTokens')
     if !semanticServer->empty()
       semanticServer.semanticHighlightUpdate(bnr)
     endif
@@ -551,6 +568,7 @@ def AddBuffersToLsp(ftype: string)
   # Add all the buffers with the same file type as the current buffer
   for binfo in getbufinfo({bufloaded: 1})
     if binfo.bufnr->getbufvar('&filetype') == ftype
+      echomsg 'load: ' .. ftype
       AddFile(binfo.bufnr)
     endif
   endfor
@@ -589,14 +607,11 @@ enddef
 def AddServerForFiltype(lspserver: dict<any>, ftype: string, omnicompl: bool)
   LspAddServer(ftype, lspserver)
   completion.OmniComplSet(ftype, omnicompl)
-
-  # If a buffer of this file type is already present, then send it to the LSP
-  # server now.
-  AddBuffersToLsp(ftype)
 enddef
 
 # Register a LSP server for one or more file types
 export def AddServer(serverList: list<dict<any>>)
+  var ftypeenabled: list<string> = []
   for server in serverList
     if !server->has_key('filetype') || !server->has_key('path')
       util.ErrMsg('LSP server information is missing filetype or path')
@@ -712,9 +727,11 @@ export def AddServer(serverList: list<dict<any>>)
 
     var ftypes = server.filetype
     if ftypes->type() == v:t_string
+     ftypeenabled->add(ftypes)
       AddServerForFiltype(lspserver, ftypes, server.omnicompl)
     elseif ftypes->type() == v:t_list
       for ftype in ftypes
+	ftypeenabled->add(ftype)
 	AddServerForFiltype(lspserver, ftype, server.omnicompl)
       endfor
     else
@@ -722,6 +739,11 @@ export def AddServer(serverList: list<dict<any>>)
       continue
     endif
   endfor
+  # Load all servers first then add them to buffers, since multiple servers
+  # can attach to the same buffer
+  for fte in uniq(ftypeenabled)
+    AddBuffersToLsp(fte)
+  endfor 
 enddef
 
 # The LSP server is considered ready when the server capabilities are
@@ -795,12 +817,13 @@ enddef
 # Display the hover message from the LSP server for the current cursor
 # location
 export def Hover(cmdmods: string)
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('hover')
-  if lspserver->empty()
-    return
-  endif
-
-  lspserver.hover(cmdmods)
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('hover')
+  for lspserver in lspservers
+    if lspserver->empty()
+      return
+    endif
+    lspserver.hover(cmdmods)
+  endfor
 enddef
 
 # Enable or disable inlay hints
@@ -824,39 +847,42 @@ enddef
 
 # show symbol references
 export def ShowReferences(peek: bool)
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('references')
-  if lspserver->empty()
-    return
-  endif
-
-  lspserver.showReferences(peek)
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('references')
+  for lspserver in lspservers
+    if lspserver->empty()
+      continue
+    endif
+    lspserver.showReferences(peek)
+  endfor
 enddef
 
 # highlight all the places where a symbol is referenced
 def g:LspDocHighlight(bnr: number = bufnr(), cmdmods: string = '')
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('documentHighlight')
-  if lspserver->empty()
-    return
-  endif
-
-  lspserver.docHighlight(bnr, cmdmods)
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('documentHighlight')
+  for lspserver in lspservers
+    if lspserver->empty()
+      continue
+    endif
+    lspserver.docHighlight(bnr, cmdmods)
+  endfor
 enddef
 
 # clear the symbol reference highlight
 def g:LspDocHighlightClear(bnr: number = bufnr())
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('documentHighlight')
-  if lspserver->empty()
-    return
-  endif
-
-  var propNames = ['LspTextRef', 'LspReadRef', 'LspWriteRef']
-  if has('patch-9.0.0233')
-    prop_remove({types: propNames, bufnr: bnr, all: true})
-  else
-    for propName in propNames
-      prop_remove({type: propName, bufnr: bnr, all: true})
-    endfor
-  endif
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('documentHighlight')
+  for lspserver in lspservers
+    if lspserver->empty()
+      continue
+    endif
+    var propNames = ['LspTextRef', 'LspReadRef', 'LspWriteRef']
+    if has('patch-9.0.0233')
+      prop_remove({types: propNames, bufnr: bnr, all: true})
+    else
+      for propName in propNames
+	prop_remove({type: propName, bufnr: bnr, all: true})
+      endfor
+    endif
+  endfor
 enddef
 
 def g:LspRequestDocSymbols()
@@ -869,7 +895,8 @@ def g:LspRequestDocSymbols()
     return
   endif
 
-  var lspserver: dict<any> = buf.CurbufGetServer('documentSymbol')
+  # TODO
+  var lspservers: list<dict<any>> = buf.CurbufGetServers('documentSymbol')
   if lspserver->empty() || !lspserver.running || !lspserver.ready
     return
   endif
@@ -884,13 +911,15 @@ export def Outline(cmdmods: string, winsize: number)
     return
   endif
 
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('documentSymbol')
-  if lspserver->empty() || !lspserver.running || !lspserver.ready
-    return
-  endif
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('documentSymbol')
+  for lspserver in lspservers
+    if lspserver->empty() || !lspserver.running || !lspserver.ready
+      continue
+    endif
 
-  outline.OpenOutlineWindow(cmdmods, winsize)
-  g:LspRequestDocSymbols()
+    outline.OpenOutlineWindow(cmdmods, winsize)
+    g:LspRequestDocSymbols()
+  endfor
 enddef
 
 # show all the symbols in a file in a popup menu
@@ -900,12 +929,13 @@ export def ShowDocSymbols()
     return
   endif
 
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('documentSymbol')
-  if lspserver->empty() || !lspserver.running || !lspserver.ready
-    return
-  endif
-
-  lspserver.getDocSymbols(fname, false)
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('documentSymbol')
+  for lspserver in lspservers
+    if lspserver->empty() || !lspserver.running || !lspserver.ready
+      continue
+    endif
+    lspserver.getDocSymbols(fname, false)
+  endfor
 enddef
 
 # Format the entire file
@@ -915,17 +945,19 @@ export def TextDocFormat(range_args: number, line1: number, line2: number)
     return
   endif
 
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('documentFormatting')
-  if lspserver->empty()
-    return
-  endif
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('documentFormatting')
+  for lspserver in lspservers
+    if lspserver->empty()
+      continue
+    endif
 
-  var fname: string = @%
-  if range_args > 0
-    lspserver.textDocFormat(fname, true, line1, line2)
-  else
-    lspserver.textDocFormat(fname, false, 0, 0)
-  endif
+    var fname: string = @%
+    if range_args > 0
+      lspserver.textDocFormat(fname, true, line1, line2)
+    else
+      lspserver.textDocFormat(fname, false, 0, 0)
+    endif
+  endfor
 enddef
 
 # TODO: Add support for textDocument.onTypeFormatting?
@@ -934,100 +966,109 @@ enddef
 # Display all the locations where the current symbol is called from.
 # Uses LSP "callHierarchy/incomingCalls" request
 export def IncomingCalls()
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('callHierarchy')
-  if lspserver->empty()
-    return
-  endif
-
-  lspserver.incomingCalls(@%)
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('callHierarchy')
+  for lspserver in lspservers
+    if lspserver->empty()
+      continue
+    endif
+    lspserver.incomingCalls(@%)
+  endfor
 enddef
 
 # Display all the symbols used by the current symbol.
 # Uses LSP "callHierarchy/outgoingCalls" request
 export def OutgoingCalls()
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('callHierarchy')
-  if lspserver->empty()
-    return
-  endif
-
-  lspserver.outgoingCalls(@%)
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('callHierarchy')
+  for lspserver in lspservers
+    if lspserver->empty()
+      continue
+    endif
+    lspserver.outgoingCalls(@%)
+  endfor
 enddef
 
 # Display the type hierarchy for the current symbol.  Direction is 0 for
 # sub types and 1 for super types.
 export def TypeHierarchy(direction: number)
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('typeHierarchy')
-  if lspserver->empty()
-    return
-  endif
-
-  lspserver.typeHierarchy(direction)
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('typeHierarchy')
+  for lspserver in lspservers
+    if lspserver->empty()
+      continue
+    endif
+    lspserver.typeHierarchy(direction)
+  endfor
 enddef
 
 # Rename a symbol
 # Uses LSP "textDocument/rename" request
 export def Rename(a_newName: string)
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('rename')
-  if lspserver->empty()
-    return
-  endif
-
-  var newName: string = a_newName
-  if newName->empty()
-    var sym: string = expand('<cword>')
-    newName = input($"Rename symbol '{sym}' to: ", sym)
-    if newName->empty()
-      return
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('rename')
+  for lspserver in lspservers
+    if lspserver->empty()
+      continue
     endif
 
-    # clear the input prompt
-    :echo "\r"
-  endif
+    var newName: string = a_newName
+    if newName->empty()
+      var sym: string = expand('<cword>')
+      newName = input($"Rename symbol '{sym}' to: ", sym)
+      if newName->empty()
+	continue
+      endif
 
-  lspserver.renameSymbol(newName)
+      # clear the input prompt
+      :echo "\r"
+    endif
+
+    lspserver.renameSymbol(newName)
+  endfor
 enddef
 
 # Perform a code action
 # Uses LSP "textDocument/codeAction" request
 export def CodeAction(line1: number, line2: number, query: string)
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('codeAction')
-  if lspserver->empty()
-    return
-  endif
-
-  var fname: string = @%
-  lspserver.codeAction(fname, line1, line2, query)
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('codeAction')
+  for lspserver in lspservers
+    if lspserver->empty()
+      continue
+    endif
+    var fname: string = @%
+    lspserver.codeAction(fname, line1, line2, query)
+  endfor
 enddef
 
 # Code lens
 # Uses LSP "textDocument/codeLens" request
 export def CodeLens()
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('codeLens')
-  if lspserver->empty()
-    return
-  endif
-
-  lspserver.codeLens(@%)
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('codeLens')
+  for lspserver in lspservers
+    if lspserver->empty()
+      continue
+    endif
+    lspserver.codeLens(@%)
+  endfor
 enddef
 
 # Perform a workspace wide symbol lookup
 # Uses LSP "workspace/symbol" request
 export def SymbolSearch(queryArg: string, cmdmods: string)
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('workspaceSymbol')
-  if lspserver->empty()
-    return
-  endif
-
-  var query: string = queryArg
-  if query->empty()
-    query = input('Lookup symbol: ', expand('<cword>'))
-    if query->empty()
-      return
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('workspaceSymbol')
+  for lspserver in lspservers
+    if lspserver->empty()
+      continue
     endif
-  endif
-  :redraw!
 
-  lspserver.workspaceQuery(query, true, cmdmods)
+    var query: string = queryArg
+    if query->empty()
+      query = input('Lookup symbol: ', expand('<cword>'))
+      if query->empty()
+	continue
+      endif
+    endif
+    :redraw!
+
+    lspserver.workspaceQuery(query, true, cmdmods)
+  endfor
 enddef
 
 # Display the list of workspace folders
@@ -1083,38 +1124,40 @@ enddef
 
 # expand the previous selection or start a new selection
 export def SelectionExpand()
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('selectionRange')
-  if lspserver->empty()
-    return
-  endif
-
-  lspserver.selectionExpand()
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('selectionRange')
+    for lspserver in lspservers
+    if lspserver->empty()
+      continue
+    endif
+    lspserver.selectionExpand()
+  endfor
 enddef
 
 # shrink the previous selection or start a new selection
 export def SelectionShrink()
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('selectionRange')
-  if lspserver->empty()
-    return
-  endif
-
-  lspserver.selectionShrink()
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('selectionRange')
+  for lspserver in lspservers
+    if lspserver->empty()
+      continue
+    endif
+    lspserver.selectionShrink()
+  endfor
 enddef
 
 # fold the entire document
 export def FoldDocument()
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('foldingRange')
-  if lspserver->empty()
-    return
-  endif
-
-  if &foldmethod != 'manual'
-    util.ErrMsg("Only works when 'foldmethod' is 'manual'")
-    return
-  endif
-
-  var fname: string = @%
-  lspserver.foldRange(fname)
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('foldingRange')
+  for lspserver in lspservers
+    if lspserver->empty()
+      continue
+    endif
+    if &foldmethod != 'manual'
+      util.ErrMsg("Only works when 'foldmethod' is 'manual'")
+      continue
+    endif
+    var fname: string = @%
+    lspserver.foldRange(fname)
+  endfor
 enddef
 
 # Enable diagnostic highlighting for all the buffers
@@ -1129,12 +1172,13 @@ enddef
 
 # Function to use with the 'tagfunc' option.
 export def TagFunc(pat: string, flags: string, info: dict<any>): any
-  var lspserver: dict<any> = buf.CurbufGetServerChecked('definition')
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('definition')
+  for lspserver in lspservers
   if lspserver->empty()
     return v:null
   endif
-
   return lspserver.tagFunc(pat, flags, info)
+  endfor
 enddef
 
 # Function to use with the 'formatexpr' option.

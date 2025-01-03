@@ -717,11 +717,12 @@ def GetCompletion(lspserver: dict<any>, triggerKind_arg: number, triggerChar: st
   # interface CompletionParams
   #   interface TextDocumentPositionParams
   var params = lspserver.getTextDocPosition(false)
+
   #   interface CompletionContext
   params.context = {triggerKind: triggerKind_arg, triggerCharacter: triggerChar}
 
   lspserver.rpc_a('textDocument/completion', params,
-			completion.CompletionReply)
+                        completion.CompletionReply)
 enddef
 
 # Get lazy properties for a completion item.

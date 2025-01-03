@@ -96,7 +96,8 @@ def LspInlayHintsUpdate(bnr: number)
     setbufvar(bnr, 'LspInlayHintsTimer', -1)
   endif
 
-  var lspserver: dict<any> = buf.BufLspServerGet(bnr, 'inlayHint')
+  #TODO
+  var lspservers: dict<any> = buf.BufLspServersGet(bnr, 'inlayHint')
   if lspserver->empty()
     return
   endif
@@ -211,7 +212,8 @@ enddef
 export def InlayHintsDisable()
   opt.lspOptions.showInlayHints = false
   for binfo in getbufinfo()
-    var lspserver: dict<any> = buf.BufLspServerGet(binfo.bufnr, 'inlayHint')
+    # TODO
+    var lspservers: dict<any> = buf.BufLspServersGet(binfo.bufnr, 'inlayHint')
     if lspserver->empty()
       continue
     endif
