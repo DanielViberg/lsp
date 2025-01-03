@@ -402,7 +402,6 @@ def BufferInit(lspserverId: number, bnr: number): void
     return
   endif
 
-
   var ftype: string = bnr->getbufvar('&filetype')
   lspserver.textdocDidOpen(bnr, ftype)
 
@@ -429,27 +428,27 @@ def BufferInit(lspserverId: number, bnr: number): void
       # It's only possible to initialize the features when the server
       # capabilities of all the registered language servers for this file type
       # are known.
-      # TODO
       var completionServers = buf.BufLspServersGet(bnr, 'completion')
-      if !completionServer->empty() && lspsrv.id == completionServer.id
+      if !completionServers->empty() && 
+	  indexof(completionServers, {_, s -> s.id == lspsrc.id})
         completion.BufferInit(lspsrv, bnr, ftype)
       endif
 
-      # TODO
       var signatureServers = buf.BufLspServersGet(bnr, 'signatureHelp')
-      if !signatureServer->empty() && lspsrv.id == signatureServer.id
+      if !signatureServer->empty() && 
+	  indexof(signatureServers, {_, s -> s.id == lspsrc.id})
 	signature.BufferInit(lspsrv)
       endif
 
-      # TODO
       var inlayHintServers = buf.BufLspServersGet(bnr, 'inlayHint')
-      if !inlayHintServer->empty() && lspsrv.id == inlayHintServer.id
+      if !inlayHintServer->empty() && 
+	  indexof(inlayHintServers, {_, s -> s.id == lspsrc.id})
 	inlayhints.BufferInit(lspsrv, bnr)
       endif
 
-      # TODO
       var semanticServers = buf.BufLspServersGet(bnr, 'semanticTokens')
-      if !semanticServer->empty() && lspsrv.id == semanticServer.id
+      if !semanticServer->empty() && 
+	  indexof(semanticServers, {_, s -> s.id == lspsrc.id})
 	semantichighlight.BufferInit(lspserver, bnr)
       endif
     endfor
@@ -482,7 +481,7 @@ export def AddFile(bnr: number): void
 
   for lspserver in lspservers
     # Dont include this server if it already exists in the buffer
-    if !empty(filter(bufservers, (_, bs) => bs.name == lspserver.name))
+    if !empty(filter(bufservers, (_, bs) => bs.id == lspserver.id))
       continue
     endif
 
@@ -498,7 +497,7 @@ export def AddFile(bnr: number): void
     if lspserver.ready
       BufferInit(lspserver.id, bnr)
     else
-      # Lsp server is not ready yet.  Initialize the lsp state for this buffer
+      # Lsp server is not ready yet. Initialize the lsp state for this buffer
       # when the server is ready.
       autocmd_add([{group: 'LSPBufferAutocmds',
                    event: 'User',
@@ -546,10 +545,11 @@ export def BufferLoadedInWin(bnr: number)
 
   # Refresh the semantic highlights
   if opt.lspOptions.semanticHighlight
-    # TODO
     var semanticServers = buf.BufLspServersGet(bnr, 'semanticTokens')
-    if !semanticServer->empty()
-      semanticServer.semanticHighlightUpdate(bnr)
+    if !semanticServers->empty()
+      for semanticServer in semanticServers
+	semanticServer.semanticHighlightUpdate(bnr)
+      endfor
     endif
   endif
 enddef
@@ -568,7 +568,6 @@ def AddBuffersToLsp(ftype: string)
   # Add all the buffers with the same file type as the current buffer
   for binfo in getbufinfo({bufloaded: 1})
     if binfo.bufnr->getbufvar('&filetype') == ftype
-      echomsg 'load: ' .. ftype
       AddFile(binfo.bufnr)
     endif
   endfor
@@ -611,7 +610,7 @@ enddef
 
 # Register a LSP server for one or more file types
 export def AddServer(serverList: list<dict<any>>)
-  var ftypeenabled: list<string> = []
+  var ftypes: list<string> = []
   for server in serverList
     if !server->has_key('filetype') || !server->has_key('path')
       util.ErrMsg('LSP server information is missing filetype or path')
@@ -725,23 +724,23 @@ export def AddServer(serverList: list<dict<any>>)
 
     var lspserver: dict<any> = lserver.NewLspServer(server)
 
-    var ftypes = server.filetype
-    if ftypes->type() == v:t_string
-     ftypeenabled->add(ftypes)
-      AddServerForFiltype(lspserver, ftypes, server.omnicompl)
-    elseif ftypes->type() == v:t_list
-      for ftype in ftypes
-	ftypeenabled->add(ftype)
+    var srvftypes = server.filetype
+    if srvftypes->type() == v:t_string
+      ftypes->add(srvftypes)
+      AddServerForFiltype(lspserver, srvftypes, server.omnicompl)
+    elseif srvftypes->type() == v:t_list
+      for ftype in srvftypes
+	ftypes->add(ftype)
 	AddServerForFiltype(lspserver, ftype, server.omnicompl)
       endfor
     else
-      util.ErrMsg($'Unsupported file type information "{ftypes->string()}" in LSP server registration')
+      util.ErrMsg($'Unsupported file type information "{srvftypes->string()}" in LSP server registration')
       continue
     endif
   endfor
   # Load all servers first then add them to buffers, since multiple servers
   # can attach to the same buffer
-  for fte in uniq(ftypeenabled)
+  for ftype in uniq(ftypes)
     AddBuffersToLsp(fte)
   endfor 
 enddef
@@ -895,13 +894,16 @@ def g:LspRequestDocSymbols()
     return
   endif
 
-  # TODO
   var lspservers: list<dict<any>> = buf.CurbufGetServers('documentSymbol')
-  if lspserver->empty() || !lspserver.running || !lspserver.ready
+  if lspservers->empty() 
     return
   endif
-
-  lspserver.getDocSymbols(fname, true)
+  for lspserver in lspservers
+    if !lspserver.running || !lspserver.ready
+      continue
+    endif
+    lspserver.getDocSymbols(fname, true)
+  endfor
 enddef
 
 # open a window and display all the symbols in a file (outline)

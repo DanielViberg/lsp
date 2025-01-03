@@ -23,26 +23,27 @@ def CallHierarchyTreeItemRefresh(idx: number)
 
   if !treeItem->has_key('children')
     # First time retrieving the children for the item at index "idx"
-    # TODO
     var lspservers = buf.BufLspServersGet(w:LspBufnr, 'callHierarchy')
-    if lspserver->empty() || !lspserver.running
-      return
-    endif
-
-    var reply: any
-    if w:LspCallHierIncoming
-      reply = lspserver.getIncomingCalls(treeItem.item)
-    else
-      reply = lspserver.getOutgoingCalls(treeItem.item)
-    endif
-
     treeItem.children = []
-    if !reply->empty()
-      for item in reply
-	treeItem.children->add({item: w:LspCallHierIncoming ? item.from :
-				item.to, open: false})
-      endfor
-    endif
+    for lspserver in lspservers
+      if lspserver->empty() || !lspserver.running
+        continue
+      endif
+
+      var reply: any
+      if w:LspCallHierIncoming
+        reply = lspserver.getIncomingCalls(treeItem.item)
+      else
+        reply = lspserver.getOutgoingCalls(treeItem.item)
+      endif
+
+      if !reply->empty()
+        for item in reply
+          treeItem.children->add({item: w:LspCallHierIncoming ? item.from :
+                                  item.to, open: false})
+        endfor
+      endif
+    endfor
   endif
 
   # Clear and redisplay the tree in the window

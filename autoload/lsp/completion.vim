@@ -544,50 +544,45 @@ enddef
 # For plugins that implement async completion this function indicates if
 # omnifunc is waiting for LSP response.
 def g:LspOmniCompletePending(): bool
-  var lspservers: dict<any> = buf.CurbufGetServersChecked('completion')
-  # TODO
-  return !lspservers->empty() && 0 
+  var lspservers: list<dict<any>> = buf.CurbufGetServersChecked('completion')
+  return !lspservers->empty() && indexof(lspservers, {_, s -> s.omniCompletePending})
 enddef
 
 # Insert mode completion handler. Used when 24x7 completion is enabled
 # (default).
-def LspComplete()
-  var lspservers: list<dict<any>> = buf.CurbufGetServers('completion')
-  for lspserver in lspservers
-    if lspserver->empty() || !lspserver.running || !lspserver.ready
-      return
-    endif
+def LspComplete(lspid: number): void
+  var lspserver = buf.BufLspServerGetById(bufnr(), lspid)
+  if lspserver->empty() || !lspserver.running || !lspserver.ready
+    return
+  endif
 
-    var [triggerKind, triggerChar] = GetTriggerAttributes(lspserver)
-    if triggerKind < 0
-      return
-    endif
+  var [triggerKind, triggerChar] = GetTriggerAttributes(lspserver)
+  if triggerKind < 0
+    return
+  endif
 
-    # first send all the changes in the current buffer to the LSP server
-    listener_flush()
+  # first send all the changes in the current buffer to the LSP server
+  listener_flush()
 
-    # initiate a request to LSP server to get list of completions
-    lspserver.getCompletion(triggerKind, triggerChar)
-  endfor
+  # initiate a request to LSP server to get list of completions
+  lspserver.getCompletion(triggerKind, triggerChar)
 enddef
 
 # Lazy complete documentation handler
-def LspResolve()
-  var lspservers: dict<any> = buf.CurbufGetServersChecked('completion')
-  for lspserver in lspservers
-    if lspserver->empty()
-      return
-    endif
+def LspResolve(lspid: number)
+  var lspserver = buf.BufLspServerGetById(bufnr(), lspid)
+  if lspserver->empty()
+    return
+  endif
 
-    var item = v:event.completed_item
-    if item->has_key('user_data') && !item.user_data->empty()
-        if item.user_data->type() == v:t_dict && !item.user_data->has_key('documentation')
-          lspserver.resolveCompletion(item.user_data)
-        else
-          ShowCompletionDocumentation(item.user_data)
-        endif
-    endif
-  endfor
+  var item = v:event.completed_item
+  if item->has_key('user_data') && !item.user_data->empty()
+      if item.user_data->type() == v:t_dict && !item.user_data->has_key('documentation')
+        lspserver.resolveCompletion(item.user_data)
+      else
+        ShowCompletionDocumentation(item.user_data)
+      endif
+  endif
 enddef
 
 # If the completion popup documentation window displays "markdown" content,
@@ -613,9 +608,8 @@ def LspSetPopupFileType()
 enddef
 
 # complete done handler (LSP server-initiated actions after completion)
-def LspCompleteDone(bnr: number)
-  # TODO
-  var lspservers: dict<any> = buf.BufLspServersGet(bnr, 'completion')
+def LspCompleteDone(bnr: number, lspid: number)
+  var lspserver = buf.BufLspServerGetById(bnr, lspid)
   if lspserver->empty()
     return
   endif
@@ -672,6 +666,7 @@ export def BufferInit(lspserver: dict<any>, bnr: number, ftype: string)
     endif
     setbufvar(bnr, '&completepopup',
 	      'width:80,highlight:Pmenu,align:item,border:off')
+
     # <Enter> in insert mode stops completion and inserts a <Enter>
     if !opt.lspOptions.noNewlineInCompletion
       :inoremap <expr> <buffer> <CR> pumvisible() ? "\<C-Y>\<CR>" : "\<CR>"
@@ -681,14 +676,14 @@ export def BufferInit(lspserver: dict<any>, bnr: number, ftype: string)
     acmds->add({bufnr: bnr,
 		event: 'TextChangedI',
 		group: 'LSPBufferAutocmds',
-		cmd: 'LspComplete()'})
+                cmd: $'LspComplete({lspserver.id})'})
   
     # Buffer completion pum blocks TextChangedI 
     if opt.lspOptions.useBufferCompletion
       acmds->add({bufnr: bnr,
                   event: 'TextChangedP',
                   group: 'LSPBufferAutocmds',
-                  cmd: 'LspComplete()'})
+                  cmd: $'LspComplete({lspserver.id})'})
     endif
   endif
 
@@ -701,19 +696,19 @@ export def BufferInit(lspserver: dict<any>, bnr: number, ftype: string)
     acmds->add({bufnr: bnr,
                 event: 'CompleteChanged',
                 group: 'LSPBufferAutocmds',
-                cmd: 'LspResolve()'})
+                cmd: $'LspResolve({lspserver.id})'})
   endif
 
   acmds->add({bufnr: bnr,
 	      event: 'CompleteChanged',
 	      group: 'LSPBufferAutocmds',
-	      cmd: 'LspSetPopupFileType()'})
+              cmd: 'LspSetPopupFileType()'})
 
   # Execute LSP server initiated text edits after completion
   acmds->add({bufnr: bnr,
 	      event: 'CompleteDone',
 	      group: 'LSPBufferAutocmds',
-	      cmd: $'LspCompleteDone({bnr})'})
+              cmd: $'LspCompleteDone({bnr}, {lspserver.id})'})
 
   autocmd_add(acmds)
 enddef

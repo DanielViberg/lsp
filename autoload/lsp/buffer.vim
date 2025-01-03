@@ -64,15 +64,15 @@ var SupportedCheckFns = {
 # Returns an empty dict if the server is not found.
 export def BufLspServersGet(bnr: number, feature: string = null_string): list<dict<any>>
   if !bufnrToServers->has_key(bnr)
-    return {}
+    return []
   endif
 
   if bufnrToServers[bnr]->empty()
-    return {}
+    return []
   endif
 
   if feature == null_string
-    return bufnrToServers[bnr][0]
+    return bufnrToServers[bnr]
   endif
 
   if !SupportedCheckFns->has_key(feature)
@@ -84,45 +84,26 @@ export def BufLspServersGet(bnr: number, feature: string = null_string): list<di
   var SupportedCheckFn = SupportedCheckFns[feature]
 
   var possibleLSPs: list<dict<any>> = []
-  var featureLSPs: list<dict<any>> = []
-
   for lspserver in bufnrToServers[bnr]
     if !lspserver.ready || !SupportedCheckFn(lspserver)
       continue
     endif
-
     possibleLSPs->add(lspserver)
   endfor
 
   if possibleLSPs->empty()
-    return {}
+    return []
   endif
-
-  # LSP server is configured to be a provider for "feature"
-  for lspserver in possibleLSPs
-    var has_feature: bool = lspserver.features->get(feature, false)
-    if has_feature
-      featureLSPs->add(lspserver)
-    endif
-  endfor
-
-  # Return the first LSP server that supports "feature" and doesn't have it
-  # disabled
-  for lspserver in possibleLSPs
-    if lspserver.featureEnabled(feature)
-      featureLSPs->add(lspserver)
-    endif
-  endfor
-
-  return uniq(featureLSPs)
+  
+  # If "feature" is disabled on server, dont load it
+  return possibleLSPs->filter((_, lsp) => lsp.featureEnabled(feature))
 enddef
 
 # Returns the LSP server for the buffer "bnr" and with ID "id". Returns an empty
 # dict if the server is not found.
 export def BufLspServerGetById(bnr: number, id: number): dict<any>
-  echomsg 'nr of servers' bufnrToServers->get(bnr)->len()
   if !bufnrToServers->has_key(bnr)
-    return {}
+    return {} 
   endif
 
   for lspserver in bufnrToServers[bnr]

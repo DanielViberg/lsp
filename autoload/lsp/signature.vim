@@ -15,13 +15,13 @@ def CloseSignaturePopup(lspserver: dict<any>)
 enddef
 
 def CloseCurBufSignaturePopup()
-  # TODO
   var lspservers: dict<any> = buf.CurbufGetServers('signatureHelp')
-  if lspserver->empty()
+  if lspservers->empty()
     return
   endif
-
-  CloseSignaturePopup(lspserver)
+  for lspserver in lspservers
+    CloseSignaturePopup(lspserver)
+  endfor
 enddef
 
 # Show the signature using "textDocument/signatureHelp" LSP method

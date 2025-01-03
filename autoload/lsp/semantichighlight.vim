@@ -228,13 +228,10 @@ enddef
 
 # Update the semantic highlighting for buffer "bnr"
 def LspUpdateSemanticHighlight(bnr: number)
-  # TODO
   var lspservers: dict<any> = buf.BufLspServersGet(bnr, 'semanticTokens')
-  if lspserver->empty()
-    return
-  endif
-
-  lspserver.semanticHighlightUpdate(bnr)
+  for lspserver in lspservers
+    lspserver.semanticHighlightUpdate(bnr)
+  endfor
 enddef
 
 # Initialize the semantic highlighting for the buffer 'bnr'

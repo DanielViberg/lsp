@@ -96,19 +96,20 @@ def LspInlayHintsUpdate(bnr: number)
     setbufvar(bnr, 'LspInlayHintsTimer', -1)
   endif
 
-  #TODO
   var lspservers: dict<any> = buf.BufLspServersGet(bnr, 'inlayHint')
-  if lspserver->empty()
-    return
-  endif
+  for lspserver in lspservers 
+    if lspserver->empty()
+      continue
+    endif
 
-  if get(g:, 'LSPTest')
-    # When running tests, update the inlay hints immediately
-    InlayHintsTimerCb(lspserver, bnr, -1)
-  else
-    timerid = timer_start(300, function('InlayHintsTimerCb', [lspserver, bnr]))
-    setbufvar(bnr, 'LspInlayHintsTimer', timerid)
-  endif
+    if get(g:, 'LSPTest')
+      # When running tests, update the inlay hints immediately
+      InlayHintsTimerCb(lspserver, bnr, -1)
+    else
+      timerid = timer_start(300, function('InlayHintsTimerCb', [lspserver, bnr]))
+      setbufvar(bnr, 'LspInlayHintsTimer', timerid)
+    endif
+  endfor
 enddef
 
 # Text is modified. Need to update the inlay hints.
@@ -189,10 +190,12 @@ var save_showInlayHints = opt.lspOptions.showInlayHints
 export def InlayHintsEnable()
   opt.lspOptions.showInlayHints = true
   for binfo in getbufinfo()
-    var lspservers: list<dict<any>> = buf.BufLspServersGet(binfo.bufnr)
+    var lspservers: list<dict<any>> = buf.BufLspServersGet(binfo.bufnr, 'inlayHint')
+
     if lspservers->empty()
-      continue
+      return
     endif
+
     for lspserver in lspservers
       if !lspserver.ready
 	  || !lspserver.featureEnabled('inlayHint')
@@ -203,6 +206,7 @@ export def InlayHintsEnable()
       BufferInit(lspserver, binfo.bufnr)
       LspInlayHintsUpdateNow(binfo.bufnr)
     endfor
+
   endfor
   save_showInlayHints = true
 enddef
@@ -212,14 +216,15 @@ enddef
 export def InlayHintsDisable()
   opt.lspOptions.showInlayHints = false
   for binfo in getbufinfo()
-    # TODO
     var lspservers: dict<any> = buf.BufLspServersGet(binfo.bufnr, 'inlayHint')
-    if lspserver->empty()
-      continue
+    if lspservers->empty()
+      return
     endif
-    LspInlayHintsUpdateStop(binfo.bufnr)
-    :silent! autocmd_delete([{bufnr: binfo.bufnr, group: 'LspInlayHints'}])
-    InlayHintsClear(binfo.bufnr)
+    for lspserver in lspservers
+      LspInlayHintsUpdateStop(binfo.bufnr)
+      :silent! autocmd_delete([{bufnr: binfo.bufnr, group: 'LspInlayHints'}])
+      InlayHintsClear(binfo.bufnr)
+    endfor
   endfor
   save_showInlayHints = false
 enddef
