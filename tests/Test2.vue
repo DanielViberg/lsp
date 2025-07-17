@@ -8,13 +8,13 @@ const thisIsMyVariabe = ref();
 
 <style>
 .test {
-	display: grid;
-	grid-auto-columns: 1fr;
-	background: gray;
+  display: grid;
+  grid-auto-columns: 1fr;
+  background: gray;
 }
 </style>
 
 <template>
-	<div :class="thisIsMyVariabe">
-	</div>
+  <div :class="thisIsMyVariabe">
+  </div>
 </template>

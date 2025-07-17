@@ -4,7 +4,9 @@
 ### ⚠️ Note! Early alpha status, lots of things are hard coded and many things dont work yet.
 
 ### TL;DR
-A lightweight lsp client. Needs no dependencies except the server binaries.
+A lightweight lsp client. 
+1. No dependencies except the server binaries.
+2. Utilizes as much of the default features vim can provide.
 
 ### Features
 - Completion
