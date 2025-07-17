@@ -1,0 +1,145 @@
+{
+  "servers": [
+    {
+      "name": "vim-ls",
+      "filetype": [
+        "vim"
+      ],
+      "path": "vim-language-server",
+      "args": [
+        "--stdio"
+      ]
+    },
+    {
+      "name": "php-ls",
+      "filetype": [
+        "php"
+      ],
+      "path": "intelephense",
+      "args": [
+        "--stdio"
+      ],
+      "initializationOptions": {},
+      "workspaceConfig": {
+        "intelephense": {
+          "format": {
+            "braces": "k&r"
+          }
+        }
+      }
+    },
+    {
+      "name": "vue-ls",
+      "filetype": [
+        "vue"
+      ],
+      "path": "vue-language-server",
+      "args": [
+        "--stdio"
+      ],
+      "initializationOptions": {
+        "typescript": {
+          "tsdk": ""
+        },
+        "vue": {
+          "hybridMode": false
+        }
+      },
+      "workspaceConfig": {
+        "html": {
+          "format": {
+            "wrapAttributes": "force-aligned"
+          }
+        }
+      }
+    },
+    {
+      "name": "ts-ls",
+      "filetype": [
+        "typescript",
+        "javascript"
+      ],
+      "path": "typescript-language-server",
+      "args": [
+        "--stdio"
+      ],
+      "features": {
+        "documentFormatting": false
+      }
+    },
+    {
+      "filetype": [
+        "json"
+      ],
+      "path": "vscode-json-languageserver",
+      "args": [
+        "--stdio"
+      ]
+    },
+    {
+      "name": "md-ls",
+      "filetype": [
+        "markdown"
+      ],
+      "path": "marksman"
+    },
+    {
+      "name": "bash-ls",
+      "filetype": [
+        "sh",
+        "bash"
+      ],
+      "path": "bash-language-server",
+      "args": [
+        "start"
+      ]
+    },
+    {
+      "name": "csharp-ls",
+      "filetype": [
+        "cs"
+      ],
+      "path": "csharp-ls"
+    },
+    {
+      "name": "rust-ls",
+      "filetype": [
+        "rust"
+      ],
+      "path": "rust-analyzer",
+      "args": [],
+      "syncInit": true
+    },
+    {
+      "name": "html-ls",
+      "filetype": [
+        "html"
+      ],
+      "path": "html-languageserver",
+      "args": [
+        "--stdio"
+      ],
+      "initializationOptions": {
+        "embeddedLanguages": {
+          "css": true,
+          "javascript": true
+        }
+      }
+    },
+    {
+      "name": "c-ls",
+      "filetype": [
+        "c",
+        "cpp"
+      ],
+      "path": "clangd",
+      "args": [
+        "--background-index",
+        "--clang-tidy"
+      ],
+      "features": {
+        "diagnostics": false
+      }
+    }
+  ]
+}
