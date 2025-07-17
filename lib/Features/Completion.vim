@@ -117,6 +117,10 @@ def RequestCompletionReply(server: any, reply: dict<any>)
       )
       var query = getline(line('.'))[tc.col : col('.') - 2]
       l.PrintDebug('Completion query ' .. query)
+      
+      # Add buffer words
+      items = items + GetBufferWordCompl(server)
+
       # Compare query to items label w/o trigger char or additional space
       items->filter((_, v) => {
         if has_key(v, 'label') && type(v.label) == v:t_string
@@ -133,12 +137,32 @@ def RequestCompletionReply(server: any, reply: dict<any>)
         endif
       })
       l.PrintDebug('Completion items count after filer ' .. items->len())
+      echomsg items->len()
       var compItems = items->map((_, i) => LspItemToCompItem(i, server.id))
+      echomsg compItems
       if mode() == 'i'
         compItems->complete(col("."))
       endif
     endif
   endif
+enddef
+
+def GetBufferWordCompl(server: any): list<dict<any>>
+  var comps: list<dict<any>> = []
+  var curLine = line('.')
+  for lnum in range(1, line('$'))
+    if lnum == curLine
+      continue
+    endif
+    var words = split(getline(lnum), '\W\+')
+    for w in words
+      comps->add({
+         label: w,
+         is_buf: true,
+      })
+    endfor
+  endfor
+  return uniq(sort(comps, (i1, i2) => i1.label == i2.label ? 0 : i1.label > i2.label ? 1 : -1))
 enddef
 
 def LspItemToCompItem(item: dict<any>, sId: number): dict<any>
@@ -151,7 +175,8 @@ def LspItemToCompItem(item: dict<any>, sId: number): dict<any>
   endif
   return {
     word: item.label, 
-    kind: '[lsp]',
+    kind: has_key(item, 'is_buf') ? '[buf]' : '[lsp]',
+    dup: has_key(item, 'is_buf') ? 1 : 0,
     info: info,
     user_data: {
       item: item,
