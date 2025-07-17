@@ -37,8 +37,6 @@ export class Diagnostics extends ft.Feature implements if.IFeature
 	    call prop_type_add('hint', {'highlight': 'LHint'})
 	    call prop_type_add('hintI', {'highlight': 'LIHint'})
 
-      :set signcolumn=yes
-
       call sign_define([
       {
         name: 's_error',
