@@ -33,7 +33,10 @@ endclass
   
 def PreSave(server: any, bId: number, par: any): void
   var docFor = df.DocumentFormatting.new(bId)
-  r.RpcAsync(server, docFor, PreSaveReply)
+  if has_key(server.serverCapabilites, 'documentFormattingProvider') &&
+      server.serverCapabilites.documentFormattingProvider
+    r.RpcAsync(server, docFor, PreSaveReply)
+  endif
 enddef
 
 def PreSaveReply(server: any, reply: dict<any>)
