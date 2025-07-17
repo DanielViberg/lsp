@@ -137,9 +137,7 @@ def RequestCompletionReply(server: any, reply: dict<any>)
         endif
       })
       l.PrintDebug('Completion items count after filer ' .. items->len())
-      echomsg items->len()
       var compItems = items->map((_, i) => LspItemToCompItem(i, server.id))
-      echomsg compItems
       if mode() == 'i'
         compItems->complete(col("."))
       endif
