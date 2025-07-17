@@ -79,7 +79,7 @@
     {
       "name": "md-ls",
       "filetype": [
-        "markdown"
+        "md"
       ],
       "path": "marksman"
     },

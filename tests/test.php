@@ -6,8 +6,8 @@ class Test{
 
 	public function __construct(string $name, int $age){
 		$this->name = $name;
-		$this->age = $age;
-	}
+    $this->age = $age;
+  }
 
 	public function getName(): string {
 		return $this->name;
