@@ -25,7 +25,7 @@ export class Server
   public var serverCapabilites: dict<any> = null_dict
   public var clientCapabilites: dict<any> = null_dict
   public var fileType: string = null_string
-
+    
   var id: number = -1
 
   var documentSync: any

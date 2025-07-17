@@ -38,12 +38,7 @@ export class Buffer
 endclass
 
 export def IsAFileBuffer(): bool
-  var path = argv(0)
-  if isdirectory(path)
-    return false
-  else
-    return true
-  endif
+  return filereadable(expand('%:p'))
 enddef 
 
 export def GetBuffersByUri(uri: string): list<number>
