@@ -5,9 +5,7 @@ var CachedConfig: list<dict<any>> = null_list
 export class Config 
 endclass
 
-command! LspConfig call OpenLspConfig()
-
-def OpenLspConfig()
+export def OpenLspConfig()
   var configDir = readfile(expand('$HOME/.vim/.lsp-config-dir'))[0]
   var configFile = configDir .. "lsp-config.json"
   execute 'edit' configFile
