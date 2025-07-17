@@ -29,6 +29,7 @@ const KIND_INCOMPLETE_COMPLETION = 3
 
 var initOnce: bool = false
 var isIncomplete: bool = false
+var bufferWords: list<string> = []
 
 export class Completion extends ft.Feature implements if.IFeature
 
@@ -44,6 +45,8 @@ export class Completion extends ft.Feature implements if.IFeature
       inoremap <expr> <Up> pumvisible() ? PumShowDoc("\<Up>") : "\<Up>"
       inoremap <expr> <Down> pumvisible() ? PumShowDoc("\<Down>") : "\<Down>"
       autocmd TextChangedI * call CheckEmptyLineForPUM()
+      autocmd BufEnter * call CacheBufferWords()
+      CacheBufferWords()
     endif
   enddef
 
@@ -69,7 +72,7 @@ export class Completion extends ft.Feature implements if.IFeature
     # 1. Check current pum if its incomplete
     if false # TODO: isIncomplete not correctly handled
       return KIND_INCOMPLETE_COMPLETION
-    endif 
+    endif
     
     var char = str.GetTriggerChar(server.serverCapabilites.completionProvider.triggerCharacters)
     if (index(server.serverCapabilites.completionProvider.triggerCharacters, char) != -1)
@@ -119,7 +122,7 @@ def RequestCompletionReply(server: any, reply: dict<any>)
       l.PrintDebug('Completion query ' .. query)
       
       # Add buffer words
-      items = items + GetBufferWordCompl(server)
+      items = items + GetCacheBufferW()
 
       # Compare query to items label w/o trigger char or additional space
       items->filter((_, v) => {
@@ -145,22 +148,27 @@ def RequestCompletionReply(server: any, reply: dict<any>)
   endif
 enddef
 
-def GetBufferWordCompl(server: any): list<dict<any>>
-  var comps: list<dict<any>> = []
-  var curLine = line('.')
-  for lnum in range(1, line('$'))
-    if lnum == curLine
-      continue
-    endif
-    var words = split(getline(lnum), '\W\+')
+def CacheBufferWords(): void
+  var lines = getbufline(bufnr(), 1, '$')
+  for l in lines
+    var words = split(l, '\W\+')
     for w in words
-      comps->add({
-         label: w,
-         is_buf: true,
-      })
+      if bufferWords->index(w) == -1
+        bufferWords->add(w)
+      endif
     endfor
   endfor
-  return uniq(sort(comps, (i1, i2) => i1.label == i2.label ? 0 : i1.label > i2.label ? 1 : -1))
+enddef
+
+def GetCacheBufferW(): list<dict<any>>
+  var comps: list<dict<any>> = []
+  for w in bufferWords
+    comps->add({
+       label: w,
+       is_buf: true,
+    })
+  endfor
+  return comps
 enddef
 
 def LspItemToCompItem(item: dict<any>, sId: number): dict<any>
