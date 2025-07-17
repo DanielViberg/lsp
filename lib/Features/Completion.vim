@@ -193,10 +193,11 @@ enddef
 
 def PumCallback(): string
   var info = complete_info(['completed', 'selected'])
-  if has_key(info, 'completed')
+  if has_key(info, 'completed') && info.selected != -1
     timer_start(0, (_) => CompleteAccept(info.completed))
+    return
   endif
-  return ""
+  return "\n\n"
 enddef
 
 def CompleteAccept(ci: any): void
