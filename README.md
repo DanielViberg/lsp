@@ -1,7 +1,7 @@
 # Vim 9 Language Server Protocol Client
 
 
-### ⚠️ Note! Early alpha status, lots of things are hard coded and many things dont work yet.⚠️
+### ⚠️ Note! Early alpha status, lots of things are hard coded and many things dont work yet.
 
 ### TL;DR
 A lightweight lsp client. Needs no dependencies except the server binaries.
