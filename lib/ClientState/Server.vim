@@ -77,7 +77,9 @@ export class Server
       initOps
     )
     r.RpcAsync(this, initReq, this.InitResponse)
-    l.PrintInfo("Server " .. this.config.name .. " init")
+    if has_key(this.config, 'name')
+      l.PrintInfo("Server " .. this.config.name .. " init")
+    endif
   enddef
 
   def InitResponse(server: Server, reply: dict<any>): void
