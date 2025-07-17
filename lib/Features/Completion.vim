@@ -134,7 +134,7 @@ def RequestCompletionReply(server: any, reply: dict<any>)
           if empty(query)
             return true # Case: typed $
           endif
-          return tolower(query) == tolower(labelName[ : len(query) - 1]) # Substring and same index
+          return query == labelName[ : len(query) - 1] # Substring and same index
         else
           return false
         endif
