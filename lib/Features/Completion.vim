@@ -188,7 +188,7 @@ def PumCallback(): string
   if has_key(info, 'completed')
     timer_start(0, (_) => CompleteAccept(info.completed))
   endif
-  return ''
+  return "\n\n"
 enddef
 
 def CompleteAccept(ci: any): void
