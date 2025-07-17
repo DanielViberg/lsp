@@ -1,1 +1,46 @@
-# LSP
+# Vim 9 Language Server Protocol Client
+
+
+## ⚠️ Note! Early alpha status, lots of things are hard coded and many things dont work yet.⚠️
+
+### TL;DR
+A lightweight lsp client. Needs no dependencies except the server binaries.
+
+### Features
+- Completion
+- GoToDefinition
+- Diagnostics
+- Formatting
+
+### Requirements
+- Vim version 9.0 or higher
+
+### Installation
+Install using [vim-plug](https://github.com/junegunn/vim-plug). Add the following lines to your `.vimrc` file:
+
+```
+vim9script
+plug#begin()
+Plug 'DanielViberg/lsp'
+plug#end()
+```
+
+For legacy scripts, use:
+
+```
+call plug#begin()
+Plug 'DanielViberg/lsp'
+call plug#end()
+```
+
+### Configuration
+Configuration file mirrors the format used in this project: [**lsp.vim**](https://github.com/yegappan/lsp) 
+TBD
+
+### Similar Plugins
+
+1. [**vim-lsp.vim**](https://github.com/prabirshrestha/vim-lsp) - Vim 8 lsp.
+
+2. [**lsp.vim**](https://github.com/yegappan/lsp) - Vim 9 lsp.
+
+3. [**coc.nvim**](https://github.com/neoclide/coc.nvim) - Vim 9 lsp.
