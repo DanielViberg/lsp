@@ -7,6 +7,7 @@
 A lightweight lsp client. 
 1. No dependencies except the server binaries.
 2. Utilizes as much of the default features vim can provide.
+3. Tested and expected to work in vim -u DEFAULTS
 
 ### Features
 - Completion

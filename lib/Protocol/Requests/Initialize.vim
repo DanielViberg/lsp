@@ -19,7 +19,11 @@ export class Initialize extends req.RequestMessage
       },
       rootUri: rootUri,
       initializationOptions: this.initOpts,
-      capabilities: json_encode(readfile(fnamemodify(currentDir, ':h') .. '/../Config/cc.json')),
+      capabilities: json_encode(
+                      json_decode(
+                        join(
+                          readfile(fnamemodify(currentDir, ':h') .. '/../Config/cc.json'), "\n")
+                      )),
     }
   enddef 
 
