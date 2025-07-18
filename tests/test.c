@@ -11,6 +11,8 @@ void greet(Person p);
 
 int add(int a, int b);
 
+int remove(int a, int b);
+
 int main() {
 	Person alice;
 	strncpy(alice.name, "Alice", MAX_NAME_LEN);

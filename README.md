@@ -39,6 +39,9 @@ call plug#end()
 Configuration file mirrors the format used in this project: [**lsp.vim**](https://github.com/yegappan/lsp) 
 TBD
 
+### Commands
+- :LspConf (Edit lsp-config.json)
+
 ### Similar Plugins
 
 1. [**vim-lsp.vim**](https://github.com/prabirshrestha/vim-lsp) - Vim 8 lsp.
