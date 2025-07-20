@@ -31,6 +31,8 @@ export class Initialize extends req.RequestMessage
       endif
     endif
 
+    rootPath = str.Uri(rootPath)
+
     l.PrintDebug('Root path: ' .. rootPath)
 
     this.params = {
