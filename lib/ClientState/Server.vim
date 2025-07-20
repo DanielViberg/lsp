@@ -70,16 +70,10 @@ export class Server
     this.job = cmd->job_start(opts)
 
     this.isRunning = true
-    var initOps = has_key(this.config, 'initializationOptions') ? this.config.initializationOptions : null_dict
 
-    var initReq = reqI.Initialize.new(
-      str.Uri(expand('%:p')),
-      initOps
-    )
+    var initReq = reqI.Initialize.new(this.config)
     r.RpcAsync(this, initReq, this.InitResponse)
-    if has_key(this.config, 'name')
-      l.PrintInfo("Server " .. this.config.name .. " init")
-    endif
+    l.PrintInfo("Server " .. get(this.config, 'name') .. " init")
   enddef
 
   def InitResponse(server: Server, reply: dict<any>): void

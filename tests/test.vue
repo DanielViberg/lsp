@@ -6,14 +6,14 @@ const thisIsAVariable = defineProps()
 </script>
 <style>
 .test {
-  display: grid;
+	display: grid;
 }
 </style>
 
 <template>
-  <div :class="thisIsAVariable">
-    <div :class="thisIsAVariable"></div>
-  </div>
-  <Test2>
-  </Test2>
+	<div :class="thisIsAVariable" :style="() => console.log()">
+		<div :class="thisIsAVariable"></div>
+	</div>
+	<Test2>
+	</Test2>
 </template>

@@ -100,3 +100,44 @@ export def Utf16ToUtf8ByteIdxWOComp(utf8_str: string, utf16_idx: number): number
 
   return byte_idx
 enddef
+
+# Find the nearest root directory containing a file or directory name from the
+# list of names in "files" starting with the directory "startDir".
+# Based on a similar implementation in the vim-lsp plugin.
+# Searches upwards starting with the directory "startDir".
+# If a file name ends with '/' or '\', then it is a directory name, otherwise
+# it is a file name.
+# Returns '' if none of the file and directory names in "files" can be found
+# in one of the parent directories.
+export def FindNearestRootDir(startDir: string, files: list<any>): string
+  var foundDirs: dict<bool> = {}
+
+  for file in files
+    if file->type() != v:t_string || file->empty()
+      continue
+    endif
+    var isDir = file[-1 : ] == '/' || file[-1 : ] == '\'
+    var relPath: string
+    if isDir
+      relPath = finddir(file, $'{startDir};')
+    else
+      relPath = findfile(file, $'{startDir};')
+    endif
+    if relPath->empty()
+      continue
+    endif
+    var rootDir = relPath->fnamemodify(isDir ? ':p:h:h' : ':p:h')
+    foundDirs[rootDir] = true
+  endfor
+  if foundDirs->empty()
+    return ''
+  endif
+
+  # Sort the directory names by length
+  var sortedList: list<string> = foundDirs->keys()->sort((a, b) => {
+    return b->len() - a->len()
+  })
+
+  # choose the longest matching path (the nearest directory from "startDir")
+  return sortedList[0]
+enddef

@@ -32,8 +32,8 @@
     "executeCommand": {
       "dynamicRegistration": false
     },
-    "configuration": false,
-    "workspaceFolders": false,
+    "configuration": true,
+    "workspaceFolders": true,
     "semanticTokens": {
       "dynamicRegistration": false,
       "requests": {
