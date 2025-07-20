@@ -3,6 +3,7 @@ vim9script
 import "../Features/Diagnostics.vim" as diag
 import "../Features/Completion.vim" as comp
 import "../Features/Formatting.vim" as for
+import "../Features/Workspace.vim" as w
 import "../Features/GoToDefinition.vim" as gtd
 import "../Features/DocumentSync.vim" as dc
 import "../Protocol/Notifications/Notification.vim" as notif
@@ -29,6 +30,7 @@ export class Server
   var id: number = -1
 
   var documentSync: any
+  var workspace: any
   var diagnostics: any
   var completion: any
   var formatting: any
@@ -85,6 +87,7 @@ export class Server
 
   def InitFeat(): void
     this.documentSync = dc.DocumentSync.new()
+    this.workspace = w.Workspace.new()
     this.diagnostics = diag.Diagnostics.new()
     if has_key(this.serverCapabilites, 'completionProvider')
       this.completion = comp.Completion.new()
@@ -101,6 +104,7 @@ export class Server
       return
     endif
     this.documentSync.ProcessRequest(data)
+    this.workspace.ProcessRequest(data)
     this.diagnostics.ProcessRequest(data)
     if has_key(this.serverCapabilites, 'completionProvider')
       this.completion.ProcessRequest(data)
@@ -114,6 +118,7 @@ export class Server
       return
     endif
     this.documentSync.ProcessNotification(data)
+    this.workspace.ProcessNotification(data)
     this.diagnostics.ProcessNotification(data)
     if has_key(this.serverCapabilites, 'completionProvider')
       this.completion.ProcessNotification(data)

@@ -11,13 +11,13 @@ export class Initialize extends req.RequestMessage
   def new(config: dict<any>)
     this.method = 'initialize'
 
-    var rootPath = ''
+    var rootUri = ''
     var rootSearchFiles = config->get('rootSearch')
     var bufDir = bufnr('.')->bufname()->fnamemodify(':p:h')
     if !rootSearchFiles->empty()
-      rootPath = str.FindNearestRootDir(bufDir, rootSearchFiles)
+      rootUri = str.FindNearestRootDir(bufDir, rootSearchFiles)
     endif
-    if rootPath->empty()
+    if rootUri->empty()
       var cwd = getcwd()
 
       # bufDir is within cwd
@@ -25,13 +25,13 @@ export class Initialize extends req.RequestMessage
       if &fileignorecase
           ? bufDirPrefix ==? cwd
           : bufDirPrefix == cwd
-        rootPath = cwd
+        rootUri = cwd
       else
-        rootPath = bufDir
+        rootUri = bufDir
       endif
     endif
 
-    rootPath = str.Uri(rootPath)
+    rootUri = str.Uri(rootPath)
 
     l.PrintDebug('Root path: ' .. rootPath)
 
@@ -41,7 +41,7 @@ export class Initialize extends req.RequestMessage
         name:    'Vim',
         version: '9.1'
       },
-      rootPath: rootPath,
+      rootUri: rootUri,
       initializationOptions: config->get('initializationOptions', null_dict),
       capabilities: json_encode(
                       json_decode(
