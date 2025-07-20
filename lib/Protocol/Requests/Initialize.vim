@@ -31,9 +31,9 @@ export class Initialize extends req.RequestMessage
       endif
     endif
 
-    rootUri = str.Uri(rootPath)
+    rootUri = str.Uri(rootUri)
 
-    l.PrintDebug('Root path: ' .. rootPath)
+    l.PrintDebug('Root uri: ' .. rootUri)
 
     this.params = {
       processId: getpid(),
