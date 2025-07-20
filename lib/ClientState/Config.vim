@@ -25,7 +25,6 @@ export def Init(): void
   if !filereadable(configFile)
   # Ask to create if dir has no file
     var sel = confirm("There is no lsp-config.json, create it now?", "&Yes\n&No", 2)
-    echomsg sel
     if sel == 1
       var exConfigFile = expand("%:p:h") .. '/../assets/lsp-config.json'
       system("cp " .. shellescape(exConfigFile) .. " " .. shellescape(configDir))

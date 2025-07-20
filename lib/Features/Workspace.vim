@@ -16,7 +16,6 @@ export class Workspace extends ft.Feature implements if.IFeature
   def ProcessRequest(data: any): void
     if has_key(data, 'method') && data.method == 'workspace/configuration'
       echomsg 'config'
-      echomsg data
     endif
   enddef
 
