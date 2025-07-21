@@ -202,17 +202,22 @@ enddef
 
 def CompleteAccept(ci: any): void
   if !ci->empty() && type(ci.user_data) == v:t_dict
-    if has_key(ci.user_data.item, 'textEdit') && 
-       ci.user_data.item.textEdit != null_dict
-      var server = ses.GetSessionServerById(ci.user_data.server_id)
-      var change = tdce.TextDocumentContentChangeEvent.new(
-        ci.user_data.item.textEdit.newText,
-        ci.user_data.item.textEdit.range,
-        server) 
-      change.VimDecode()
-      change.ApplyChange()
-    else
+    if !ci.user_data.item->has_key('additionalTextEdits')
       ResolveCompletion(ci.user_data.server_id, bufnr(), ci.user_data.item)
+      return
+    else 
+      if has_key(ci.user_data.item, 'textEdit') && 
+         ci.user_data.item.textEdit != null_dict
+        var server = ses.GetSessionServerById(ci.user_data.server_id)
+        var change = tdce.TextDocumentContentChangeEvent.new(
+          ci.user_data.item.textEdit.newText,
+          ci.user_data.item.textEdit.range,
+          server) 
+        change.VimDecode()
+        change.ApplyChange()
+      else
+        ResolveCompletion(ci.user_data.server_id, bufnr(), ci.user_data.item)
+      endif
     endif
   endif
 enddef
@@ -248,4 +253,19 @@ def ResolveCompletionReply(server: any, reply: dict<any>): void
     setline(line('.'), startText .. reply.result.label .. lineText[ col('.') - 1 : ])
     cursor(line('.'), col('.') + len(reply.result.label) - query->len())
   endif
+
+  var oldCurLine = line('.')
+  var oldCurCol = col('.')
+
+ if has_key(reply.result, 'additionalTextEdits')
+  for edit in reply.result->get('additionalTextEdits')
+    var change = tdce.TextDocumentContentChangeEvent.new(
+      edit.newText,
+      edit.range,
+      server)
+    change.VimDecode()
+    change.ApplyChange()
+  endfor
+  cursor(oldCurLine, oldCurCol)
+ endif
 enddef

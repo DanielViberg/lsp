@@ -1,5 +1,4 @@
 <script setup>
-import Test2 from './Test2.vue'
 
 const thisIsAVariable = defineProps()
 
@@ -14,6 +13,4 @@ const thisIsAVariable = defineProps()
 	<div :class="thisIsAVariable" :style="() => console.log()">
 		<div :class="thisIsAVariable"></div>
 	</div>
-	<Test2>
-	</Test2>
 </template>
