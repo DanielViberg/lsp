@@ -4,6 +4,7 @@ import "./Abstract/Feature.vim" as ft
 import "./Interfaces/IFeature.vim" as if
 import "../Protocol/Requests/DocumentFormatting.vim" as df
 import "../Rpc/Rpc.vim" as r
+import "../Utils/TextEdit.vim" as te
 import "../ClientState/Session.vim" as ses
 import "../Protocol/Objects/TextDocumentContentChangeEvent.vim" as tdce
 
@@ -41,11 +42,12 @@ enddef
 
 def PreSaveReply(server: any, reply: dict<any>)
   if has_key(reply, 'result') && reply.result != null
+    var changes: list<tdce.TextDocumentContentChangeEvent>
     for r in reply.result
       var change = tdce.TextDocumentContentChangeEvent.new(r.newText, r.range, server)
-      change.VimDecode()
-      change.ApplyChangeByLines(true)
-      noautocmd write
+      changes->add(change)
     endfor
+    te.ApplyTextEdits(bufnr(), changes) 
+    #noautocmd write
   endif
 enddef

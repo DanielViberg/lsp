@@ -1,5 +1,4 @@
 <script setup>
-
 const thisIsAVariable = defineProps()
 
 </script>

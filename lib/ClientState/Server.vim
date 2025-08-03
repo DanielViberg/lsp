@@ -81,7 +81,7 @@ export class Server
   def InitResponse(server: Server, reply: dict<any>): void
     server.isInit = true
     server.serverCapabilites = reply.result.capabilities
-    r.RpcAsyncMes(server, notif.Notification.new(notif.INITIALIZED))
+    r.RpcAsyncMes(server, notif.Notification.new('initialized'))
     server.InitFeat()
   enddef
 
@@ -97,6 +97,7 @@ export class Server
     this.isFeatInit = true
     l.PrintDebug('Ready and do open')
     dc.DidOpen(this, bufnr(), null)
+    this.workspace.SendWorkspaceConfig(this, this.config->get('workspaceConfig', null_dict))
   enddef
   
   def ProcessRequest(data: any): void 
@@ -133,7 +134,7 @@ export class Server
   enddef
 
   def StopResponse(server: Server, reply: dict<any>): void
-    r.RpcAsyncMes(server, notif.Notification.new(notif.EXIT))
+    r.RpcAsyncMes(server, notif.Notification.new('exit'))
     if server.job->job_status() == 'run'
       server.job->job_stop()
     endif
@@ -141,7 +142,7 @@ export class Server
   enddef
 
   def Kill(): void
-    r.RpcAsyncMes(this, notif.Notification.new(notif.EXIT))
+    r.RpcAsyncMes(this, notif.Notification.new('exit'))
   enddef
 
   def IsReady(): bool 

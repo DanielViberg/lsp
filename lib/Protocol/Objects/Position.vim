@@ -96,4 +96,9 @@ export class Position implements j.JsonSerializable
     endif
   enddef
 
+  def Equals(p: Position): bool
+    return this.line == p.line &&
+           this.character == p.character
+  enddef
+
 endclass

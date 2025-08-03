@@ -11,6 +11,7 @@ export def RpcSync(job: job, req: rm.RequestMessage, Cb: func)
 enddef
 
 export def RpcAsyncMes(server: any, notif: mes.Message)
+  l.PrintDebug('Notification ' .. notif.method)
   server.job->ch_sendexpr(notif.ToJson())
 enddef
 

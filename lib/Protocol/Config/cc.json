@@ -11,7 +11,7 @@
       }
     },
     "didChangeConfiguration": {
-      "dynamicRegistration": false
+      "dynamicRegistration": true
     },
     "didChangeWatchedFiles": {
       "dynamicRegistration": false,
@@ -33,7 +33,7 @@
       "dynamicRegistration": false
     },
     "configuration": true,
-    "workspaceFolders": true,
+    "workspaceFolders": false,
     "semanticTokens": {
       "dynamicRegistration": false,
       "requests": {
@@ -63,7 +63,7 @@
       "dynamicRegistration": false
     },
     "inlayHint": {
-      "dynamicRegistration": false,
+      "dynamicRegistration": true,
       "resolveSupport": {
         "properties": []
       }
@@ -261,7 +261,7 @@
       "dynamicRegistration": false
     },
     "semanticTokens": {
-      "dynamicRegistration": false,
+      "dynamicRegistration": true,
       "requests": {
         "range": false,
         "full": {

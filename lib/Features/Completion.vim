@@ -214,7 +214,7 @@ def CompleteAccept(ci: any): void
           ci.user_data.item.textEdit.range,
           server) 
         change.VimDecode()
-        change.ApplyChange()
+        change.ApplyCompletionChange()
       else
         ResolveCompletion(ci.user_data.server_id, bufnr(), ci.user_data.item)
       endif
@@ -239,7 +239,7 @@ def ResolveCompletionReply(server: any, reply: dict<any>): void
       reply.result.textEdit.range,
       server)
     change.VimDecode()
-    change.ApplyChange()
+    change.ApplyCompletionChange()
   elseif has_key(reply.result, 'label')
     var tc = str.GetTriggerCharIdx(
       server.serverCapabilites.completionProvider.triggerCharacters,
@@ -254,18 +254,17 @@ def ResolveCompletionReply(server: any, reply: dict<any>): void
     cursor(line('.'), col('.') + len(reply.result.label) - query->len())
   endif
 
-  var oldCurLine = line('.')
-  var oldCurCol = col('.')
-
- if has_key(reply.result, 'additionalTextEdits')
-  for edit in reply.result->get('additionalTextEdits')
-    var change = tdce.TextDocumentContentChangeEvent.new(
-      edit.newText,
-      edit.range,
-      server)
-    change.VimDecode()
-    change.ApplyChange()
-  endfor
-  cursor(oldCurLine, oldCurCol)
- endif
+  if has_key(reply.result, 'additionalTextEdits')
+    var oldCurLine = line('.')
+    var oldCurCol = col('.')
+    for edit in reply.result->get('additionalTextEdits')->reverse()
+      var change = tdce.TextDocumentContentChangeEvent.new(
+        edit.newText,
+        edit.range,
+        server)
+      change.VimDecode()
+      change.ApplyCompletionChange()
+    endfor
+    cursor(oldCurLine, oldCurCol)
+  endif
 enddef

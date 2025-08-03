@@ -46,7 +46,8 @@ export class TextDocumentContentChangeEvent implements j.JsonSerializable
     this.end.VimDecode()
   enddef
 
-  def ApplyChange(): void 
+  # Always one line
+  def ApplyCompletionChange(): void 
     if pumvisible()
       []->complete(col('.'))
     endif
@@ -73,16 +74,5 @@ export class TextDocumentContentChangeEvent implements j.JsonSerializable
     endif
     
     ds.DidChange(this.server, bufnr(), false)  
-  enddef
-
-  def ApplyChangeByLines(clearTrail: bool)
-    if empty(trim(this.text))
-      return
-    endif
-    var lines = split(this.text, '\n')
-    if clearTrail
-      deletebufline(bufnr(), this.start.line + len(lines), '$')
-    endif
-    setline(this.start.line, lines)
   enddef
 endclass

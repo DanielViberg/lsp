@@ -7,7 +7,6 @@ var reqVer: number = 0
 export abstract class RequestMessage extends mes.Message
 
   var id: number
-  var method: string
   var params: dict<any>
 
   def ToJson(): dict<any>
