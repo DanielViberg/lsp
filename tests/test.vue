@@ -10,7 +10,7 @@ const thisIsAVariable = defineProps()
 </style>
 
 <template>
-	<div :class="thisIsAVariable" :style="() => console.log()">
+	<div :class="thisIsAVariable">
 		<div :class="thisIsAVariable"></div>
 	</div>
 </template>
