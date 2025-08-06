@@ -30,6 +30,7 @@ const KIND_INCOMPLETE_COMPLETION = 3
 var initOnce: bool = false
 var isIncomplete: bool = false
 var bufferWords: list<string> = []
+var lastChar: string
 
 export class Completion extends ft.Feature implements if.IFeature
 
@@ -59,7 +60,6 @@ export class Completion extends ft.Feature implements if.IFeature
 
   def RequestCompletion(server: any, bId: number): void 
     if mode() == 'i' 
-      []->complete(col(".")) # Pum list is sometimes outdated
       var tdpos = tdp.TextDocumentPosition.new(server, bId)
       var compReq = c.Completion.new(
         this.GetTriggerKind(server, bId),
@@ -144,6 +144,7 @@ def RequestCompletionReply(server: any, reply: dict<any>)
       var compItems = items->map((_, i) => LspItemToCompItem(i, server.id))
       if mode() == 'i'
         compItems->complete(col("."))
+        complete_check()
       endif
     endif
   endif

@@ -92,7 +92,7 @@ export class Server
     if has_key(this.serverCapabilites, 'completionProvider')
       this.completion = comp.Completion.new()
     endif
-    this.formatting = for.Formatting.new()
+    #this.formatting = for.Formatting.new()
     this.goToDefinition = gtd.GoToDefinition.new()
     this.isFeatInit = true
     l.PrintDebug('Ready and do open')
@@ -109,7 +109,7 @@ export class Server
     if has_key(this.serverCapabilites, 'completionProvider')
       this.completion.ProcessRequest(data)
     endif
-    this.formatting.ProcessRequest(data)
+    #this.formatting.ProcessRequest(data)
     this.goToDefinition.ProcessRequest(data)
   enddef
 
@@ -123,7 +123,7 @@ export class Server
     if has_key(this.serverCapabilites, 'completionProvider')
       this.completion.ProcessNotification(data)
     endif
-    this.formatting.ProcessNotification(data)
+    #this.formatting.ProcessNotification(data)
     this.goToDefinition.ProcessNotification(data)
   enddef
 
