@@ -46,6 +46,7 @@ export class Completion extends ft.Feature implements if.IFeature
       inoremap <expr> <Down> pumvisible() ? PumShowDoc("\<Down>") : "\<Down>"
       autocmd TextChangedI * call CheckEmptyLineForPUM()
       autocmd BufEnter * call CacheBufferWords()
+      autocmd BufAdd * call CacheBufferWords()
       CacheBufferWords()
     endif
   enddef
