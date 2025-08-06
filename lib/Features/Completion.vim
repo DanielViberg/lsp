@@ -30,7 +30,7 @@ const KIND_INCOMPLETE_COMPLETION = 3
 var initOnce: bool = false
 var isIncomplete: bool = false
 var bufferWords: list<string> = []
-var lastChar: string
+var cacheWords: list<dict<any>> = []
 
 export class Completion extends ft.Feature implements if.IFeature
 
@@ -143,8 +143,10 @@ def RequestCompletionReply(server: any, reply: dict<any>)
       l.PrintDebug('Completion items count after filer ' .. items->len())
       var compItems = items->map((_, i) => LspItemToCompItem(i, server.id))
       if mode() == 'i'
-        compItems->complete(col("."))
-        complete_check()
+        if cacheWords != compItems
+          compItems->complete(col('.'))
+        endif
+        cacheWords = compItems
       endif
     endif
   endif
