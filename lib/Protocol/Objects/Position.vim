@@ -64,7 +64,7 @@ export class Position implements j.JsonSerializable
   def ServerEncode(): dict<any>
     var text = getline(this.line)
     var line = this.line - 1
-    var char = this.character
+    var char = this.character - 1
     if text->empty()
       return {
          line: line,

@@ -14,7 +14,7 @@ export class TextDocumentPosition implements j.JsonSerializable
     var line = line(".", bufwinid(bId))
     var ltext = getline(line)
     var column = col(".", bufwinid(bId))
-    this.position = p.Position.new(server, line, column - 1)
+    this.position = p.Position.new(server, line, column)
   enddef
 
   def ToJson(): dict<any>

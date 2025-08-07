@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #define MAX_NAME_LEN 50
+#define MIN_NAME_LEN 20
 
 typedef	struct {
 	char name[MAX_NAME_LEN];

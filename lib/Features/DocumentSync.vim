@@ -97,11 +97,11 @@ export def DidChange(server: any, bId: number, par: any): void
             {
                 start: {
                   line: hunk.from_idx + 1, # Current line
-                  character: 0
+                  character: 1
                 },
                 end: {
                   line: hunk.from_idx + hunk.from_count + 2, # Start two lines town
-                  character: 0
+                  character: 1
                 }
             },
             server
