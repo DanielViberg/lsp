@@ -143,6 +143,7 @@ def RequestCompletionReply(server: any, reply: dict<any>)
       l.PrintDebug('Completion items count after filer ' .. items->len())
       var compItems = items->map((_, i) => LspItemToCompItem(i, server.id))
       if mode() == 'i'
+        # TODO: Change this to changetick
         if cacheWords != compItems
           compItems->complete(col('.'))
         endif
