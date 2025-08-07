@@ -18,7 +18,7 @@ export class FormattingOptions implements j.JsonSerializable
   def new()
     this.tabSize = &tabstop
     this.insertSpaces = &expandtab
-    this.trimTrailingWhitespaces = false
+    this.trimTrailingWhitespaces = true
     this.insertFinalNewline = false
     this.trimFinalNewlines = true
   enddef

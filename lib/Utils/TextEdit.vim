@@ -5,11 +5,13 @@ import "../Protocol/Objects/Position.vim" as p
 import "../Utils/Log.vim" as l
 
 export def ApplyTextEdits(bnr: number, changes: list<tdce.TextDocumentContentChangeEvent>)
-  var bLines = getbufline(bnr, 1, '$')
-  # Sort
+  # Sort changes bottom up
   var sChanges = SortChanges(changes)
+
+  echomsg 'changes: ' .. sChanges->len()
   
   for change in sChanges
+    var bLines = getbufline(bnr, 1, '$')
     # Skip empty edits 
     if change.start.Equals(change.end) || change.text == ""
       return
@@ -28,62 +30,91 @@ export def ApplyTextEdits(bnr: number, changes: list<tdce.TextDocumentContentCha
     echomsg end.character
     echomsg 'text: '  .. change.text
 
-    # Special case deleting of complete lines
-    if empty(change.text) &&
-        start.character == 1 &&
-        end.character == 1
-      var delStart = min([start.line, bLines->len()])
-      var delEnd = min([end.line - 1, bLines->len()])
-      echomsg 'delete line: ' .. delStart .. ' to ' .. delEnd
-      deletebufline(bnr, delStart, delEnd)
-      bLines = bLines[ : delStart - 1] + bLines[delEnd : ]
-      continue
-    endif
+    sleep 1
 
-    var newLines: list<string> = split(change.text, "\n")
-    echomsg newLines
-
-    var startLine: string
     var endLine: string
-    var appendAdjust: number = 1
+    var newLines: list<string> = split(change.text, "\n", 1)
 
-    if start.line - 1 < bLines->len() && 
-        newLines->len() > 0
-      appendAdjust = 0
-      startLine = bLines[start.line - 1]
-      newLines[0] = [startLine[ : start.character - 1], newLines[0]]->join("\n")
-      if end.line - 1 < bLines->len()
-        endLine = bLines[end.line - 1]
-        newLines[newLines->len() - 1] ..= endLine[end.character - 1 : ]
+    echomsg 'newLines:'
+    echomsg  newLines
+
+    # Replace lines with new lines
+    var bufLen = getbufline(bnr, 1, '$')->len()
+    # Change within buffer limits
+    var changeStart = min([start.line, bufLen])
+
+    #Clear trailing lines if change ends after buf len
+    echomsg 'endl:' .. end.line
+    echomsg 'bufLen:' .. bufLen
+    echomsg 'newlLINE' .. newLines->len()
+
+    # Trailing lines on full buffer change
+    if end.line >= bufLen && 
+       newLines->len() < bufLen &&
+       newLines->len() > end.line - start.line  
+      echomsg 'delete ' .. newLines->len() .. bufLen
+        deletebufline(bnr, newLines->len(), bufLen)
+    endif
+    
+
+    # This change removes lines
+    if newLines->len() < end.line - start.line  
+      for dl in range(start.line, end.line)->reverse()
+        # Ignore partial line delete
+        echomsg 'dl: ' .. dl
+        echomsg 'startl ' .. start.line 
+        echomsg 'endl ' .. end.line 
+        if (start.character > 1 && dl == start.line) || 
+            end.character >= 1 && dl == end.line
+          # Erase after (start) or up until (end)
+          var eline = getbufoneline(bnr, dl)
+          if dl == start.line
+            echomsg 'set start ' .. eline[ : start.character - 1]
+            setbufline(bnr, dl, eline[ : start.character - 1])
+          endif
+          if dl == end.line
+            echomsg 'set end ' .. eline[end.character - 1 : ]
+            setbufline(bnr, dl, eline[end.character - 1 : ])
+          endif
+          echomsg 'skip'
+          continue
+        endif
+        echomsg 'erasel: ' .. dl
+        deletebufline(bnr, dl)
+      endfor
+    endif
+
+    var idx: number = 0
+    for newLine in newLines
+      # First line change by character
+      var changeIdx = changeStart + idx
+      if idx == 0 && start.character > 1
+        var aline = getbufoneline(bnr, changeIdx)
+        setbufline(bnr, changeIdx, aline[ : start.character] .. newLine)
+        idx += 1
+        echomsg 'flc ' .. changeIdx .. ' t:' ..  newLine
+        continue
       endif
-			# We only need to update the start line because we can't have overlapping edits
-      bLines[start.line - 1] = newLines[0]
-      echomsg 'set at: ' .. start.line .. ' with ' .. bLines[start.line - 1]
-      setbufline(bnr, start.line, bLines[start.line - 1]->split("\n"))
-      bLines = getbufline(bnr, 1, '$')
-      echomsg 'post set: ' ..  bLines->len()
-    endif
 
-    if start.line != end.line 
-			# We can't delete beyond the end of the buffer. So the start end end here are
-			# both min() reduced
-      var delStart = min([start.line + 1, bLines->len()])
-      var delEnd = min([end.line, bLines->len()])
-      echomsg 'delete at: ' .. delStart .. ' to ' .. delEnd
-      deletebufline(bnr, delStart, delEnd)
-      bLines = getbufline(bnr, 1, '$')
-    endif
+      # Last line change by character
+      if idx == newLines->len() - 1 &&
+          end.character > 1
+        var aline = getbufoneline(bnr, changeIdx)
+        echomsg 'l line: ' aline[end.character - 2 : ]
+        echomsg 'e r:' .. end.character 
+        echomsg 'llc ' .. changeIdx .. ' t:' ..  newLine .. aline[end.character - 2 : ]
+        setbufline(bnr, changeIdx, newLine .. aline[end.character - 2 : ])
+        idx += 1
+        continue
+      endif
 
-    if newLines->len() > 1 
-      var nr: number = start.line - appendAdjust
-      echomsg 'append buf line at: ' .. nr .. 
-        ' with ' .. 
-        newLines[1 - appendAdjust : newLines->len() - appendAdjust]->join("\n")
-      appendbufline(bnr, 
-        start.line - appendAdjust, 
-        newLines[1 - appendAdjust : newLines->len() - appendAdjust])
-      bLines = getbufline(bnr, 1, '$')
-    endif
+      # Full line change
+      if !empty(newLine)
+        echomsg 'set full line:' newLine
+        setbufline(bnr, changeStart + idx, newLine)
+      endif
+      idx += 1
+    endfor
   endfor
 enddef
 
@@ -91,7 +122,7 @@ enddef
 # Puts insertions (end == start) before deletions (end > start) at the same point.
 # Uses stable sort to preserve order of multiple insertions at the same point.
 def SortChanges(edits: list<tdce.TextDocumentContentChangeEvent>): list<tdce.TextDocumentContentChangeEvent>
-    edits->sort((i1, i2) => Less(i1, i2) ? -1 : 1)
+    edits->sort((i1, i2) => Less(i1, i2) ? 1 : -1)
     return edits
 enddef
 
