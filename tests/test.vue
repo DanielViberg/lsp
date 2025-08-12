@@ -7,14 +7,22 @@ const thisI2Variable = defineSlots()
 .test {
 	display: grid;
 	align-self: center;
+
+
+
 }
-
-
-
 </style>
 
 <template>
 	<div :class="thisI2Variable" :style="test">
 		<div :class="thisI2Variable"></div>
+
+
+
 	</div>
+
+
+
+
+
 </template>
