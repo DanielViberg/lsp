@@ -1,12 +1,12 @@
 <?php
 
 class Test {
-public function test() {
-
-
-			return;
-}
+	public function test() {
+		return;
 
 
 
+
+
+	}
 }
