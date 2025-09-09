@@ -275,6 +275,12 @@ enddef
 def CompletionChange(change: any, server: any): void
   change.VimDecode(bufnr())
   t.ApplyTextEdits(bufnr(), [change])
-  cursor(change.start.line, col('.') + strlen(change.text))
+  var matchPos = match(getline(change.start.line), '\${\w\+\}\|\$\d\+')
+  if matchPos >= 0
+    execute 'normal! :s/\${\w\+}\|\$\d\+//g' .. "\<CR>"
+    cursor(change.start.line, matchPos + 1)
+  else
+    cursor(change.start.line, col('.') + strlen(change.text))
+  endif
   d.DidChange(server, bufnr(), false)  
 enddef
