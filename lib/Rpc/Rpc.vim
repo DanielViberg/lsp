@@ -6,7 +6,7 @@ import "../ClientState/Session.vim" as ses
 import "../Protocol/Abstracts/Message.vim" as mes
 import "../Utils/Log.vim" as l
 
-export def RpcSync(server: any, req: rm.RequestMessage)
+export def RpcSync(server: any, req: rm.RequestMessage): any
   return server.job->ch_evalexpr(req.ToJson())
 enddef
 

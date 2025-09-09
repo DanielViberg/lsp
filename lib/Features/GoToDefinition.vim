@@ -52,7 +52,7 @@ def GoToReply(server: any, reply: dict<any>)
   for loc in reply.result
     if has_key(loc, 'uri') && has_key(loc, 'range')
       var pos = p.Position.new(server, loc.range.start.line, loc.range.start.character)  
-      pos.VimDecode()
+      #pos.VimDecode() TODO: Needs bufnr
       locations->add(lo.Location.new(loc.uri, pos))
     else
       l.PrintWarning('Null or LocationLink not supported')

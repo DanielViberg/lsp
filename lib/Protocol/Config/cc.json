@@ -1,9 +1,14 @@
 {
+  "offsetEncoding": ["utf-32", "utf-16"],
   "workspace": {
-    "applyEdit": false,
+    "applyEdit": true,
     "workspaceEdit": {
       "documentChanges": false,
-      "resourceOperations": [],
+      "resourceOperations": [
+        "rename",
+        "create",
+        "delete"
+      ],
       "failureHandling": "",
       "normalizesLineEndings": false,
       "changeAnnotationSupport": {
@@ -75,7 +80,7 @@
   "textDocument": {
     "synchronization": {
       "dynamicRegistration": false,
-      "willSave": true,
+      "willSave": false,
       "willSaveWaitUntil": false,
       "didSave": true
     },
@@ -96,10 +101,7 @@
         "resolveSupport": {
           "properties": [
             "documentation",
-            "detail",
-            "additionalTextEdits",
-            "textEdit",
-            "inserText"
+            "detail"
           ]
         },
         "insertTextModeSupport": {
@@ -166,7 +168,33 @@
     "documentSymbol": {
       "dynamicRegistration": false,
       "symbolKind": {
-        "valueSet": []
+        "valueSet": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25
+        ]
       },
       "hierarchicalDocumentSymbolSupport": false,
       "tagSupport": {
@@ -322,7 +350,6 @@
       "allowedTags": []
     },
     "positionEncodings": [
-      "utf-8",
       "utf-16",
       "utf-32"
     ]

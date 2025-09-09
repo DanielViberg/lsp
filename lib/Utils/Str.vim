@@ -143,38 +143,3 @@ export def FindNearestRootDir(startDir: string, files: list<any>): string
   # choose the longest matching path (the nearest directory from "startDir")
   return sortedList[0]
 enddef
-
-# Get the index of the character at [pos.line, pos.character] in buffer "bnr"
-# without counting the composing characters.  The LSP server counts composing
-# characters as separate characters whereas Vim string indexing ignores the
-# composing characters.
-export def GetCharIdxWithoutCompChar(bnr: number, pos: p.Position): number
-  var col: number = pos.character
-  # When on the first character, nothing to do.
-  if col <= 0
-    return col
-  endif
-
-  # Need a loaded buffer to read the line and compute the offset
-  :silent! bnr->bufload()
-
-  var ltext: string = bnr->getbufline(pos.line + 1)->get(0, '')
-  if ltext->empty()
-    return col
-  endif
-
-  # Convert the character index that includes composing characters as separate
-  # characters to a byte index and then back to a character index ignoring the
-  # composing characters.
-  var byteIdx = ltext->byteidxcomp(col)
-  if byteIdx != -1
-    if byteIdx == ltext->strlen()
-      # Byte index points to the byte after the last byte.
-      return ltext->strcharlen()
-    else
-      return ltext->charidx(byteIdx, false)
-    endif
-  endif
-
-  return col
-enddef

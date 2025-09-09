@@ -2,6 +2,7 @@ vim9script
 
 import "../../Utils/Json.vim" as j
 import "../../Utils/Str.vim" as s
+import "../../Utils/Log.vim" as l
 
 const KIND_UTF8  = 'utf-8'
 const KIND_UTF16 = 'utf-16'
@@ -29,35 +30,34 @@ export class Position implements j.JsonSerializable
     return this.ServerEncode()
   enddef
 
-  def VimDecode(): void
+  def VimDecode(bId: number): void
     this.line += 1
-    var text = getline(this.line)
-    if text->empty()
-      return
-    endif
-    var enc = this.GetServerEncoding()
-    var textLen = 0
-    if enc == KIND_UTF16
-      textLen = text->strutf16len(true)
-    else
-      textLen = text->strlen()
-    endif
 
-    if this.character > textLen
-      this.character += 1
+    # When on the first character, nothing to do.
+    if this.character <= 0
       return
     endif
 
-    if this.character == textLen
-      this.character = text->strchars()
-    else
-      if enc == KIND_UTF16
-        this.character = s.Utf16ToUtf8ByteIdxWOComp(text, this.character)
+    # Need a loaded buffer to read the line and compute the offset
+    :silent! bId->bufload()
+
+    var ltext: string = bId->getbufline(this.line)->get(0, '')
+    if ltext->empty()
+      return
+    endif
+
+    # Convert the character index that includes composing characters as separate
+    # characters to a byte index and then back to a character index ignoring the
+    # composing characters.
+    var byteIdx = ltext->byteidxcomp(this.character)
+    if byteIdx != -1
+      if byteIdx == ltext->strlen()
+        # Byte index points to the byte after the last byte.
+        this.character = ltext->strcharlen()
       else
-        this.character = text->charidx(this.character, true)
+        this.character = ltext->charidx(byteIdx, false)
       endif
     endif
-    this.character += 1
   enddef
 
   # 1. Subract 1 char, then calculate byte offset

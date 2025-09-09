@@ -13,6 +13,7 @@ import "../Features/DocumentSync.vim" as d
 import "../Protocol/Objects/Position.vim" as p
 import "../Protocol/Objects/TextDocumentPosition.vim" as tdp
 import "../Protocol/Objects/TextDocumentContentChangeEvent.vim" as tdce
+import "../Utils/TextEdit.vim" as t
 
 # Completion was triggered by typing an identifier (24x7 code
 # complete), manual invocation (e.g Ctrl+Space) or via API.
@@ -218,8 +219,7 @@ def CompleteAccept(ci: any): void
           ci.user_data.item.textEdit.newText,
           ci.user_data.item.textEdit.range,
           server) 
-        change.VimDecode()
-        change.ApplyCompletionChange()
+        CompletionChange(change, server)
       else
         ResolveCompletion(ci.user_data.server_id, bufnr(), ci.user_data.item)
       endif
@@ -243,8 +243,7 @@ def ResolveCompletionReply(server: any, reply: dict<any>): void
       reply.result.textEdit.newText,
       reply.result.textEdit.range,
       server)
-    change.VimDecode()
-    change.ApplyCompletionChange()
+    CompletionChange(change, server)
   elseif has_key(reply.result, 'label')
     var tc = str.GetTriggerCharIdx(
       server.serverCapabilites.completionProvider.triggerCharacters,
@@ -267,9 +266,15 @@ def ResolveCompletionReply(server: any, reply: dict<any>): void
         edit.newText,
         edit.range,
         server)
-      change.VimDecode()
-      change.ApplyCompletionChange()
+      CompletionChange(change, server)
     endfor
     cursor(oldCurLine, oldCurCol)
   endif
+enddef
+
+def CompletionChange(change: any, server: any): void
+  change.VimDecode(bufnr())
+  t.ApplyTextEdits(bufnr(), [change])
+  cursor(change.start.line, col('.') + strlen(change.text))
+  d.DidChange(server, bufnr(), false)  
 enddef

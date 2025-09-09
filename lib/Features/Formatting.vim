@@ -36,18 +36,16 @@ def PreSave(server: any, bId: number, par: any): void
   var docFor = df.DocumentFormatting.new(bId)
   if has_key(server.serverCapabilites, 'documentFormattingProvider') &&
       server.serverCapabilites.documentFormattingProvider
-    r.RpcAsync(server, docFor, PreSaveReply)
-  endif
-enddef
-
-def PreSaveReply(server: any, reply: dict<any>)
-  if has_key(reply, 'result') && reply.result != null
-    var changes: list<tdce.TextDocumentContentChangeEvent>
-    for r in reply.result
-      var change = tdce.TextDocumentContentChangeEvent.new(r.newText, r.range, server)
-      changes->add(change)
-    endfor
-    te.ApplyTextEdits(bufnr(), changes) 
-    #noautocmd write
+    var reply = r.RpcSync(server, docFor)
+    if has_key(reply, 'result') && reply.result != null
+      var changes: list<tdce.TextDocumentContentChangeEvent>
+      for r in reply.result
+        var change = tdce.TextDocumentContentChangeEvent.new(r.newText, r.range, server)
+        change.VimDecode(bId)
+        changes->add(change)
+      endfor
+      te.ApplyTextEdits(bId, changes) 
+      #noautocmd write
+    endif
   endif
 enddef

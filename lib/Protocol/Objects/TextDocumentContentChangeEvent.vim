@@ -4,7 +4,6 @@ import "../../Utils/Json.vim" as j
 import "../../Utils/Str.vim" as s
 import "../../ClientState/Session.vim" as ses
 import "../../Protocol/Objects/Position.vim" as p
-import "../../Features/DocumentSync.vim" as ds
 
 export class TextDocumentContentChangeEvent implements j.JsonSerializable
   
@@ -40,39 +39,8 @@ export class TextDocumentContentChangeEvent implements j.JsonSerializable
     endif
   enddef
 
-  def VimDecode(): void
-    this.text = this.text
-    this.start.VimDecode()
-    this.end.VimDecode()
-  enddef
-
-  # Always one line
-  def ApplyCompletionChange(): void 
-    if pumvisible()
-      []->complete(col('.'))
-    endif
-
-    var triggerChars = this.server.serverCapabilites.completionProvider.triggerCharacters
-    var text = substitute(join(split(this.text, '\n'), ''), '[\t\\]', '', 'g') 
-    var line = this.start.line
-    var col = this.start.character
-    var end = this.end.character
-    var lineText = getline(line)
-
-    var textBefore = col > 1 ? lineText[ : col - 2] : ''
-    # Must be one line according to spec
-    var newText = textBefore .. substitute(join(split(text, '\n'), ''), '\\', '', 'g') .. lineText[end - 1 : ]
-    setline(line, newText)
-
-    # Remove and place cursor at ${0} or $0
-    var matchPos = match(getline(line), '\${\w\+\}\|\$\d\+')
-    if matchPos >= 0
-      execute 'normal! :s/\${\w\+}\|\$\d\+//g' .. "\<CR>"
-      cursor(line, matchPos + 1)
-    else
-      cursor(line, col + len(text))
-    endif
-    
-    ds.DidChange(this.server, bufnr(), false)  
+  def VimDecode(bId: number): void
+    this.start.VimDecode(bId)
+    this.end.VimDecode(bId)
   enddef
 endclass

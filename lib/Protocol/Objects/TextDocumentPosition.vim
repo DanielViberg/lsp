@@ -24,8 +24,8 @@ export class TextDocumentPosition implements j.JsonSerializable
     }
   enddef
 
-  def VimDecode()
-    this.position.VimDecode()
+  def VimDecode(bId: number): void
+    this.position.VimDecode(bId)
   enddef
 
   def ServerEncode()

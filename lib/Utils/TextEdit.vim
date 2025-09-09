@@ -27,13 +27,13 @@ export def ApplyTextEdits(bnr: number, changes: list<tdce.TextDocumentContentCha
   for c in changes
     # Adjust the start and end columns for multibyte characters
 
-    startRow = c.start.line
-    startCol = s.GetCharIdxWithoutCompChar(bnr, c.start)
-    startLine = [c.start.line, startLine]->min()
+    startRow = c.start.line - 1
+    startCol = c.start.character
+    startLine = [c.start.line - 1, startLine]->min()
 
-    endRow = c.end.line
-    endCol = s.GetCharIdxWithoutCompChar(bnr, c.end)
-    finishLine = [c.end.line, finishLine]->max()
+    endRow = c.end.line - 1
+    endCol = c.end.character
+    finishLine = [c.end.line - 1, finishLine]->max()
 
     updateEdits->add({
        A: [startRow, startCol],
