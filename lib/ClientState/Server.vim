@@ -10,6 +10,7 @@ import "../Protocol/Notifications/Notification.vim" as notif
 import "../Protocol/Requests/Initialize.vim" as reqI
 import "../Protocol/Requests/Shutdown.vim" as reqSu
 import "../ClientState/Config.vim" as c
+import "../Protocol/Config/cc.vim" as cap
 import "../Rpc/Rpc.vim" as r
 import "../Utils/Str.vim" as str
 import "../Utils/Log.vim" as l
@@ -40,8 +41,7 @@ export class Server
     l.PrintDebug('New server')
     if this.id != null
       this.config = c.GetConfigServerById(this.id)
-      this.clientCapabilites = 
-        json_decode(join(readfile(fnamemodify(currentDir, ':h') .. '/../Protocol/Config/cc.json'), "\n"))
+      this.clientCapabilites = cap.CC
     endif
   enddef
 
@@ -104,28 +104,28 @@ export class Server
     if !this.isFeatInit
       return
     endif
-    this.documentSync.ProcessRequest(data)
-    this.workspace.ProcessRequest(data)
-    this.diagnostics.ProcessRequest(data)
+    this.documentSync.ProcessRequest(this, data)
+    this.workspace.ProcessRequest(this, data)
+    this.diagnostics.ProcessRequest(this, data)
     if has_key(this.serverCapabilites, 'completionProvider')
-      this.completion.ProcessRequest(data)
+      this.completion.ProcessRequest(this, data)
     endif
-    this.formatting.ProcessRequest(data)
-    this.goToDefinition.ProcessRequest(data)
+    this.formatting.ProcessRequest(this, data)
+    this.goToDefinition.ProcessRequest(this, data)
   enddef
 
   def ProcessNotification(data: any): void 
     if !this.isFeatInit
       return
     endif
-    this.documentSync.ProcessNotification(data)
-    this.workspace.ProcessNotification(data)
-    this.diagnostics.ProcessNotification(data)
+    this.documentSync.ProcessNotification(this, data)
+    this.workspace.ProcessNotification(this, data)
+    this.diagnostics.ProcessNotification(this, data)
     if has_key(this.serverCapabilites, 'completionProvider')
-      this.completion.ProcessNotification(data)
+      this.completion.ProcessNotification(this, data)
     endif
-    this.formatting.ProcessNotification(data)
-    this.goToDefinition.ProcessNotification(data)
+    this.formatting.ProcessNotification(this, data)
+    this.goToDefinition.ProcessNotification(this, data)
   enddef
 
   def Stop(): void

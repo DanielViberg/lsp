@@ -44,7 +44,7 @@ export def RpcOutCb(server: any, chan: channel, msg: any): void
   endif
 
   if msg->has_key('id') && msg->has_key('method')
-    server.ProcessRequest(string(msg))
+    server.ProcessRequest(msg)
   elseif msg->has_key('method')
     server.ProcessNotification(msg)
   endif

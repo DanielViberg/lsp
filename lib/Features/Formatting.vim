@@ -24,10 +24,10 @@ export class Formatting extends ft.Feature implements if.IFeature
     autocmd BufWritePre * ft.FeatAu(PreSave)
   enddef
   
-  def ProcessRequest(data: any): void 
+  def ProcessRequest(server: any, data: any): void 
   enddef
 
-  def ProcessNotification(data: any): void 
+  def ProcessNotification(server: any, data: any): void 
   enddef
 
 endclass
@@ -45,7 +45,7 @@ def PreSave(server: any, bId: number, par: any): void
         changes->add(change)
       endfor
       te.ApplyTextEdits(bId, changes) 
-      #noautocmd write
+      noautocmd write
     endif
   endif
 enddef

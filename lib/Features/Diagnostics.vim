@@ -65,10 +65,10 @@ export class Diagnostics extends ft.Feature implements if.IFeature
   def AutoCmds()
   enddef
   
-  def ProcessRequest(data: any): void 
+  def ProcessRequest(server: any, data: any): void 
   enddef
 
-  def ProcessNotification(data: any): void 
+  def ProcessNotification(server: any, data: any): void 
     if has_key(data, 'method') && data.method == 'textDocument/publishDiagnostics'
       this.PublishDiagnostics(data)
     endif

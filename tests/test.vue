@@ -12,5 +12,6 @@ const thisI2Variable = defineSlots()
 </style>
 
 <template>
-	<div :class="thisIsAVariable" :style="thisI2Variable"></div>
+	<div :class="thisIsAVariable"
+	     :style="thisI2Variable"></div>
 </template>

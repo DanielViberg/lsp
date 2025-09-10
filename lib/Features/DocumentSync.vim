@@ -43,10 +43,10 @@ export class DocumentSync extends ft.Feature implements if.IFeature
     endif
   enddef
 
-  def ProcessRequest(data: any): void 
+  def ProcessRequest(server: any, data: any): void 
   enddef
 
-  def ProcessNotification(data: any): void 
+  def ProcessNotification(server: any, data: any): void 
   enddef
 endclass
 

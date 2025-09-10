@@ -16,20 +16,14 @@ export class FormattingOptions implements j.JsonSerializable
 	var trimFinalNewlines: bool
 
   def new()
-    this.tabSize = &tabstop
-    this.insertSpaces = &expandtab
-    this.trimTrailingWhitespaces = true
-    this.insertFinalNewline = false
-    this.trimFinalNewlines = true
+    this.tabSize = shiftwidth()
+    this.insertSpaces = &expandtab ? true : false
   enddef
 
   def ToJson(): dict<any>
     return {
        tabSize: this.tabSize,
        insertSpaces: this.insertSpaces,
-       trimTrailingWhitespaces: this.trimTrailingWhitespaces,
-       insertFinalNewline: this.insertFinalNewline,
-       trimFinalNewlines: this.trimFinalNewlines
     }
   enddef
 

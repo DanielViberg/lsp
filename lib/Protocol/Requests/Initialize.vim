@@ -4,6 +4,7 @@ import "../Abstracts/RequestMessage.vim" as req
 import "../../Utils/Json.vim" as j
 import "../../Utils/Str.vim" as str
 import "../../Utils/Log.vim" as l
+import "../Config/cc.vim" as c
 
 const currentDir = expand('<sfile>')
 
@@ -43,11 +44,7 @@ export class Initialize extends req.RequestMessage
       },
       rootUri: rootUri,
       initializationOptions: config->get('initializationOptions', null_dict),
-      capabilities: json_encode(
-                      json_decode(
-                        join(
-                          readfile(fnamemodify(currentDir, ':h') .. '/../Config/cc.json'), "\n")
-                      )),
+      capabilities: c.CC
     }
   enddef 
 

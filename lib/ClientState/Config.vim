@@ -50,3 +50,25 @@ export def GetConfigServerById(id: number): dict<any>
   return !empty(serv) ? serv[0] : null_dict
 enddef
 
+
+export def GetConfigItem(server: any, configItem: dict<any>): any
+  if server.config.workspaceConfig->empty()
+    return {}
+  endif
+  if !configItem->has_key('section') || configItem.section->empty()
+    return server.config.workspaceConfig
+  endif
+  var config: any = server.config.workspaceConfig
+  for part in configItem.section->split('\.')
+    if !config->has_key(part)
+      return {}
+    endif
+    var nConfig = config[part]
+    if type(nConfig) == v:t_bool
+      nConfig = string(nConfig)
+    endif
+    config = nConfig
+  endfor
+  return config
+enddef
+
