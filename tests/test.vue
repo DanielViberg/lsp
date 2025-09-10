@@ -7,7 +7,6 @@ const thisI2Variable = defineSlots()
 .test {
 	display: grid;
 	align-self: center;
-	display: grid;
 }
 </style>
 
