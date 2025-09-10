@@ -12,5 +12,8 @@ const thisI2Variable = defineSlots()
 
 <template>
 	<div :class="thisIsAVariable"
-	     :style="thisI2Variable"></div>
+	     :style="thisI2Variable">
+		<textarea name="${2}"
+			  id="${4}"></textarea>
+	</div>
 </template>
