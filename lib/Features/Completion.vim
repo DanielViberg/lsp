@@ -289,18 +289,19 @@ def CompletionChange(changes: list<any>, server: any): void
   endif
 
   var cursorLineDelta = 0
-  var completionText = ''
+  var newCol = 0
   for change in changes
     change.VimDecode(bufnr())
-    if !change.moveCursor
-      cursorLineDelta += change.end.line - change.start.line - 1
-    else
-      completionText = change.text
+    if change.end.line < line('.')
+      cursorLineDelta = change.text->split("\n")->len()
+    endif
+    if change.start.line == line('.')
+      newCol = change.start.character + strlen(change.text) + 1
     endif
   endfor
 
   t.ApplyTextEdits(bufnr(), changes)
-  cursor(line('.') + cursorLineDelta, col('.') + strlen(completionText))
+  cursor(line('.') + cursorLineDelta, newCol)
 
   d.DidChange(server, bufnr(), false)  
 enddef
