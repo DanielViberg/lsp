@@ -105,6 +105,7 @@ def RequestCompletionReply(server: any, reply: dict<any>)
     l.PrintDebug('Completion with result')
     var result = reply.result
     if result == null
+      l.PrintDebug('Result is null')
       return
     endif
     var items = type(result) == v:t_dict && 
@@ -215,11 +216,21 @@ def CompleteAccept(ci: any): void
       if has_key(ci.user_data.item, 'textEdit') && 
          ci.user_data.item.textEdit != null_dict
         var server = ses.GetSessionServerById(ci.user_data.server_id)
-        var change = tdce.TextDocumentContentChangeEvent.new(
+        var changes: list<any> = []
+        changes->add(tdce.TextDocumentContentChangeEvent.new(
           ci.user_data.item.textEdit.newText,
           ci.user_data.item.textEdit.range,
-          server) 
-        CompletionChange(change, server)
+          server,
+          true))
+        if has_key(ci.user_data.item, 'additionalTextEdits')
+          for edit in ci.user_data.item->get('additionalTextEdits')
+            changes->add(tdce.TextDocumentContentChangeEvent.new(
+              edit.newText,
+              edit.range,
+              server))
+          endfor
+        endif
+        CompletionChange(changes, server)
       else
         ResolveCompletion(ci.user_data.server_id, bufnr(), ci.user_data.item)
       endif
@@ -238,12 +249,13 @@ def ResolveCompletion(sid: number, buf: number, item: any): void
 enddef
 
 def ResolveCompletionReply(server: any, reply: dict<any>): void
+  var changes: list<any> = []
   if has_key(reply.result, 'textEdit') && reply.result.textEdit != null_dict
-    var change = tdce.TextDocumentContentChangeEvent.new(
+    changes->add(tdce.TextDocumentContentChangeEvent.new(
       reply.result.textEdit.newText,
       reply.result.textEdit.range,
-      server)
-    CompletionChange(change, server)
+      server,
+      true))
   elseif has_key(reply.result, 'label')
     var tc = str.GetTriggerCharIdx(
       server.serverCapabilites.completionProvider.triggerCharacters,
@@ -256,31 +268,39 @@ def ResolveCompletionReply(server: any, reply: dict<any>): void
     var startText = start == 0 ? '' : lineText[ : start]
     setline(line('.'), startText .. reply.result.label .. lineText[ col('.') - 1 : ])
     cursor(line('.'), col('.') + len(reply.result.label) - query->len())
+    return
   endif
 
   if has_key(reply.result, 'additionalTextEdits')
-    var oldCurLine = line('.')
-    var oldCurCol = col('.')
-    for edit in reply.result->get('additionalTextEdits')->reverse()
-      var change = tdce.TextDocumentContentChangeEvent.new(
+    for edit in reply.result->get('additionalTextEdits')
+      changes->add(tdce.TextDocumentContentChangeEvent.new(
         edit.newText,
         edit.range,
-        server)
-      CompletionChange(change, server)
+        server))
     endfor
-    cursor(oldCurLine, oldCurCol)
   endif
+
+  CompletionChange(changes, server)
 enddef
 
-def CompletionChange(change: any, server: any): void
-  change.VimDecode(bufnr())
-  t.ApplyTextEdits(bufnr(), [change])
-  var matchPos = match(getline(change.start.line), '\${\w\+\}\|\$\d\+')
-  if matchPos >= 0
-    execute 'normal! :s/\${\w\+}\|\$\d\+//g' .. "\<CR>"
-    cursor(change.start.line, matchPos + 1)
-  else
-    cursor(change.start.line, col('.') + strlen(change.text))
+def CompletionChange(changes: list<any>, server: any): void
+  if changes->len() == 0
+    return
   endif
+
+  var cursorLineDelta = 0
+  var completionText = ''
+  for change in changes
+    change.VimDecode(bufnr())
+    if !change.moveCursor
+      cursorLineDelta += change.end.line - change.start.line - 1
+    else
+      completionText = change.text
+    endif
+  endfor
+
+  t.ApplyTextEdits(bufnr(), changes)
+  cursor(line('.') + cursorLineDelta, col('.') + strlen(completionText))
+
   d.DidChange(server, bufnr(), false)  
 enddef

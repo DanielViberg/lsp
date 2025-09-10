@@ -12,8 +12,9 @@ export class TextDocumentContentChangeEvent implements j.JsonSerializable
   var text: string = null_string
   var server: any = null
   var defined: bool = false
+  var moveCursor: bool = false
 
-  def new(text: string, range: dict<any>, this.server = v:none) 
+  def new(text: string, range: dict<any>, this.server = v:none, this.moveCursor = v:none) 
     this.text = text
     if range != null_dict
       this.start = p.Position.new(this.server, range.start.line, range.start.character)
