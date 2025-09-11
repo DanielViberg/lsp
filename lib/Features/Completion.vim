@@ -288,6 +288,17 @@ def CompletionChange(changes: list<any>, server: any): void
     return
   endif
 
+  # FIXME: Vue server includes import even when it exists, filter out 
+  # those additionalTextEdits
+  changes->filter((_, ca) => {
+    if ca.moveCursor
+      return true
+    endif
+    return getline(1, '$')->indexof((_, line) => {
+      return line .. "\n" == ca.text
+    }) == -1
+  })
+
   var cursorLineDelta = 0
   var newCol = 0
   for change in changes
