@@ -16,5 +16,6 @@ const thisIsMyVariabe = ref();
 
 <template>
 	<div :class="thisIsMyVariabe">
+		<slot />
 	</div>
 </template>

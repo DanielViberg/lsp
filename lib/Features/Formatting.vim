@@ -45,7 +45,7 @@ def PreSave(server: any, bId: number, par: any): void
         changes->add(change)
       endfor
       te.ApplyTextEdits(bId, changes) 
-      noautocmd write
+      #noautocmd write
     endif
   endif
 enddef

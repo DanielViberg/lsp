@@ -1,4 +1,5 @@
 <script setup>
+
 const thisIsAVariable = defineProps()
 const thisI2Variable = defineSlots()
 
@@ -11,9 +12,7 @@ const thisI2Variable = defineSlots()
 </style>
 
 <template>
-	<div :class="thisIsAVariable"
-	     :style="thisI2Variable">
-		<textarea name="${2}"
-			  id="${4}"></textarea>
+	<div :class="thisIsAVariable">
+		<Test2 />
 	</div>
 </template>

@@ -79,7 +79,7 @@ enddef
 export def DidChange(server: any, bId: number, par: any): void
   l.PrintDebug("Did change sid: " .. server.id .. " bId " .. bId )
   var changes: list<tdcce.TextDocumentContentChangeEvent>
-  if true # GetSyncKind(server) == KIND_FULL
+  if GetSyncKind(server) == KIND_FULL
     changes->add(tdcce.TextDocumentContentChangeEvent.new(
       bId->getbufline(1, '$')->join("\n") .. "\n",
       null_dict,
@@ -87,11 +87,11 @@ export def DidChange(server: any, bId: number, par: any): void
     ))
   endif
 
-  if false #GetSyncKind(server) == KIND_INC
+  if GetSyncKind(server) == KIND_INC
     var newBufState = bId->getbufline(1, '$')
     if has_key(CachedBufferContent, bId)
       var diffs = diff(CachedBufferContent[bId], newBufState, {output: 'indices'})
-      for hunk in diffs
+      for hunk in diffs->reverse()
         var change = tdcce.TextDocumentContentChangeEvent.new(
             join(newBufState[hunk.to_idx : hunk.to_idx + hunk.to_count], "\n") .. "\n", 
             {
