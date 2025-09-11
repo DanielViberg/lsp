@@ -30,7 +30,6 @@ const KIND_INCOMPLETE_COMPLETION = 3
 
 var initOnce: bool = false
 var isIncomplete: bool = false
-var onlyBuffer: bool = false
 var bufferWords: list<string> = []
 var cacheWords: list<dict<any>> = []
 
@@ -50,7 +49,7 @@ export class Completion extends ft.Feature implements if.IFeature
       autocmd TextChangedI * call CheckEmptyLineForPUM()
       autocmd BufEnter * call CacheBufferWords()
       autocmd BufAdd * call CacheBufferWords()
-      CacheBufferWords()
+      autocmd VimEnter * call CacheBufferWords()
     endif
   enddef
 

@@ -21,8 +21,10 @@ export class Buffer
 
     var conServerIds = conf.GetConfigServerIdsByFt(ft)
     l.PrintDebug('Configured servers ' .. conServerIds->join(' '))
+
     var sesServersIds = ses.GetSessionServerIdsByFt(ft)
     l.PrintDebug('Session servers ' .. sesServersIds->join(' '))
+
     var newServerIds = conServerIds->filter((_, i) => index(sesServersIds, i) < 0)
     l.PrintDebug('New servers ' .. newServerIds->join(' '))
 
@@ -33,7 +35,6 @@ export class Buffer
       ses.SetSessionServer(s)
       s.Init(bId)
     endfor
-
   enddef
 endclass
 

@@ -1,6 +1,6 @@
 vim9script
 
-export const IS_DEBUG: bool = true
+export const IS_DEBUG: bool = false
 
 export enum Type
   Info,
