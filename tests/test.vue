@@ -13,6 +13,5 @@ const thisI2Variable = defineSlots()
 
 <template>
 	<div :class="thisIsAVariable">
-		<Test2 />
 	</div>
 </template>

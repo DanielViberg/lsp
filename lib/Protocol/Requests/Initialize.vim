@@ -42,6 +42,7 @@ export class Initialize extends req.RequestMessage
         name:    'Vim',
         version: '9.1'
       },
+      trace: l.IS_DEBUG ? 'verbose' : 'off',
       rootUri: rootUri,
       initializationOptions: config->get('initializationOptions', null_dict),
       capabilities: c.CC

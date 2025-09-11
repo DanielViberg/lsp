@@ -30,6 +30,7 @@ const KIND_INCOMPLETE_COMPLETION = 3
 
 var initOnce: bool = false
 var isIncomplete: bool = false
+var onlyBuffer: bool = false
 var bufferWords: list<string> = []
 var cacheWords: list<dict<any>> = []
 

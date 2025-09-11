@@ -1,6 +1,6 @@
 vim9script
 
-var isDebug: bool = false
+export const IS_DEBUG: bool = true
 
 export enum Type
   Info,
@@ -19,7 +19,7 @@ export def PrintInfo(msg: string): void
 enddef
 
 export def PrintDebug(msg: string): void
-  if isDebug
+  if IS_DEBUG
     echomsg msg
   endif
 enddef
