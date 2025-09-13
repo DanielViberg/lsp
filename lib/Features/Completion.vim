@@ -30,12 +30,14 @@ const KIND_INCOMPLETE_COMPLETION = 3
 
 var initOnce: bool = false
 var isIncomplete: bool = false
+var noServer: bool = false
 var bufferWords: list<string> = []
 var cacheWords: list<dict<any>> = []
 
 export class Completion extends ft.Feature implements if.IFeature
 
-  def new()
+  def new(ns: bool)
+    noServer = ns
     this.AutoCmds()
   enddef
 
@@ -50,6 +52,10 @@ export class Completion extends ft.Feature implements if.IFeature
       autocmd BufEnter * call CacheBufferWords()
       autocmd BufAdd * call CacheBufferWords()
       autocmd VimEnter * call CacheBufferWords()
+      autocmd InsertLeave * call CacheBufferWords()
+      if noServer
+        autocmd TextChangedI * call CompleteNoServer()
+      endif
     endif
   enddef
 
@@ -155,6 +161,14 @@ def RequestCompletionReply(server: any, reply: dict<any>)
   endif
 enddef
 
+def CompleteNoServer()
+  var items: list<any> = GetCacheBufferW()
+  var compItems = items->map((_, i) => LspItemToCompItem(i, -1))
+  if mode() == 'i'
+      compItems->complete(col('.'))
+  endif
+enddef
+
 def CacheBufferWords(): void
   var lines = getbufline(bufnr(), 1, '$')
   for l in lines
@@ -200,7 +214,9 @@ enddef
 
 def PumCallback(): string
   var info = complete_info(['completed', 'selected'])
-  if has_key(info, 'completed') && info.selected != -1
+  if has_key(info, 'completed') && 
+     info.selected != -1 &&
+     !noServer
     timer_start(0, (_) => CompleteAccept(info.completed))
     return ""
   endif

@@ -5,6 +5,7 @@ import "./Session.vim" as ses
 import "./Server.vim" as ser
 import "../Utils/Str.vim" as str
 import "../Utils/Log.vim" as l
+import "../Features/Completion.vim" as c
 
 export class Buffer
   def new()
@@ -22,19 +23,24 @@ export class Buffer
     var conServerIds = conf.GetConfigServerIdsByFt(ft)
     l.PrintDebug('Configured servers ' .. conServerIds->join(' '))
 
-    var sesServersIds = ses.GetSessionServerIdsByFt(ft)
-    l.PrintDebug('Session servers ' .. sesServersIds->join(' '))
+    if conServerIds->len() == 0
+      l.PrintDebug('No servers, start buff comp')
+      var comp = c.Completion.new(true)
+    else
+      var sesServersIds = ses.GetSessionServerIdsByFt(ft)
+      l.PrintDebug('Session servers ' .. sesServersIds->join(' '))
 
-    var newServerIds = conServerIds->filter((_, i) => index(sesServersIds, i) < 0)
-    l.PrintDebug('New servers ' .. newServerIds->join(' '))
+      var newServerIds = conServerIds->filter((_, i) => index(sesServersIds, i) < 0)
+      l.PrintDebug('New servers ' .. newServerIds->join(' '))
 
-    var bId = bufnr()
-    for nsi in newServerIds
-      l.PrintDebug('New server ' .. nsi)
-      var s = ser.Server.new(nsi, ft)
-      ses.SetSessionServer(s)
-      s.Init(bId)
-    endfor
+      var bId = bufnr()
+      for nsi in newServerIds
+        l.PrintDebug('New server ' .. nsi)
+        var s = ser.Server.new(nsi, ft)
+        ses.SetSessionServer(s)
+        s.Init(bId)
+      endfor
+    endif
   enddef
 endclass
 

@@ -90,7 +90,7 @@ export class Server
     this.workspace = w.Workspace.new()
     this.diagnostics = diag.Diagnostics.new()
     if has_key(this.serverCapabilites, 'completionProvider')
-      this.completion = comp.Completion.new()
+      this.completion = comp.Completion.new(false)
     endif
     this.formatting = for.Formatting.new()
     this.goToDefinition = gtd.GoToDefinition.new()
