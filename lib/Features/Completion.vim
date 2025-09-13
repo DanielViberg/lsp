@@ -220,7 +220,7 @@ def PumCallback(): string
     timer_start(0, (_) => CompleteAccept(info.completed))
     return ""
   endif
-  return "\n\n"
+  return "\n"
 enddef
 
 def CompleteAccept(ci: any): void
