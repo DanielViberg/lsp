@@ -220,7 +220,11 @@ def PumCallback(): string
     timer_start(0, (_) => CompleteAccept(info.completed))
     return ""
   endif
-  return "\n"
+  if noServer
+    return "\n"
+  else
+    return "\n\n"
+  endif
 enddef
 
 def CompleteAccept(ci: any): void
