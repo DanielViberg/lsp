@@ -4,7 +4,7 @@
 ### ⚠️ Note! Early alpha status, lots of things are hard coded and many things dont work yet.
 
 ### TL;DR
-A lightweight lsp client. 
+A pure vim9script, lightweight lsp client. 
 1. No dependencies except the server binaries.
 2. Utilizes as much of the default features vim can provide.
 3. Tested and expected to work in vim -u DEFAULTS
