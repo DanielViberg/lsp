@@ -9,11 +9,16 @@ A lightweight lsp client.
 2. Utilizes as much of the default features vim can provide.
 3. Tested and expected to work in vim -u DEFAULTS
 
+### WIP
+- Configurable commands and features
+- Vim documentation
+- More lsp features
+
 ### Features
 - Completion
-- GoToDefinition
+- GoToDefinition (Hardcoded to <Enter>)
 - Diagnostics
-- Formatting
+- Formatting (Hardcoded to BufPreWrite event)
 
 ### Requirements
 - Vim version 9.0 or higher
