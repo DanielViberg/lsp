@@ -12,6 +12,7 @@ A lightweight lsp client.
 ### WIP
 - Configurable commands and features
 - Vim documentation
+- Testing
 - More lsp features
 
 ### Features
