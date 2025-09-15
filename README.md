@@ -17,7 +17,7 @@ A lightweight lsp client.
 
 ### Features
 - Completion
-- GoToDefinition (Hardcoded to "<Enter>")
+- GoToDefinition (Hardcoded to "\<Enter>")
 - Diagnostics
 - Formatting (Hardcoded to BufPreWrite event)
 
