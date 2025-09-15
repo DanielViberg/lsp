@@ -7,5 +7,13 @@ import "./Langs/VUE.vim" as vue
 e.TESTING = true
 e.DEBUG = true
 
-php.PHP.new().Run()
-vue.VUE.new().Run()
+var result = 1
+result = php.PHP.new().Run()
+result = vue.VUE.new().Run()
+
+if !result
+  echomsg "ALL TEST OK, EXITING ..."
+  e.DEBUG = false
+  sleep 2
+  :exit
+endif

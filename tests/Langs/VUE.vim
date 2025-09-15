@@ -19,16 +19,23 @@ export class VUE extends a.ATest implements i.ITest
             hybridMode: false
           }
        },
-      workspaceConfig: {}
+      workspaceConfig: {
+        html: {
+          format: {
+	          enable: true,
+	          wrapAttributes: "force-aligned"
+          }
+        }
+      }
     }
   enddef
 
   def PreFormatString(): string
-    return "<style>\n.text {}\n\n</style>"
+    return "<style>\n.text {}\n\n</style>\n<template>\n<div :style=\"\" :class=\"\">\n</div>\n</template>"
   enddef
 
   def PostFormatString(): string
-    return "<style>\n.text {}\n</style>"
+    return "<style>\n.text {}\n</style>\n<template>\n\t<div :style=\"\"\n\t     :class=\"\">\n\t</div>\n</template>"
   enddef
 
 endclass

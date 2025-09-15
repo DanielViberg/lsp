@@ -28,6 +28,7 @@ export abstract class ATest
       maxWait -= 1
       if maxWait == 0
         l.PrintError("Failed to init server")
+        return 1
       endif
       sleep 1
     endwhile
@@ -38,9 +39,11 @@ export abstract class ATest
     LspFormat
     if this.PostFormatString() != join(getline(1, '$'), "\n")
       l.PrintError("Formatting failed")
+      echomsg this.PostFormatString()
+      echomsg join(getline(1, '$'), "\n")
+      :mes
+      return 1
     endif
-
-
     :1,$d
     return 0
   enddef
