@@ -7,4 +7,3 @@ RUN npm install -g typescript@5.8.3
 
 WORKDIR /app
 VOLUME /app
-CMD ["vim", "-u", "DEFAULTS", "-c", "source /app/plugin/lsp.vim", "-c", "source /app/tests/run.vim"]
