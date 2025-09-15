@@ -64,7 +64,7 @@ export class Diagnostics extends ft.Feature implements if.IFeature
 
   def AutoCmds()
   enddef
-  
+
   def ProcessRequest(server: any, data: any): void 
   enddef
 

@@ -61,7 +61,7 @@ export class Server
                  exit_cb: function(r.RpcExitCb, [this])}
 
     if !executable(this.config.path)
-      l.PrintError("Binary for " .. this.config.path .. "is missing")
+      l.PrintError("Binary for " .. this.config.path .. " is missing")
       return
     endif
 

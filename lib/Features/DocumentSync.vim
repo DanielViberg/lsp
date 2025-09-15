@@ -23,7 +23,7 @@ var initOnce: bool = false
 const KIND_NONE = 0
 const KIND_FULL = 1
 const KIND_INC  = 2
-
+  
 export class DocumentSync extends ft.Feature implements if.IFeature
 
   def new()
@@ -42,6 +42,7 @@ export class DocumentSync extends ft.Feature implements if.IFeature
       autocmd TextChangedP * ft.FeatAu(DidChange, true)
     endif
   enddef
+
 
   def ProcessRequest(server: any, data: any): void 
   enddef

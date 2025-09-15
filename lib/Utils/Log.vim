@@ -1,6 +1,6 @@
 vim9script
 
-export const IS_DEBUG: bool = false
+import "../../env.vim" as e
 
 export enum Type
   Info,
@@ -14,19 +14,19 @@ enddef
 
 export def PrintInfo(msg: string): void
   echohl DiagnosticsOk
-    echomsg msg | redraw
+  echomsg msg | redraw
   echohl None
 enddef
 
 export def PrintDebug(msg: string): void
-  if IS_DEBUG
-    echomsg msg
+  if e.DEBUG
+    echomsg msg | redraw
   endif
 enddef
 
 export def PrintWarning(msg: string): void
   echohl Warning
-  echomsg msg
+  echomsg msg | redraw
   echohl None
 enddef
 

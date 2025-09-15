@@ -1,5 +1,7 @@
 vim9script
 
+import "../../env.vim" as e
+
 var CachedConfig: list<dict<any>> = null_list
 
 export class Config 
@@ -14,22 +16,31 @@ enddef
 export def Init(): void
 
   var pointerFile = expand("$HOME/.vim/.lsp-config-dir")
-  if !filereadable(pointerFile)
-    # Ask user for config file dir + (lsp-config.json)
-    var configDir = input("Enter directory for lsp servers config file (lsp-config.json):", expand("$HOME"), "dir")
-    writefile([configDir], pointerFile)
-  endif
 
-  var configDir = readfile(expand("$HOME/.vim/.lsp-config-dir"))[0]
-  var configFile = configDir .. "lsp-config.json"
-  if !filereadable(configFile)
-  # Ask to create if dir has no file
-    var sel = confirm("There is no lsp-config.json, create it now?", "&Yes\n&No", 2)
-    if sel == 1
-      var exConfigFile = expand("%:p:h") .. '/../assets/lsp-config.json'
-      system("cp " .. shellescape(exConfigFile) .. " " .. shellescape(configDir))
-    else
-      return
+  var configFile: string = ""
+  var configDir: string = ""
+
+  if e.TESTING
+    configFile = e.TESTING_CONF_FILE
+  else
+    if !filereadable(pointerFile)
+      # Ask user for config file dir + (lsp-config.json)
+      configDir = input("Enter directory for lsp servers config file (lsp-config.json):", expand("$HOME"), "dir")
+      writefile([configDir], pointerFile)
+    endif
+
+    configDir = readfile(expand("$HOME/.vim/.lsp-config-dir"))[0]
+    configFile = configDir .. "lsp-config.json"
+
+    if !filereadable(configFile)
+    # Ask to create if dir has no file
+      var sel = confirm("There is no lsp-config.json, create it now?", "&Yes\n&No", 2)
+      if sel == 1
+        var exConfigFile = expand("%:p:h") .. '/../assets/lsp-config.json'
+        system("cp " .. shellescape(exConfigFile) .. " " .. shellescape(configDir))
+      else
+        return
+      endif
     endif
   endif
 
@@ -49,7 +60,6 @@ export def GetConfigServerById(id: number): dict<any>
   var serv = CachedConfig->filter((_, s) => s.id == id)
   return !empty(serv) ? serv[0] : null_dict
 enddef
-
 
 export def GetConfigItem(server: any, configItem: dict<any>): any
   if server.config.workspaceConfig->empty()

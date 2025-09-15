@@ -1,5 +1,8 @@
 FROM alpine:latest
-RUN apk add --no-cache vim
+RUN apk add --no-cache vim nodejs npm
+
+RUN npm install -g intelephense
+
 WORKDIR /app
 VOLUME /app
-CMD ["vim"]
+CMD ["vim", "-u", "DEFAULTS", "-c", "source /app/plugin/lsp.vim", "-c", "source /app/tests/run.vim"]

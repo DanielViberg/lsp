@@ -10,7 +10,7 @@ import "../Protocol/Objects/Position.vim" as p
 import "../Protocol/Objects/Location.vim" as lo
 
 var initOnce: bool = false
-
+  
 export class GoToDefinition extends ft.Feature implements if.IFeature
 
   def new()

@@ -10,11 +10,13 @@ g:loaded_lsp = true
 
 import "../lib/ClientState/Buffer.vim" as b
 import "../lib/ClientState/Config.vim" as c
+import "../lib/Features/Formatting.vim" as f
 
 def InitServers()
   b.Buffer.new()
 enddef
 
 command! LspConfig call c.OpenLspConfig()
+command! LspFormat call f.FormatCmd()
 
 au BufEnter * call InitServers()

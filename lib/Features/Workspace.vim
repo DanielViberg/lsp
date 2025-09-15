@@ -14,7 +14,6 @@ export class Workspace extends ft.Feature implements if.IFeature
   enddef
 
   def AutoCmds()
-
   enddef
 
   def ProcessRequest(server: any, data: any): void

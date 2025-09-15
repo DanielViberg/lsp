@@ -5,6 +5,7 @@ import "../../Utils/Json.vim" as j
 import "../../Utils/Str.vim" as str
 import "../../Utils/Log.vim" as l
 import "../Config/cc.vim" as c
+import "../../../env.vim" as e
 
 const currentDir = expand('<sfile>')
 
@@ -42,7 +43,7 @@ export class Initialize extends req.RequestMessage
         name:    'Vim',
         version: '9.1'
       },
-      trace: l.IS_DEBUG ? 'verbose' : 'off',
+      trace: e.DEBUG ? 'verbose' : 'off',
       rootUri: rootUri,
       initializationOptions: config->get('initializationOptions', null_dict),
       capabilities: c.CC
