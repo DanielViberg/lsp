@@ -13,7 +13,7 @@ export abstract class ATest
     writefile([json_encode({ servers: [ this.Config() ]})], e.TESTING_CONF_FILE)
     var file = "/tmp/vim-lsp-test-" .. this.Config().name .. "." .. this.Config().filetype[0]
     writefile([""], file)
-    execute "e " .. file 
+    execute "e! " .. file 
 
     # Wait until server init
     var servers = ses.GetSessionServersByBuf(bufnr())
@@ -22,8 +22,13 @@ export abstract class ATest
       return 0
     endif
 
-    while !servers[0].isFeatInit
+    var maxWait = 5
+    while !servers[0].isFeatInit && maxWait > 0
       l.PrintDebug("Waiting for server to init")
+      maxWait -= 1
+      if maxWait == 0
+        l.PrintError("Failed to init server")
+      endif
       sleep 1
     endwhile
 
@@ -35,7 +40,10 @@ export abstract class ATest
       l.PrintError("Formatting failed")
     endif
 
+
+    :1,$d
     return 0
   enddef
 
 endclass
+

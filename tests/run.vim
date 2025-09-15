@@ -8,3 +8,4 @@ e.TESTING = true
 e.DEBUG = true
 
 php.PHP.new().Run()
+vue.VUE.new().Run()

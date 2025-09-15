@@ -13,7 +13,7 @@ export class VUE extends a.ATest implements i.ITest
       args: ["--stdio"],
       initializationOptions: {
           typescript: {
-              tsdk: "/home/daniel/sources/tools/node-v20.18.0-linux-x64/lib/node_modules/typescript/lib"
+              tsdk: "/usr/local/lib/node_modules/typescript/lib"
           },
           vue: {
             hybridMode: false
@@ -24,9 +24,11 @@ export class VUE extends a.ATest implements i.ITest
   enddef
 
   def PreFormatString(): string
+    return "<style>\n.text {}\n\n</style>"
   enddef
 
   def PostFormatString(): string
+    return "<style>\n.text {}\n</style>"
   enddef
 
 endclass
