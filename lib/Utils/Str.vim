@@ -75,34 +75,6 @@ export def Utf8ToUtf32WithComp(utf8_str: string, utf8_idx: number): number
   return min([utf8_idx, len(chars)])
 enddef
 
-export def Utf16ToUtf8ByteIdxWOComp(utf8_str: string, utf16_idx: number): number
-  var byte_idx = 0
-  var utf16_count = 0
-
-  while byte_idx < len(utf8_str)
-    var cp_str = strcharpart(utf8_str, byte_idx, 1)
-    var cp = char2nr(cp_str)
-
-    # Skip combining marks (like U+0300 to U+036F, plus others)
-    if cp >= 0x0300 && cp <= 0x036F
-      byte_idx += strlen(cp_str)
-      continue
-    endif
-
-    # How many UTF-16 units this base character takes
-    var width = cp <= 0xFFFF ? 1 : 2
-
-    if utf16_count + width > utf16_idx
-      break
-    endif
-
-    utf16_count += width
-    byte_idx += strlen(cp_str)
-  endwhile
-
-  return byte_idx
-enddef
-
 # Find the nearest root directory containing a file or directory name from the
 # list of names in "files" starting with the directory "startDir".
 # Based on a similar implementation in the vim-lsp plugin.
