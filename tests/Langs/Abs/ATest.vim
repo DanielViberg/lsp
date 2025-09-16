@@ -17,6 +17,8 @@ export abstract class ATest
     writefile([""], file)
     execute "e! " .. file 
 
+    # Buffers
+
     # Wait until server init
     var servers = ses.GetSessionServersByBuf(bufnr())
     if servers->len() == 0
@@ -48,13 +50,12 @@ export abstract class ATest
     # Completion
     var states = this.CompletionStates()
     for state in states
-      echomsg state[0]
       appendbufline(bufnr(), 0, split(state[0], '\n'))
       :doautocmd TextChangedI
       execute "normal! /¤\<CR>" 
       var charBefore = getline('.')[col('.') - 2]
       cursor(line('.'), col('.') + 1)
-      normal! xx
+      normal! hxx
       timer_start(1000, (_) => {
         var items = complete_info(["items"]).items->map((_, mi) => mi.word)
         if assert_equal(items, state[1])
@@ -68,6 +69,40 @@ export abstract class ATest
       if result
         l.PrintError("Completion failed")
         return result
+      endif
+      :1,$d
+    endfor
+
+    var accepts = this.CompletionAccepts()
+    for accept in accepts
+      appendbufline(bufnr(), 0, split(accept[0], '\n'))
+      :doautocmd TextChangedI
+      execute "normal! /¤\<CR>" 
+      var charBefore = getline('.')[col('.') - 2]
+      cursor(line('.'), col('.') + 1)
+      normal! hxx
+      timer_start(1000, (_) => {
+        var items = complete_info(["items"]).items->map((mix, mi) => {
+          var r = { index: mix, word: mi.word }
+          return r
+        })
+        for item in items
+          if item.word == accept[1]
+            feedkeys("\<Enter>", "")
+            timer_start(500, (_) => {
+              feedkeys("\<Esc>", "")
+            })
+            return
+          endif
+          feedkeys("\<Down>", "")
+        endfor
+      })
+      feedkeys("\<Left>\<Left>ei\<Right>" .. charBefore, "x!")
+      if assert_equal(join(getline(1, '$'), "\n"), accept[2])
+        echomsg join(getline(1, '$'), "\n")
+        echomsg accept[2]
+        l.PrintError("Failed completion accept")
+        return 1
       endif
       :1,$d
     endfor

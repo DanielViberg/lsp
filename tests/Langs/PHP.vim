@@ -55,7 +55,17 @@ export class PHP extends a.ATest implements i.ITest
                                                                           "function", 
                                                                           "test", 
                                                                           "testVar", 
-                                                                          "null"])]
+                                                                          "null"])
+                                                                          ]
+  enddef
+
+  def CompletionAccepts(): list<tuple<string, string, string>>
+    return [
+      ("<?php\n class Test {\n\tpub¤\n}\n", "public", "<?php\n class Test {\n\tpublic\n}\n"),
+      ("<?php\n class Test {\n\tpublic function test()\n{\n\t $testVar = null;\n\t $testV¤ = 1;\n}\n}\n", 
+      "$testVar",
+      "<?php\n class Test {\n\tpublic function test()\n{\n\t $testVar = null;\n\t $testVar = 1;\n}\n}\n"),
+    ]
   enddef
 
 endclass

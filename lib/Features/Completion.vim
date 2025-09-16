@@ -153,13 +153,10 @@ def RequestCompletionReply(server: any, reply: dict<any>)
       })
       l.PrintDebug('Completion items count after filer ' .. items->len())
       var compItems = items->map((_, i) => LspItemToCompItem(i, server.id))
-      if mode() == 'i' || e.TESTING
-        # TODO: Change this to changetick
-        if cacheWords != compItems
-          compItems->complete(col('.'))
-        endif
-        cacheWords = compItems
+      if cacheWords != compItems && mode() == 'i'
+        compItems->complete(col('.'))
       endif
+      cacheWords = compItems
     endif
   endif
 enddef
@@ -219,9 +216,11 @@ enddef
 
 def PumCallback(): string
   var info = complete_info(['completed', 'selected'])
+  l.PrintDebug("Pum callback: " .. json_encode(info))
   if has_key(info, 'completed') && 
      info.selected != -1 &&
      !noServer
+    l.PrintDebug("Accept completion")
     timer_start(0, (_) => CompleteAccept(info.completed))
     return ""
   endif
@@ -240,6 +239,7 @@ def CompleteAccept(ci: any): void
     else 
       if has_key(ci.user_data.item, 'textEdit') && 
          ci.user_data.item.textEdit != null_dict
+        l.PrintDebug("Process completion change")
         var server = ses.GetSessionServerById(ci.user_data.server_id)
         var changes: list<any> = []
         changes->add(tdce.TextDocumentContentChangeEvent.new(
@@ -249,6 +249,7 @@ def CompleteAccept(ci: any): void
           true))
         if has_key(ci.user_data.item, 'additionalTextEdits')
           for edit in ci.user_data.item->get('additionalTextEdits')
+            l.PrintDebug("Process additionalTextEdits")
             changes->add(tdce.TextDocumentContentChangeEvent.new(
               edit.newText,
               edit.range,
@@ -264,6 +265,7 @@ def CompleteAccept(ci: any): void
 enddef
 
 def ResolveCompletion(sid: number, buf: number, item: any): void
+  l.PrintDebug("Resolve completion")
   var server = ses.GetSessionServerById(sid)
   if !server.serverCapabilites.completionProvider.resolveProvider
     return
@@ -276,12 +278,14 @@ enddef
 def ResolveCompletionReply(server: any, reply: dict<any>): void
   var changes: list<any> = []
   if has_key(reply.result, 'textEdit') && reply.result.textEdit != null_dict
+    l.PrintDebug("Process completion change")
     changes->add(tdce.TextDocumentContentChangeEvent.new(
       reply.result.textEdit.newText,
       reply.result.textEdit.range,
       server,
       true))
   elseif has_key(reply.result, 'label')
+    l.PrintDebug("Process buffer word change")
     var tc = str.GetTriggerCharIdx(
       server.serverCapabilites.completionProvider.triggerCharacters,
       line('.'),
@@ -297,6 +301,7 @@ def ResolveCompletionReply(server: any, reply: dict<any>): void
   endif
 
   if has_key(reply.result, 'additionalTextEdits')
+    l.PrintDebug("Process additionalTextEdits")
     for edit in reply.result->get('additionalTextEdits')
       changes->add(tdce.TextDocumentContentChangeEvent.new(
         edit.newText,

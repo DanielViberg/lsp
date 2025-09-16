@@ -42,4 +42,9 @@ export class VUE extends a.ATest implements i.ITest
     return []
   enddef
 
+  def CompletionAccepts(): list<tuple<string, string, string>>
+    return [
+    ]
+  enddef
+
 endclass

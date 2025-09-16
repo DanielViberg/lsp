@@ -13,6 +13,7 @@ export interface ITest
 
 # Completion
   def CompletionStates(): list<tuple<string, list<string>>>
+  def CompletionAccepts(): list<tuple<string, string, string>>
 
 # Diagnostics
 
