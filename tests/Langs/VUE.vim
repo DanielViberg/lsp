@@ -47,7 +47,10 @@ export class VUE extends a.ATest implements i.ITest
       ("<style>\n.item {\n\tdis¤\n}\n</style>\n", "display", "<style>\n.item {\n\tdisplay: ;\n}\n</style>\n"),
       ("<script setup>\nconst testVar = ref(\"\")\n</script>\n<template>\n<div :class=\"tes¤\">\n</div></template>\n", 
       "testVar", 
-      "<script setup>\nconst testVar = ref(\"\")\n</script>\n<template>\n<div :class=\"testVar\">\n</div></template>\n") 
+      "<script setup>\nconst testVar = ref(\"\")\n</script>\n<template>\n<div :class=\"testVar\">\n</div></template>\n"),
+      ("<script setup>\nconst testVar = ref(\"\")\n</script>\n<template>\n<div :class=\"!tes¤\">\n</div></template>\n", 
+      "testVar", 
+      "<script setup>\nconst testVar = ref(\"\")\n</script>\n<template>\n<div :class=\"!testVar\">\n</div></template>\n") 
     ]
   enddef
 

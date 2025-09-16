@@ -133,6 +133,7 @@ def RequestCompletionReply(server: any, reply: dict<any>)
       line('.'),
       col('.')
     )
+    l.PrintDebug('Completion tc ' .. json_encode(tc))
     var query = getline(line('.'))[tc.col : col('.') - 2]
     l.PrintDebug('Completion query ' .. query)
     
