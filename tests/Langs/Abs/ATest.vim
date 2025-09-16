@@ -97,13 +97,42 @@ export abstract class ATest
           feedkeys("\<Down>", "")
         endfor
       })
-      feedkeys("\<Left>\<Left>ei\<Right>" .. charBefore, "x!")
+      feedkeys("\<Left>\<Left>ei\<Right>" .. charBefore, "x!") #TODO: fails at short words
       if assert_equal(join(getline(1, '$'), "\n"), accept[2])
         echomsg join(getline(1, '$'), "\n")
         echomsg accept[2]
         l.PrintError("Failed completion accept")
         return 1
       endif
+      :1,$d
+    endfor
+
+    var incrEdits = this.CompletionIncrEdit()
+    for iedit in incrEdits
+      appendbufline(bufnr(), 0, split(iedit[0], '\n'))
+      :doautocmd TextChangedI
+      execute "normal! /¤\<CR>"
+      normal! x
+      for c in range(0, len(iedit[1]) - 1)
+        var nextChar = iedit[1][c]
+        timer_start(500, (_) => {
+          var items = complete_info(["items"]).items->map((_, mi) => mi.word)
+          if assert_equal(items, iedit[2][c]) && c < len(iedit[1]) - 1
+            echomsg items
+            echomsg iedit[2][c]
+            l.PrintError("Wrong completion count")
+            result = 1
+            return
+          endif
+
+          feedkeys("\<Esc>", "")
+        })
+        feedkeys("i\<Right>" .. nextChar, "x!")
+        if result
+          l.PrintError("Completion failed")
+          return 1
+        endif
+      endfor
       :1,$d
     endfor
 

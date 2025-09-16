@@ -113,51 +113,50 @@ def RequestCompletionReply(server: any, reply: dict<any>)
   if has_key(reply, 'result')
     l.PrintDebug('Completion with result')
     var result = reply.result
-    if result == null
-      l.PrintDebug('Result is null')
-      return
-    endif
-    var items = type(result) == v:t_dict && 
-                has_key(result, 'items') ? result.items : result
-    if items->len() > 0
-      if type(result) == v:t_dict
-        isIncomplete = result.isIncomplete
-      endif
-      l.PrintDebug('Completion item count ' .. items->len())
-      # Get trigger char before the word, or '\s'
-      var tc = str.GetTriggerCharIdx(
-        server.serverCapabilites.completionProvider.triggerCharacters,
-        line('.'),
-        col('.')
-      )
-      var query = getline(line('.'))[tc.col : col('.') - 2]
-      l.PrintDebug('Completion query ' .. query)
-      
-      # Add buffer words
-      items = items + GetCacheBufferW()
+    var items: list<any> = []
 
-      # Compare query to items label w/o trigger char or additional space
-      items->filter((_, v) => {
-        if has_key(v, 'label') && type(v.label) == v:t_string
-          var labelName = trim(v.label)
-          if server.serverCapabilites.completionProvider.triggerCharacters->index(labelName[0]) != -1
-            labelName = labelName[1 : ]
-          endif
-          if empty(query)
-            return true # Case: typed $
-          endif
-          return query == labelName[ : len(query) - 1] # Substring and same index
-        else
-          return false
-        endif
-      })
-      l.PrintDebug('Completion items count after filer ' .. items->len())
-      var compItems = items->map((_, i) => LspItemToCompItem(i, server.id))
-      if cacheWords != compItems && mode() == 'i'
-        compItems->complete(col('.'))
-      endif
-      cacheWords = compItems
+    if type(result) == v:t_dict && has_key(result, 'items')
+      items = result.items
+    elseif type(result) == v:t_list
+      items = result
     endif
+
+    # Add buffer words
+    items = items + GetCacheBufferW()
+
+    l.PrintDebug('Completion item count ' .. items->len())
+    # Get trigger char before the word, or '\s'
+    var tc = str.GetTriggerCharIdx(
+      server.serverCapabilites.completionProvider.triggerCharacters,
+      line('.'),
+      col('.')
+    )
+    var query = getline(line('.'))[tc.col : col('.') - 2]
+    l.PrintDebug('Completion query ' .. query)
+    
+    # Compare query to items label w/o trigger char or additional space
+    items->filter((_, v) => {
+      if has_key(v, 'label') && type(v.label) == v:t_string
+        var labelName = trim(v.label)
+        if server.serverCapabilites.completionProvider.triggerCharacters->index(labelName[0]) != -1
+          labelName = labelName[1 : ]
+        endif
+        if empty(query)
+          return true # Case: typed $
+        endif
+        return query == labelName[ : len(query) - 1] # Substring and same index
+      else
+        return false
+      endif
+    })
+
+    l.PrintDebug('Completion items count after filter ' .. items->len())
+    var compItems = items->map((_, i) => LspItemToCompItem(i, server.id))
+    if mode() == 'i'
+      l.PrintDebug('Prompt completions')
+      compItems->complete(col('.'))
+    endif
+    cacheWords = compItems
   endif
 enddef
 

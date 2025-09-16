@@ -14,6 +14,7 @@ export interface ITest
 # Completion
   def CompletionStates(): list<tuple<string, list<string>>>
   def CompletionAccepts(): list<tuple<string, string, string>>
+  def CompletionIncrEdit(): list<tuple<string, string, list<list<string>>>>
 
 # Diagnostics
 

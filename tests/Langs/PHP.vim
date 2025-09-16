@@ -68,4 +68,36 @@ export class PHP extends a.ATest implements i.ITest
     ]
   enddef
 
+  def CompletionIncrEdit(): list<tuple<string, string, list<list<string>>>>
+    return [
+      ("<?php\n class Test {\n\tpu¤\n}\n", "blic", [["public", "public"],
+                                                    ["public", "public"],
+                                                    ["public", "public"],
+                                                    ["public", "public"]]),
+
+      ("<?php\n class Test {\n\tpublic function test()\n{\n\t$longVariable = 1;\n\t$lo¤\n}\n}\n", "ngVariable", [
+                                                    ["$longVariable", "longVariable"],
+                                                    ["$longVariable", "longVariable"],
+                                                    ["$longVariable", "longVariable"],
+                                                    ["$longVariable", "longVariable"],
+                                                    ["$longVariable", "longVariable"],
+                                                    ["$longVariable", "longVariable"],
+                                                    ["$longVariable", "longVariable"],
+                                                    ["$longVariable", "longVariable"],
+                                                    ["$longVariable", "longVariable"],
+                                                    ["$longVariable", "longVariable"],
+                                                    ]),
+
+    ("<?php\n noValidVar\n class Test {\n\tpublic function test()\n{\n\tnoV¤\n}\n}\n", "alidVar", [
+                                                    ["noValidVar"],
+                                                    ["noValidVar"],
+                                                    ["noValidVar"],
+                                                    ["noValidVar"],
+                                                    ["noValidVar"],
+                                                    ["noValidVar"],
+                                                    ["noValidVar"],
+                                                    ]),
+    ]
+  enddef
+
 endclass
