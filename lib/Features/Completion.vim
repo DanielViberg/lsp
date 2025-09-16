@@ -29,11 +29,12 @@ const KIND_CHARACTER = 2
 # incomplete.
 const KIND_INCOMPLETE_COMPLETION = 3
 
+export var bufferWords: list<string> = []
+export var cacheWords: list<dict<any>> = []
+var cachedWordsHash: string
 var initOnce: bool = false
 var isIncomplete: bool = false
 var noServer: bool = false
-export var bufferWords: list<string> = []
-export var cacheWords: list<dict<any>> = []
 
 export class Completion extends ft.Feature implements if.IFeature
 
@@ -122,6 +123,7 @@ def RequestCompletionReply(server: any, reply: dict<any>)
     endif
 
     # Add buffer words
+    var onlyBuffer = items->len() == 0
     items = items + GetCacheBufferW()
 
     l.PrintDebug('Completion item count ' .. items->len())
@@ -152,8 +154,10 @@ def RequestCompletionReply(server: any, reply: dict<any>)
 
     l.PrintDebug('Completion items count after filter ' .. items->len())
     var compItems = items->map((_, i) => LspItemToCompItem(i, server.id))
-    if mode() == 'i'
+    var newHash = sha256(json_encode(compItems))
+    if mode() == 'i' && (cachedWordsHash != newHash || onlyBuffer)
       l.PrintDebug('Prompt completions')
+      cachedWordsHash = newHash
       compItems->complete(col('.'))
     endif
     cacheWords = compItems

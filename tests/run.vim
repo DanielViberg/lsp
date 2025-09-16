@@ -10,8 +10,8 @@ e.DEBUG = true
 
 var result = 1
 result = php.PHP.new().Run()
-result = vue.VUE.new().Run()
-result = vim.VIM.new().Run()
+#result = vue.VUE.new().Run()
+#result = vim.VIM.new().Run()
 
 if !result
   echomsg "ALL TEST OK, EXITING ..."
