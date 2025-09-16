@@ -5,6 +5,8 @@ import "../../../env.vim" as e
 import "../../../lib/Utils/Log.vim" as l
 import "../../../lib/ClientState/Session.vim" as ses
 
+var result: number = 0
+
 export abstract class ATest
 
   abstract def Config(): dict<list<any>>
@@ -37,14 +39,41 @@ export abstract class ATest
     appendbufline(bufnr(), 0, split(this.PreFormatString(), '\n'))
     :doautocmd TextChangedI
     LspFormat
-    if this.PostFormatString() != join(getline(1, '$'), "\n")
+    if assert_equal(this.PostFormatString(), join(getline(1, '$'), "\n"))
       l.PrintError("Formatting failed")
-      echomsg this.PostFormatString()
-      echomsg join(getline(1, '$'), "\n")
-      :mes
-      return 1
     endif
+
     :1,$d
+
+    # Completion
+    var states = this.CompletionStates()
+    for state in states
+      echomsg state[0]
+      appendbufline(bufnr(), 0, split(state[0], '\n'))
+      :doautocmd TextChangedI
+      execute "normal! /¤\<CR>" 
+      var charBefore = getline('.')[col('.') - 2]
+      cursor(line('.'), col('.') + 1)
+      normal! xx
+      timer_start(1000, (_) => {
+        var items = complete_info(["items"]).items->map((_, mi) => mi.word)
+        if assert_equal(items, state[1])
+          echomsg items
+          echomsg state[1]
+          result = 1
+        endif
+        feedkeys("\<Esc>", "")
+      })
+      feedkeys("i\<Right>" .. charBefore, "x!")
+      if result
+        l.PrintError("Completion failed")
+        return result
+      endif
+      :1,$d
+    endfor
+
+    :1,$d
+
     return 0
   enddef
 

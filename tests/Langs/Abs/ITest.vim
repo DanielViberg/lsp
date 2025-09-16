@@ -12,6 +12,7 @@ export interface ITest
   def PostFormatString(): string
 
 # Completion
+  def CompletionStates(): list<tuple<string, list<string>>>
 
 # Diagnostics
 

@@ -38,4 +38,8 @@ export class VUE extends a.ATest implements i.ITest
     return "<style>\n.text {}\n</style>\n<template>\n\t<div :style=\"\"\n\t     :class=\"\">\n\t</div>\n</template>"
   enddef
 
+  def CompletionStates(): list<tuple<string, list<string>>>
+    return []
+  enddef
+
 endclass

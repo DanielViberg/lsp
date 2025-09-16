@@ -19,6 +19,7 @@ enddef
 export def RpcAsync(server: any, req: rm.RequestMessage, Cb: func)
   l.PrintDebug('Request ' .. req.method)
   var Fn = function('RpcAsyncCb', [server, Cb])
+  server.isWaiting = true
   server.job->ch_sendexpr(req.ToJson(), {callback: Fn})
 enddef
 
@@ -29,6 +30,7 @@ def RpcAsyncCb(server: any, RpcCb: func, chan: channel, reply: dict<any>)
   else
     RpcCb(server, reply)
   endif
+  server.isWaiting = false
 enddef
 
 export def RpcOutCb(server: any, chan: channel, msg: any): void

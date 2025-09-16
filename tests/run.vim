@@ -8,7 +8,7 @@ e.TESTING = true
 e.DEBUG = true
 
 var result = 1
-result = php.PHP.new().Run()
+#result = php.PHP.new().Run()
 result = vue.VUE.new().Run()
 
 if !result

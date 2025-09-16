@@ -14,6 +14,7 @@ import "../Protocol/Objects/Position.vim" as p
 import "../Protocol/Objects/TextDocumentPosition.vim" as tdp
 import "../Protocol/Objects/TextDocumentContentChangeEvent.vim" as tdce
 import "../Utils/TextEdit.vim" as t
+import "../../env.vim" as e
 
 # Completion was triggered by typing an identifier (24x7 code
 # complete), manual invocation (e.g Ctrl+Space) or via API.
@@ -53,6 +54,7 @@ export class Completion extends ft.Feature implements if.IFeature
       autocmd BufAdd * call CacheBufferWords()
       autocmd VimEnter * call CacheBufferWords()
       autocmd InsertLeave * call CacheBufferWords()
+      autocmd InsertEnter * call CacheBufferWords()
       if noServer
         autocmd TextChangedI * call CompleteNoServer()
       endif
@@ -66,7 +68,8 @@ export class Completion extends ft.Feature implements if.IFeature
   enddef
 
   def RequestCompletion(server: any, bId: number): void 
-    if mode() == 'i' 
+    l.PrintDebug('Request completion')
+    if mode() == 'i' || e.TESTING
       var tdpos = tdp.TextDocumentPosition.new(server, bId)
       var compReq = c.Completion.new(
         this.GetTriggerKind(server, bId),
@@ -150,7 +153,7 @@ def RequestCompletionReply(server: any, reply: dict<any>)
       })
       l.PrintDebug('Completion items count after filer ' .. items->len())
       var compItems = items->map((_, i) => LspItemToCompItem(i, server.id))
-      if mode() == 'i'
+      if mode() == 'i' || e.TESTING
         # TODO: Change this to changetick
         if cacheWords != compItems
           compItems->complete(col('.'))
@@ -171,13 +174,15 @@ enddef
 
 def CacheBufferWords(): void
   var lines = getbufline(bufnr(), 1, '$')
+  var lix = 1
   for l in lines
     var words = split(l, '\W\+')
     for w in words
-      if bufferWords->index(w) == -1
+      if bufferWords->index(w) == -1 && line('.') != lix
         bufferWords->add(w)
       endif
     endfor
+    lix += 1
   endfor
 enddef
 
