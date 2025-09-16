@@ -32,8 +32,8 @@ const KIND_INCOMPLETE_COMPLETION = 3
 var initOnce: bool = false
 var isIncomplete: bool = false
 var noServer: bool = false
-var bufferWords: list<string> = []
-var cacheWords: list<dict<any>> = []
+export var bufferWords: list<string> = []
+export var cacheWords: list<dict<any>> = []
 
 export class Completion extends ft.Feature implements if.IFeature
 
@@ -327,6 +327,11 @@ def CompletionChange(changes: list<any>, server: any): void
       return line .. "\n" == ca.text
     }) == -1
   })
+
+  # FIXME: For the moment, remove any snipped data
+  for change in changes
+    change.ClearSnippet()
+  endfor
 
   var cursorLineDelta = 0
   var newCol = 0

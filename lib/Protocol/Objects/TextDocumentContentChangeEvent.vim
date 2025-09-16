@@ -40,6 +40,10 @@ export class TextDocumentContentChangeEvent implements j.JsonSerializable
     endif
   enddef
 
+  def ClearSnippet(): void
+    this.text = substitute(this.text, '\$\d\+', '', 'g')
+  enddef
+
   def VimDecode(bId: number): void
     this.start.VimDecode(bId)
     this.end.VimDecode(bId)

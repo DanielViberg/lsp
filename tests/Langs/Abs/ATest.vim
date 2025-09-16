@@ -4,6 +4,7 @@ import "./ITest.vim" as i
 import "../../../env.vim" as e
 import "../../../lib/Utils/Log.vim" as l
 import "../../../lib/ClientState/Session.vim" as ses
+import "../../../lib/Features/Completion.vim" as comp
 
 var result: number = 0
 
@@ -12,6 +13,8 @@ export abstract class ATest
   abstract def Config(): dict<list<any>>
 
   def Run(): number
+    comp.bufferWords = []
+    comp.cacheWords = []
     writefile([json_encode({ servers: [ this.Config() ]})], e.TESTING_CONF_FILE)
     var file = "/tmp/vim-lsp-test-" .. this.Config().name .. "." .. this.Config().filetype[0]
     writefile([""], file)
