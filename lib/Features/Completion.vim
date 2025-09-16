@@ -168,8 +168,14 @@ enddef
 def CompleteNoServer()
   var items: list<any> = GetCacheBufferW()
   var compItems = items->map((_, i) => LspItemToCompItem(i, -1))
-  if mode() == 'i'
-      compItems->complete(col('.'))
+  var match = complete_match()
+  var [col, trigger] = match->len() > 0 ? match[0] : [null, null_string]
+  if mode() == 'i' && strlen(trigger) > 0
+    compItems->filter((_, v) => {
+        var labelName = trim(v.word)
+        return trigger == labelName[ : len(trigger) - 1]
+    })
+    compItems->complete(col('.'))
   endif
 enddef
 
