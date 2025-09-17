@@ -8,6 +8,7 @@ import "../Utils/Log.vim" as l
 import "../../env.vim" as e
 
 export def RpcSync(server: any, req: rm.RequestMessage): any
+  server.userMiddleware.PreRequest(server, req)
   return server.job->ch_evalexpr(req.ToJson())
 enddef
 

@@ -4,9 +4,10 @@ import "../Features/Diagnostics.vim" as diag
 import "../Features/Completion.vim" as comp
 import "../Features/Snippet.vim" as sn
 import "../Features/Formatting.vim" as for
-import "../Features/Workspace.vim" as w
+import "../Features/UserMiddleware.vim" as m
 import "../Features/GoToDefinition.vim" as gtd
 import "../Features/DocumentSync.vim" as dc
+import "../Features/Workspace.vim" as w
 import "../Protocol/Notifications/Notification.vim" as notif
 import "../Protocol/Requests/Initialize.vim" as reqI
 import "../Protocol/Requests/Shutdown.vim" as reqSu
@@ -39,6 +40,7 @@ export class Server
   var snippet: any
   var formatting: any
   var goToDefinition: any
+  var userMiddleware: any
 
   def new(this.id = v:none, this.fileType = v:none)
     l.PrintDebug('New server')
@@ -102,6 +104,7 @@ export class Server
     l.PrintDebug('Ready and do open')
     dc.DidOpen(this, bufnr(), null)
     this.workspace.SendWorkspaceConfig(this, this.config->get('workspaceConfig', null_dict))
+    this.userMiddleware = m.UserMiddleware.new()
   enddef
   
   def ProcessRequest(data: any): void 
@@ -116,6 +119,8 @@ export class Server
     endif
     this.formatting.ProcessRequest(this, data)
     this.goToDefinition.ProcessRequest(this, data)
+
+    this.userMiddleware.ProcessRequest(this, data)
   enddef
 
   def ProcessNotification(data: any): void 

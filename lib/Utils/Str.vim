@@ -21,7 +21,9 @@ export def GetTriggerCharIdx(triggerChars: any, line: number, col: number): dict
        match(c, '\s') >= 0 ||
        c == '[' || # TODO: How to fix this?
        c == '(' ||
-       c == '!'
+       c == '!' ||
+       c == '/' ||
+       c == '\'
       break
     endif
     pcol -= 1
