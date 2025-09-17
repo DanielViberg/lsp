@@ -339,11 +339,6 @@ def CompletionChange(changes: list<any>, server: any): void
     }) == -1
   })
 
-  # FIXME: For the moment, remove any snipped data
-  for change in changes
-    change.ClearSnippet()
-  endfor
-
   var cursorLineDelta = 0
   var newCol = 0
   for change in changes
