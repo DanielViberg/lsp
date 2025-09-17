@@ -267,6 +267,9 @@ def CompleteAccept(ci: any): void
           endfor
         endif
         CompletionChange(changes, server)
+        if ci.user_data.item->get('insertTextFormat') == 2
+          server.snippet.Handle()
+        endif
       else
         ResolveCompletion(ci.user_data.server_id, bufnr(), ci.user_data.item)
       endif
@@ -319,7 +322,6 @@ def ResolveCompletionReply(server: any, reply: dict<any>): void
         server))
     endfor
   endif
-
   CompletionChange(changes, server)
 enddef
 
@@ -353,6 +355,6 @@ def CompletionChange(changes: list<any>, server: any): void
 
   t.ApplyTextEdits(bufnr(), changes)
   cursor(line('.') + cursorLineDelta, newCol)
-
-  d.DidChange(server, bufnr(), false)  
+  
+  d.DidChange(server, bufnr(), false)
 enddef

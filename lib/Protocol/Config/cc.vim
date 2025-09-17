@@ -69,7 +69,7 @@ export const CC = {
     completion: {
       dynamicRegistration: false,
       completionItem: {
-        snippetSupport: false,
+        snippetSupport: true,
         commitCharactersSupport: false,
         documentationFormat: ['plaintext'],
         deprecatedSupport: false,

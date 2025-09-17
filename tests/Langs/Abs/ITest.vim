@@ -6,20 +6,19 @@ export interface ITest
 
   def Config(): dict<any>
 
-# Formatting
+  # Formatting
   def PreFormatString(): string
-
   def PostFormatString(): string
 
-# Completion
+  # Completion
   def CompletionStates(): list<tuple<string, list<string>>>
   def CompletionAccepts(): list<tuple<string, string, string>>
   def CompletionIncrEdit(): list<tuple<string, string, list<list<string>>>>
 
-# Diagnostics
+  # Diagnostics
 
-# GoToDefinition
+  # GoToDefinition
 
-# Workspace
+  # Workspace
 
 endinterface

@@ -2,6 +2,7 @@ vim9script
 
 import "../Features/Diagnostics.vim" as diag
 import "../Features/Completion.vim" as comp
+import "../Features/Snippet.vim" as sn
 import "../Features/Formatting.vim" as for
 import "../Features/Workspace.vim" as w
 import "../Features/GoToDefinition.vim" as gtd
@@ -35,6 +36,7 @@ export class Server
   var workspace: any
   var diagnostics: any
   var completion: any
+  var snippet: any
   var formatting: any
   var goToDefinition: any
 
@@ -93,6 +95,7 @@ export class Server
     if has_key(this.serverCapabilites, 'completionProvider')
       this.completion = comp.Completion.new(false)
     endif
+    this.snippet = sn.Snippet.new()
     this.formatting = for.Formatting.new()
     this.goToDefinition = gtd.GoToDefinition.new()
     this.isFeatInit = true
