@@ -23,7 +23,7 @@ export class Buffer
     var conServerIds = conf.GetConfigServerIdsByFt(ft)
     l.PrintDebug('Configured servers ' .. conServerIds->join(' '))
 
-    if conServerIds->len() == 0
+    if conServerIds->len() == 0 && ses.SessionServers->len() == 0
       l.PrintDebug('No servers, start buff comp')
       var comp = c.Completion.new(true)
     else

@@ -3,7 +3,7 @@ vim9script
 import "./Server.vim" as ser
 import "../Utils/Log.vim" as l
 
-var SessionServers: list<ser.Server> = null_list
+export var SessionServers: list<ser.Server> = null_list
 
 export def SetSessionServer(server: ser.Server): void
   l.PrintDebug('Adding server: ' .. server.id .. ' to session')
