@@ -11,6 +11,7 @@ var result: number = 0
 export abstract class ATest
 
   abstract def Config(): dict<list<any>>
+  var noServer: bool = false
 
   def Run(): number
     comp.bufferWords = []
@@ -20,17 +21,15 @@ export abstract class ATest
     writefile([""], file)
     execute "e! " .. file 
 
-    # Buffers
-
     # Wait until server init
     var servers = ses.GetSessionServersByBuf(bufnr())
-    if servers->len() == 0
+    if servers->len() == 0 && !this.noServer
       l.PrintError("No server found")
       return 0
     endif
 
     var maxWait = 5
-    while !servers[0].isFeatInit && maxWait > 0
+    while !this.noServer && !servers[0].isFeatInit && maxWait > 0
       l.PrintDebug("Waiting for server to init")
       maxWait -= 1
       if maxWait == 0

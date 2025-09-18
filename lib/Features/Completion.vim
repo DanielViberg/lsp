@@ -235,7 +235,17 @@ def PumCallback(): string
     return ""
   endif
   if noServer
-    return "\n"
+    var comp = info->get('completed')
+    var word = ""
+    if !comp->empty() 
+      word = comp->get("word")
+    endif
+    if !word->empty()
+      timer_start(0, (_) => CompleteAcceptBuf(word))
+      return ""
+    else
+      return "\n"
+    endif
   else
     return "\n\n"
   endif
@@ -304,12 +314,7 @@ def ResolveCompletionReply(server: any, reply: dict<any>): void
       line('.'),
       col('.')
     )
-    var query = getline(line('.'))[tc.col : col('.') - 2]
-    var lineText = getline(line('.'))
-    var start = col('.') - query->len() - 2 <= 0 ? 0 : col('.') - 2 - query->len()
-    var startText = start == 0 ? '' : lineText[ : start]
-    setline(line('.'), startText .. reply.result.label .. lineText[ col('.') - 1 : ])
-    cursor(line('.'), col('.') + len(reply.result.label) - query->len())
+    CompleteAcceptBuf(reply.result.label)
     return
   endif
 
@@ -323,6 +328,16 @@ def ResolveCompletionReply(server: any, reply: dict<any>): void
     endfor
   endif
   CompletionChange(changes, server)
+enddef
+
+def CompleteAcceptBuf(word: string): void
+  var match = complete_match()
+  var [_, trigger] = match->len() > 0 ? match[0] : [null, null_string]
+  var lineText = getline(line('.'))
+  var start = col('.') - trigger->len() - 2 <= 0 ? 0 : col('.') - 2 - trigger->len()
+  var startText = start == 0 ? '' : lineText[ : start]
+  setline(line('.'), startText .. word .. lineText[ col('.') - 1 : ])
+  cursor(line('.'), col('.') + len(word) - trigger->len())
 enddef
 
 def CompletionChange(changes: list<any>, server: any): void
