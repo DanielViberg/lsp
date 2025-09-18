@@ -253,6 +253,14 @@ enddef
 
 def CompleteAccept(ci: any): void
   if !ci->empty() && type(ci.user_data) == v:t_dict
+    if ci.user_data.item->get('is_buf') || ci.user_data.item->has_key('insertText')
+      var word = ci->get('word')
+      if ci.user_data.item->has_key('insertText')
+        word = ci.user_data.item.insertText
+      endif
+      CompleteAcceptBuf(word)
+      return
+    endif
     if !ci.user_data.item->has_key('additionalTextEdits')
       ResolveCompletion(ci.user_data.server_id, bufnr(), ci.user_data.item)
       return
@@ -307,15 +315,6 @@ def ResolveCompletionReply(server: any, reply: dict<any>): void
       reply.result.textEdit.range,
       server,
       true))
-  elseif has_key(reply.result, 'label')
-    l.PrintDebug("Process buffer word change")
-    var tc = str.GetTriggerCharIdx(
-      server.serverCapabilites.completionProvider.triggerCharacters,
-      line('.'),
-      col('.')
-    )
-    CompleteAcceptBuf(reply.result.label)
-    return
   endif
 
   if has_key(reply.result, 'additionalTextEdits')
@@ -327,10 +326,12 @@ def ResolveCompletionReply(server: any, reply: dict<any>): void
         server))
     endfor
   endif
+
   CompletionChange(changes, server)
 enddef
 
 def CompleteAcceptBuf(word: string): void
+  l.PrintDebug("Completion Accept Buf")
   var match = complete_match()
   var [_, trigger] = match->len() > 0 ? match[0] : [null, null_string]
   var lineText = getline(line('.'))
