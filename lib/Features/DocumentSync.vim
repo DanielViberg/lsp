@@ -19,6 +19,7 @@ import "../Protocol/Objects/TextDocumentPosition.vim" as tdp
 
 var CachedBufferContent: dict<list<string>>
 var initOnce: bool = false
+var didOpenBuffers: list<number> = []
 
 const KIND_NONE = 0
 const KIND_FULL = 1
@@ -59,8 +60,9 @@ export def DidOpen(server: any, bId: number, par: any): void
   l.PrintDebug("Server is init: " .. server.isInit)
   l.PrintDebug("Server is featInit: " .. server.isFeatInit)
 
-  if b.IsAFileBuffer()
+  if b.IsAFileBuffer() && index(didOpenBuffers, bId) == -1
     var didOpenNotif = ddo.DocumentDidOpen.new(s.Uri(expand('%:p')), server.fileType, bId)
+    didOpenBuffers->append(bId)
     r.RpcAsyncMes(server, didOpenNotif)
     if GetSyncKind(server) == KIND_INC
       CachedBufferContent[bId] = bId->getbufline(1, '$')
@@ -70,10 +72,13 @@ enddef
 
 export def DidClose(server: any, bId: number, par: any): void
   l.PrintDebug("Did close sid: " .. server.id .. " bId " .. bId )
-  var didCloseNotif = ddcl.DocumentDidClose.new(s.Uri(expand('%:p')))
-  r.RpcAsyncMes(server, didCloseNotif)
-  if has_key(CachedBufferContent, bId)
-    unlet CachedBufferContent[bId]
+  if index(didOpenBuffers, bId) != -1
+    remove(didOpenBuffers, index(didOpenBuffers, bId))
+    var didCloseNotif = ddcl.DocumentDidClose.new(s.Uri(expand('%:p')))
+    r.RpcAsyncMes(server, didCloseNotif)
+    if has_key(CachedBufferContent, bId)
+      unlet CachedBufferContent[bId]
+    endif
   endif
 enddef
 
