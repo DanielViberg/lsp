@@ -1,145 +1,84 @@
 {
-  "servers": [
+  "servers":
+  [
     {
       "name": "vim-ls",
-      "filetype": [
-        "vim"
-      ],
+      "filetype": ["vim"],
       "path": "vim-language-server",
-      "args": [
-        "--stdio"
-      ]
-    },
+      "args": ["--stdio"]
+    }, 
     {
       "name": "php-ls",
-      "filetype": [
-        "php"
-      ],
+      "filetype": ["php"],
       "path": "intelephense",
-      "args": [
-        "--stdio"
-      ],
-      "initializationOptions": {},
+      "args": ["--stdio"],
+      "initializationOptions": {
+          "licenceKey": ""
+      },
       "workspaceConfig": {
-        "intelephense": {
-          "format": {
-            "braces": "k&r"
-          }
-        }
       }
     },
     {
       "name": "vue-ls",
-      "filetype": [
-        "vue"
-      ],
+      "filetype": ["vue"],
       "path": "vue-language-server",
-      "args": [
-        "--stdio"
-      ],
+      "args": ["--stdio"],
       "initializationOptions": {
-        "typescript": {
-          "tsdk": ""
-        },
-        "vue": {
-          "hybridMode": false
-        }
-      },
-      "workspaceConfig": {
-        "html": {
-          "format": {
-            "wrapAttributes": "force-aligned"
+          "typescript": {
+              "tsdk": ""
+          },
+          "vue": {
+            "hybridMode": false
           }
-        }
+       },
+      "workspaceConfig": {
       }
     },
     {
       "name": "ts-ls",
-      "filetype": [
-        "typescript",
-        "javascript"
-      ],
+      "filetype": ["js"],
       "path": "typescript-language-server",
-      "args": [
-        "--stdio"
-      ],
-      "features": {
-        "documentFormatting": false
-      }
+      "args": ["--stdio"],
+      "initializationOptions": {},
+      "workspaceConfig": {}
     },
     {
-      "filetype": [
-        "json"
-      ],
+      "filetype": ["json"],
       "path": "vscode-json-languageserver",
-      "args": [
-        "--stdio"
-      ]
-    },
-    {
-      "name": "md-ls",
-      "filetype": [
-        "md"
-      ],
-      "path": "marksman"
+      "args": ["--stdio"],
+      "initializationOptions": {},
+      "workspaceConfig": {}
     },
     {
       "name": "bash-ls",
-      "filetype": [
-        "sh",
-        "bash"
-      ],
+      "filetype": ["sh", "bash"],
       "path": "bash-language-server",
-      "args": [
-        "start"
-      ]
+      "args": ["start"],
+      "initializationOptions": {},
+      "workspaceConfig": {}
     },
     {
       "name": "csharp-ls",
-      "filetype": [
-        "cs"
-      ],
-      "path": "csharp-ls"
+      "filetype": ["cs"],
+      "path": "csharp-ls",
+      "initializationOptions": {},
+      "workspaceConfig": {}
     },
     {
       "name": "rust-ls",
-      "filetype": [
-        "rust"
-      ],
+      "filetype": ["rs"],
       "path": "rust-analyzer",
       "args": [],
-      "syncInit": true
-    },
-    {
-      "name": "html-ls",
-      "filetype": [
-        "html"
-      ],
-      "path": "html-languageserver",
-      "args": [
-        "--stdio"
-      ],
-      "initializationOptions": {
-        "embeddedLanguages": {
-          "css": true,
-          "javascript": true
-        }
-      }
+      "initializationOptions": {},
+      "workspaceConfig": {}
     },
     {
       "name": "c-ls",
-      "filetype": [
-        "c",
-        "cpp"
-      ],
+      "filetype": ["c", "cpp"],
       "path": "clangd",
-      "args": [
-        "--background-index",
-        "--clang-tidy"
-      ],
-      "features": {
-        "diagnostics": false
-      }
+      "args": ["--background-index", "--clang-tidy"],
+      "initializationOptions": {},
+      "workspaceConfig": {}
     }
   ]
 }

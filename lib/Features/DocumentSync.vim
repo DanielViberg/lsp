@@ -61,8 +61,8 @@ export def DidOpen(server: any, bId: number, par: any): void
   l.PrintDebug("Server is featInit: " .. server.isFeatInit)
 
   if b.IsAFileBuffer() && index(didOpenBuffers, bId) == -1
+    didOpenBuffers->add(bId)
     var didOpenNotif = ddo.DocumentDidOpen.new(s.Uri(expand('%:p')), server.fileType, bId)
-    didOpenBuffers->append(bId)
     r.RpcAsyncMes(server, didOpenNotif)
     if GetSyncKind(server) == KIND_INC
       CachedBufferContent[bId] = bId->getbufline(1, '$')
