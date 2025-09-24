@@ -6,6 +6,9 @@ import "./Langs/PHP.vim" as php
 import "./Langs/VUE.vim" as vue
 import "./Langs/VIM.vim" as vim
 import "./Langs/TXT.vim" as txt
+import "./Langs/BLADE.vim" as blade
+import "./Langs/JS.vim" as js
+import "./Langs/TS.vim" as ts
 
 e.TESTING = true
 e.DEBUG = true
@@ -14,11 +17,13 @@ var result = 1
 
 def RunCheck(test: i.ITest): void
   if test.Run()
-    :stop
+    finish
     :mes
   endif
 enddef
 
+#RunCheck(ts.TS.new())
+RunCheck(blade.BLADE.new())
 RunCheck(txt.TXT.new())
 RunCheck(php.PHP.new())
 RunCheck(vue.VUE.new())

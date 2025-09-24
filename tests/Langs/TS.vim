@@ -10,7 +10,7 @@ export class TS extends a.ATest implements i.ITest
   def Config(): dict<any>
     return {
       name: "ts-ls",
-      filetype: ["js"],
+      filetype: ["ts"],
       path: "typescript-language-server",
       args: ["--stdio"],
       initializationOptions: {},
@@ -31,7 +31,9 @@ export class TS extends a.ATest implements i.ITest
   enddef
 
   def CompletionAccepts(): list<tuple<string, string, string>>
-    return []
+    return [
+      ("con¤\n", "console", "console"),
+    ]
   enddef
 
   def CompletionIncrEdit(): list<tuple<string, string, list<list<string>>>>

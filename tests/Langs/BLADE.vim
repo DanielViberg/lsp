@@ -3,18 +3,16 @@ vim9script
 import "./Abs/ATest.vim" as a
 import "./Abs/ITest.vim" as i
 
-# TODO
+export class BLADE extends a.ATest implements i.ITest
 
-export class TS extends a.ATest implements i.ITest
+  def new()
+    this.noServer = true
+  enddef
 
   def Config(): dict<any>
     return {
-      name: "ts-ls",
-      filetype: ["js"],
-      path: "typescript-language-server",
-      args: ["--stdio"],
-      initializationOptions: {},
-      workspaceConfig: {}
+      name: "blade-ls",
+      filetype: ["blade.php"],
     }
   enddef
 
@@ -31,7 +29,9 @@ export class TS extends a.ATest implements i.ITest
   enddef
 
   def CompletionAccepts(): list<tuple<string, string, string>>
-    return []
+    return [
+      ("completionWord\ncompl¤", "completionWord", "completionWord\ncompletionWord\n"),
+    ]
   enddef
 
   def CompletionIncrEdit(): list<tuple<string, string, list<list<string>>>>
