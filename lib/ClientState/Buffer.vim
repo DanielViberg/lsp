@@ -17,7 +17,7 @@ export class Buffer
       return
     endif
 
-    var ft = &filetype
+    var ft = expand('%:e')
     l.PrintDebug('Filetype ' .. ft)
 
     var conServerIds = conf.GetConfigServerIdsByFt(ft)

@@ -30,7 +30,7 @@ export def GetSessionServersByFt(ft: string): list<ser.Server>
 enddef
 
 export def GetSessionServersByBuf(bufnr: number): list<ser.Server>
-  var ft = getbufvar(bufnr, '&filetype')
+  var ft = fnamemodify(bufname(bufnr()), ':e')
   return GetSessionServersByFt(ft)
 enddef
 

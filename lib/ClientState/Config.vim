@@ -51,7 +51,9 @@ export def Init(): void
 enddef
 
 export def GetConfigServerIdsByFt(ft: string): list<number>
-  return CachedConfig->filter((_, s) => has_key(s, 'filetype') && index(s.filetype, ft) != -1)
+  return CachedConfig->filter((_, s) => has_key(s, 'filetype') && 
+                                        has_key(s, 'path') &&
+                                        index(s.filetype, ft) != -1)
                      ->mapnew((_, s) => has_key(s, 'id') ? s.id : '')
                      ->filter((_, i) => !empty(i))
 enddef 

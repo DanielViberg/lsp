@@ -31,7 +31,6 @@ const KIND_INCOMPLETE_COMPLETION = 3
 
 export var bufferWords: list<string> = []
 export var cacheWords: list<dict<any>> = []
-var cachedWordsHash: string
 var initOnce: bool = false
 var isIncomplete: bool = false
 var noServer: bool = false
@@ -155,10 +154,9 @@ def RequestCompletionReply(server: any, reply: dict<any>)
 
     l.PrintDebug('Completion items count after filter ' .. items->len())
     var compItems = items->map((_, i) => LspItemToCompItem(i, server.id))
-    var newHash = sha256(json_encode(compItems))
-    if mode() == 'i' && (cachedWordsHash != newHash || onlyBuffer)
+    l.PrintDebug('Completion mode ' .. mode())
+    if mode() == 'i' 
       l.PrintDebug('Prompt completions')
-      cachedWordsHash = newHash
       compItems->complete(col('.'))
     endif
     cacheWords = compItems
@@ -328,6 +326,10 @@ def ResolveCompletionReply(server: any, reply: dict<any>): void
   endif
 
   CompletionChange(changes, server)
+
+  if changes->len() == 0
+    CompleteAcceptBuf(reply.result.label)
+  endif
 enddef
 
 def CompleteAcceptBuf(word: string): void
