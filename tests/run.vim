@@ -24,14 +24,14 @@ def RunCheck(test: i.ITest): void
 enddef
 
 #RunCheck(ts.TS.new())
-RunCheck(c.C.new())
-#RunCheck(blade.BLADE.new())
-#RunCheck(txt.TXT.new())
-#RunCheck(php.PHP.new())
-#RunCheck(vue.VUE.new())
-#RunCheck(vim.VIM.new())
+#RunCheck(c.C.new())
+RunCheck(blade.BLADE.new())
+RunCheck(txt.TXT.new())
+RunCheck(php.PHP.new())
+RunCheck(vue.VUE.new())
+RunCheck(vim.VIM.new())
 
-#echomsg "ALL TEST OK, EXITING ..."
-#e.DEBUG = false
-#sleep 2
-#:exit
+echomsg "ALL TEST OK, EXITING ..."
+e.DEBUG = false
+sleep 2
+:exit

@@ -126,24 +126,19 @@ def RequestCompletionReply(server: any, reply: dict<any>)
     items = items + GetCacheBufferW()
 
     l.PrintDebug('Completion item count ' .. items->len())
-    # Get trigger char before the word, or '\s'
-    var tc = str.GetTriggerCharIdx(
-      server.serverCapabilites.completionProvider.triggerCharacters,
-      line('.'),
-      col('.')
-    )
-    l.PrintDebug('Completion tc ' .. json_encode(tc))
-    var query = getline(line('.'))[tc.col : col('.') - 2]
+
+    var savePos = getpos('.')
+    call cursor(line('.'), col('.') + 1)
+    normal! b
+    var query = substitute(expand("<cword>"), '[^a-zA-Z]', '', 'g')
+    call setpos('.', savePos)
     l.PrintDebug('Completion query ' .. query)
     
     # Compare query to items label w/o trigger char or additional space
     items->filter((_, v) => {
       if has_key(v, 'label') && type(v.label) == v:t_string
-        var labelName = trim(v.label)
-        if server.serverCapabilites.completionProvider.triggerCharacters->index(labelName[0]) != -1
-          labelName = labelName[1 : ]
-        endif
-        if empty(query)
+        var labelName = substitute(v.label, '[^a-zA-Z]', '', 'g')
+        if empty(query) && !v->has_key('is_buf')
           return true # Case: typed $
         endif
         return query == labelName[ : len(query) - 1] # Substring and same index

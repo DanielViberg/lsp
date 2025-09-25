@@ -47,15 +47,7 @@ export class PHP extends a.ATest implements i.ITest
                                                                           "$php_errormsg", 
                                                                           "$HTTP_RAW_POST_DATA", 
                                                                           "$http_response_header", 
-                                                                          "$this", 
-                                                                          "php", 
-                                                                          "class", 
-                                                                          "Test", 
-                                                                          "public", 
-                                                                          "function", 
-                                                                          "test", 
-                                                                          "testVar", 
-                                                                          "null"])
+                                                                          "$this"])
                                                                           ]
   enddef
 

@@ -1,7 +1,6 @@
 vim9script
 
 export const CC = {
-  offsetEncoding: ['utf-32', 'utf-16'],
   workspace: {
     applyEdit: false,
     workspaceEdit: {
@@ -214,5 +213,6 @@ export const CC = {
       dynamicRegistration: false,
       executionSummarySupport: false
     }
-  }
+  },
+  offsetEncoding: ['utf-32', 'utf-16'],
 }

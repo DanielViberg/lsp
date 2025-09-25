@@ -19,11 +19,6 @@ export def GetTriggerCharIdx(triggerChars: any, line: number, col: number): dict
   for c in cursorPrefix->split('\zs')->reverse()
     if index(triggerChars, c) != -1 || 
        match(c, '\s') >= 0 ||
-       c == '[' || # TODO: How to fix this?
-       c == '(' ||
-       c == '!' ||
-       c == '/' ||
-       c == '\'
       break
     endif
     pcol -= 1

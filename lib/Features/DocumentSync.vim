@@ -55,13 +55,13 @@ endclass
 
 export def DidOpen(server: any, bId: number, par: any): void
 
-  l.PrintDebug("Did open sid: " .. server.id .. " bId " .. bId )
-  l.PrintDebug("Server is running: " .. server.isRunning)
-  l.PrintDebug("Server is init: " .. server.isInit)
-  l.PrintDebug("Server is featInit: " .. server.isFeatInit)
 
   if b.IsAFileBuffer() && index(didOpenBuffers, bId) == -1
     didOpenBuffers->add(bId)
+    l.PrintDebug("Did open sid: " .. server.id .. " bId " .. bId )
+    l.PrintDebug("Server is running: " .. server.isRunning)
+    l.PrintDebug("Server is init: " .. server.isInit)
+    l.PrintDebug("Server is featInit: " .. server.isFeatInit)
     var didOpenNotif = ddo.DocumentDidOpen.new(s.Uri(expand('%:p')), server.fileType, bId)
     r.RpcAsyncMes(server, didOpenNotif)
     if GetSyncKind(server) == KIND_INC
@@ -71,9 +71,9 @@ export def DidOpen(server: any, bId: number, par: any): void
 enddef
 
 export def DidClose(server: any, bId: number, par: any): void
-  l.PrintDebug("Did close sid: " .. server.id .. " bId " .. bId )
   if index(didOpenBuffers, bId) != -1
     remove(didOpenBuffers, index(didOpenBuffers, bId))
+    l.PrintDebug("Did close sid: " .. server.id .. " bId " .. bId )
     var didCloseNotif = ddcl.DocumentDidClose.new(s.Uri(expand('%:p')))
     r.RpcAsyncMes(server, didCloseNotif)
     if has_key(CachedBufferContent, bId)
