@@ -81,7 +81,7 @@ export const CC = {
         labelDetailsSupport: false
       },
       completionItemKind: { valueSet: range(1, 25) },
-      contextSupport: true,
+      contextSupport: false,
       insertTextMode: 0,
       completionList: { itemDefaults: [] }
     },

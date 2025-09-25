@@ -1,11 +1,12 @@
-FROM alpine:latest
+FROM alpine:3.22.1
 RUN apk add --no-cache vim nodejs npm
+RUN apk add --no-cache clang-dev
 
-RUN npm install -g intelephense
+RUN npm install -g intelephense@1.14.4
 RUN npm install -g @vue/language-server@2.2.10
 RUN npm install -g typescript@5.8.3
-RUN npm install -g vim-language-server
-RUN npm install -g typescript-language-server
+RUN npm install -g vim-language-server@2.3.1
+RUN npm install -g typescript-language-server@4.3.3
 
 WORKDIR /app
 VOLUME /app
