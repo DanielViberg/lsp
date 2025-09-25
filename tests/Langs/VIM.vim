@@ -30,7 +30,7 @@ export class VIM extends a.ATest implements i.ITest
 
   def CompletionAccepts(): list<tuple<string, string, string>>
     return [
-      ("vim9script\nappend\n app¤\n", "append", "vim9script\nappend\nappend\n"),
+      ("vim9script\nappend\n app¤\n", "append", "vim9script\nappend\n append\n"),
     ]
   enddef
 

@@ -337,8 +337,10 @@ def CompleteAcceptBuf(word: string): void
   var match = complete_match()
   var [_, trigger] = match->len() > 0 ? match[0] : [null, null_string]
   var lineText = getline(line('.'))
-  var start = col('.') - trigger->len() - 2 <= 0 ? 0 : col('.') - 2 - trigger->len()
-  var startText = start == 0 ? '' : lineText[ : start]
+  var cursorIndex = col('.') - 1
+  var compIndex = cursorIndex - trigger->len()
+  var startIndex = compIndex <= 0 && cursorIndex == 0 ? 0 : compIndex
+  var startText = startIndex == 0 ? '' : lineText[ : startIndex - 1]
   setline(line('.'), startText .. word .. lineText[ col('.') - 1 : ])
   cursor(line('.'), col('.') + len(word) - trigger->len())
 enddef
