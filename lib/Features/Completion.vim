@@ -178,7 +178,9 @@ def CacheBufferWords(): void
   for l in lines
     var words = split(l, '\W\+')
     for w in words
-      if bufferWords->index(w) == -1 && line('.') != lix
+      if bufferWords->index(w) == -1 && 
+         line('.') != lix &&
+         w =~# '[a-zA-Z]'
         bufferWords->add(w)
       endif
     endfor
