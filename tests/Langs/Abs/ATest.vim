@@ -67,7 +67,12 @@ export abstract class ATest
         endif
         feedkeys("\<Esc>", "")
       })
-      feedkeys("i\<Right>" .. charBefore, "x!")
+      # If character behind cursor
+      if getline('.')->len() - 1 >= col('.')
+        feedkeys("i" .. charBefore, "x!")
+      else
+        feedkeys("i\<Right>" .. charBefore, "x!")
+      endif
       if result
         l.PrintError("Completion failed")
         return result

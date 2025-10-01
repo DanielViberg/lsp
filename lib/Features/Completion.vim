@@ -128,8 +128,9 @@ def RequestCompletionReply(server: any, reply: dict<any>)
     l.PrintDebug('Completion item count ' .. items->len())
 
     var savePos = getpos('.')
-    call cursor(line('.'), col('.') + 1)
+    call cursor(line('.'), col('.'))
     normal! b
+    l.PrintDebug('Completion cword ' .. expand("<cword>"))
     var query = substitute(expand("<cword>"), '[^a-zA-Z]', '', 'g')
     call setpos('.', savePos)
     l.PrintDebug('Completion query ' .. query)

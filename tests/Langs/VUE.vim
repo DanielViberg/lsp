@@ -39,7 +39,9 @@ export class VUE extends a.ATest implements i.ITest
   enddef
 
   def CompletionStates(): list<tuple<string, list<string>>>
-    return []
+    return [
+      ("<script setup>\nconst testVar = ref();\n</script>\n<template>\n<div :class=\"testV¤\">\n</div>\n</template>", ["testV", "testVar", "testVar"]),
+    ]
   enddef
 
   def CompletionAccepts(): list<tuple<string, string, string>>
