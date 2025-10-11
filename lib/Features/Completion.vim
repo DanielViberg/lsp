@@ -140,7 +140,7 @@ def RequestCompletionReply(server: any, reply: dict<any>)
       if has_key(v, 'label') && type(v.label) == v:t_string
         var labelName = substitute(v.label, '[^a-zA-Z]', '', 'g')
         if empty(query) && !v->has_key('is_buf')
-          return true # Case: typed $
+          return true # Case: typed $ and is not a bufferComp
         endif
         return query == labelName[ : len(query) - 1] # Substring and same index
       else
@@ -175,17 +175,15 @@ enddef
 
 def CacheBufferWords(): void
   var lines = getbufline(bufnr(), 1, '$')
-  var lix = 1
   for l in lines
     var words = split(l, '\W\+')
     for w in words
-      if bufferWords->index(w) == -1 && 
-         line('.') != lix &&
-         w =~# '[a-zA-Z]'
+      if bufferWords->index(w) == -1 && # Dont already exists
+         mode() != 'i' &&               # Check only finished words
+         w =~# '[a-zA-Z]'               # Only letterWords
         bufferWords->add(w)
       endif
     endfor
-    lix += 1
   endfor
 enddef
 
