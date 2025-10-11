@@ -35,7 +35,7 @@ export class DocumentSync extends ft.Feature implements if.IFeature
     if !initOnce
       initOnce = true
       autocmd BufEnter * ft.FeatAu(DidOpen)
-      autocmd BufUnload * ft.FeatAu(DidClose)
+      autocmd BufWipeout * ft.FeatAu(DidClose)
       autocmd BufWritePre * ft.FeatAu(WillSave)
       autocmd BufWritePost * ft.FeatAu(DidSave)
       autocmd TextChangedI * ft.FeatAu(DidChange, true)
@@ -54,8 +54,6 @@ endclass
 
 
 export def DidOpen(server: any, bId: number, par: any): void
-
-
   if b.IsAFileBuffer() && index(didOpenBuffers, bId) == -1
     didOpenBuffers->add(bId)
     l.PrintDebug("Did open sid: " .. server.id .. " bId " .. bId )
