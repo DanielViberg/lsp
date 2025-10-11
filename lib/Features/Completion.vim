@@ -101,7 +101,8 @@ def PumShowDoc(key: string): string
 enddef
 
 def CheckEmptyLineForPUM()
-  if getline('.') =~ '^\s*$'
+  if getline('.') =~ '\W$' # Ends with word
+      || getline('.') =~ '^\s*$' # Line is empty
     set completeopt+=noselect
   else
     set completeopt-=noselect
