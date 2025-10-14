@@ -12,6 +12,7 @@ import "../Protocol/Notifications/Notification.vim" as notif
 import "../Protocol/Requests/Initialize.vim" as reqI
 import "../Protocol/Requests/Shutdown.vim" as reqSu
 import "../ClientState/Config.vim" as c
+import "../ClientState/Abstract/Server.vim" as serv
 import "../Protocol/Config/cc.vim" as cap
 import "../Rpc/Rpc.vim" as r
 import "../Utils/Str.vim" as str
@@ -19,30 +20,8 @@ import "../Utils/Log.vim" as l
 
 const currentDir = expand('<sfile>')
 
-export class Server 
+export class Server extends serv.Server
   
-  public var isRunning: bool = false
-  public var isInit: bool = false
-  public var isFeatInit: bool = false
-  public var isWaiting: bool = false
-  public var job: job = null_job
-  public var config: dict<any> = null_dict
-  public var serverCapabilites: dict<any> = null_dict
-  public var clientCapabilites: dict<any> = null_dict
-  public var fileType: string = null_string
-  public var reqNr: number = 0
-    
-  var id: number = -1
-
-  var documentSync: any
-  var workspace: any
-  var diagnostics: any
-  var completion: any
-  var snippet: any
-  var formatting: any
-  var goToDefinition: any
-  var userMiddleware: any
-
   def new(this.id = v:none, this.fileType = v:none)
     l.PrintDebug('New server')
     if this.id != null
@@ -84,10 +63,6 @@ export class Server
     l.PrintInfo("Server " .. get(this.config, 'name') .. " init")
   enddef
 
-  def AddReq(): void
-    this.reqNr += 1
-  enddef
-
   def InitResponse(server: Server, reply: dict<any>): void
     server.isInit = true
     server.serverCapabilites = reply.result.capabilities
@@ -112,35 +87,6 @@ export class Server
     this.userMiddleware = m.UserMiddleware.new()
   enddef
   
-  def ProcessRequest(data: any): void 
-    if !this.isFeatInit
-      return
-    endif
-    this.documentSync.ProcessRequest(this, data)
-    this.workspace.ProcessRequest(this, data)
-    this.diagnostics.ProcessRequest(this, data)
-    if has_key(this.serverCapabilites, 'completionProvider')
-      this.completion.ProcessRequest(this, data)
-    endif
-    this.formatting.ProcessRequest(this, data)
-    this.goToDefinition.ProcessRequest(this, data)
-
-    this.userMiddleware.ProcessRequest(this, data)
-  enddef
-
-  def ProcessNotification(data: any): void 
-    if !this.isFeatInit
-      return
-    endif
-    this.documentSync.ProcessNotification(this, data)
-    this.workspace.ProcessNotification(this, data)
-    this.diagnostics.ProcessNotification(this, data)
-    if has_key(this.serverCapabilites, 'completionProvider')
-      this.completion.ProcessNotification(this, data)
-    endif
-    this.formatting.ProcessNotification(this, data)
-    this.goToDefinition.ProcessNotification(this, data)
-  enddef
 
   def Stop(): void
     this.isRunning = false
@@ -165,17 +111,4 @@ export class Server
       this.job->job_status() == 'run'
   enddef
 
-  def PostDidChange(bId: number): void
-    l.PrintDebug('Post did change')
-    if !this.isFeatInit
-      return
-    endif
-
-    if has_key(this.serverCapabilites, 'completionProvider')
-      this.completion.RequestCompletion(this, bId)
-    endif
-  enddef
-
 endclass
-
-

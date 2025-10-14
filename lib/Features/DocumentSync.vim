@@ -4,6 +4,7 @@ import "./Abstract/Feature.vim" as ft
 import "./Interfaces/IFeature.vim" as if
 import "../ClientState/Buffer.vim" as b
 import "../ClientState/Session.vim" as ses
+import "../ClientState/Abstract/Server.vim" as abs
 import "../Rpc/Rpc.vim" as r
 import "../Utils/Str.vim" as s
 import "../Utils/Log.vim" as l
@@ -45,15 +46,15 @@ export class DocumentSync extends ft.Feature implements if.IFeature
   enddef
 
 
-  def ProcessRequest(server: any, data: any): void 
+  def ProcessRequest(server: abs.Server, data: any): void 
   enddef
 
-  def ProcessNotification(server: any, data: any): void 
+  def ProcessNotification(server: abs.Server, data: any): void 
   enddef
 endclass
 
 
-export def DidOpen(server: any, bId: number, par: any): void
+export def DidOpen(server: abs.Server, bId: number, par: any): void
   if b.IsAFileBuffer() && index(didOpenBuffers, bId) == -1
     didOpenBuffers->add(bId)
     l.PrintDebug("Did open sid: " .. server.id .. " bId " .. bId )
@@ -68,7 +69,7 @@ export def DidOpen(server: any, bId: number, par: any): void
   endif
 enddef
 
-export def DidClose(server: any, bId: number, par: any): void
+export def DidClose(server: abs.Server, bId: number, par: any): void
   if index(didOpenBuffers, bId) != -1
     remove(didOpenBuffers, index(didOpenBuffers, bId))
     l.PrintDebug("Did close sid: " .. server.id .. " bId " .. bId )
@@ -80,7 +81,7 @@ export def DidClose(server: any, bId: number, par: any): void
   endif
 enddef
 
-export def DidChange(server: any, bId: number, par: any): void
+export def DidChange(server: abs.Server, bId: number, par: any): void
   l.PrintDebug("Did change sid: " .. server.id .. " bId " .. bId )
   var changes: list<tdcce.TextDocumentContentChangeEvent>
   if GetSyncKind(server) == KIND_FULL
@@ -125,14 +126,14 @@ export def DidChange(server: any, bId: number, par: any): void
   endif
 enddef
 
-def GetSyncKind(server: any): number
+def GetSyncKind(server: abs.Server): number
   if type(server.serverCapabilites.textDocumentSync) == v:t_dict
     return server.serverCapabilites.textDocumentSync.change
   endif
   return server.serverCapabilites.textDocumentSync
 enddef
 
-export def WillSave(server: any, bId: number, par: any): void
+export def WillSave(server: abs.Server, bId: number, par: any): void
   if !server.clientCapabilites.textDocument.synchronization.willSave
     return
   endif
@@ -147,7 +148,7 @@ export def WillSave(server: any, bId: number, par: any): void
   endif
 enddef
 
-export def DidSave(server: any, bId: number, par: any): void
+export def DidSave(server: abs.Server, bId: number, par: any): void
   if !server.clientCapabilites.textDocument.synchronization.didSave
     return
   endif

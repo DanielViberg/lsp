@@ -1,42 +1,50 @@
 vim9script
 
 import "../Protocol/Abstracts/RequestMessage.vim" as rm
-import "../ClientState/Server.vim" as serv
+import "../ClientState/Abstract/Server.vim" as serv
 import "../ClientState/Session.vim" as ses
 import "../Protocol/Abstracts/Message.vim" as mes
 import "../Utils/Log.vim" as l
 import "../../env.vim" as e
 
-export def RpcSync(server: any, req: rm.RequestMessage): any
+var serverReqNrState: dict<any> = {}
+
+export def RpcSync(server: serv.Server, req: rm.RequestMessage): any
   server.userMiddleware.PreRequest(server, req)
   return server.job->ch_evalexpr(req.ToJson())
 enddef
 
-export def RpcAsyncMes(server: any, notif: mes.Message)
+export def RpcAsyncMes(server: serv.Server, notif: mes.Message)
   l.PrintDebug('Notification ' .. notif.method)
   server.job->ch_sendexpr(notif.ToJson())
 enddef
 
-export def RpcAsync(server: any, req: rm.RequestMessage, Cb: func)
+export def RpcAsync(server: serv.Server, req: rm.RequestMessage, Cb: func)
   l.PrintDebug('Request ' .. req.method)
-  server.AddReq()
-  req.id = server.reqNr
+
+  if !has_key(serverReqNrState, server.id)
+    serverReqNrState[server.id] = 1
+  else
+    serverReqNrState[server.id] += 1
+  endif
+  req.id = serverReqNrState[server.id]
+
   var Fn = function('RpcAsyncCb', [server, Cb])
   server.isWaiting = true
   server.job->ch_sendexpr(req.ToJson(), {callback: Fn})
 enddef
 
-def RpcAsyncCb(server: any, RpcCb: func, chan: channel, reply: dict<any>)
+def RpcAsyncCb(server: serv.Server, RpcCb: func, chan: channel, reply: dict<any>)
   var sName = has_key(server.config, 'name') ? server.config.name : ''
   if has_key(reply, 'error')
     l.PrintError('(' .. sName .. ') ' .. string(reply.error.message))
-  else
+  elseif reply.id >= serverReqNrState[server.id]
     RpcCb(server, reply)
   endif
   server.isWaiting = false
 enddef
 
-export def RpcOutCb(server: any, chan: channel, msg: any): void
+export def RpcOutCb(server: serv.Server, chan: channel, msg: any): void
   var sName = has_key(server.config, 'name') ? server.config.name : ''
   
   if has_key(msg, 'error')

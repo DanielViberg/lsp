@@ -1,6 +1,7 @@
 vim9script
 
 import "../ClientState/Server.vim" as s
+import "../ClientState/Abstract/Server.vim" as abs
 import "../ClientState/Session.vim" as ses
 import "../Utils/Str.vim" as str
 import "../Utils/Log.vim" as l
@@ -63,13 +64,13 @@ export class Completion extends ft.Feature implements if.IFeature
     endif
   enddef
 
-  def ProcessRequest(server: any, data: any): void 
+  def ProcessRequest(server: abs.Server, data: any): void 
   enddef
 
-  def ProcessNotification(server: any, data: any): void 
+  def ProcessNotification(server: abs.Server, data: any): void 
   enddef
 
-  def RequestCompletion(server: any, bId: number): void 
+  def RequestCompletion(server: abs.Server, bId: number): void 
     l.PrintDebug('Request completion')
     if mode() == 'i' || e.TESTING
       var tdpos = tdp.TextDocumentPosition.new(server, bId)
@@ -82,7 +83,7 @@ export class Completion extends ft.Feature implements if.IFeature
     CompleteNoServer()
   enddef
 
-  def GetTriggerKind(server: any, bId: number): number
+  def GetTriggerKind(server: abs.Server, bId: number): number
     # 1. Check current pum if its incomplete
     if false # TODO: isIncomplete not correctly handled
       return KIND_INCOMPLETE_COMPLETION
@@ -112,11 +113,7 @@ def CheckEmptyLineForPUM()
   endif
 enddef
 
-def RequestCompletionReply(server: any, reply: dict<any>)
-  if reply.id != server.reqNr
-    l.PrintDebug('Skip compl response')
-    return
-  endif
+def RequestCompletionReply(server: abs.Server, reply: dict<any>)
   # TODO: handle itemDefaults
   if has_key(reply, 'result')
     l.PrintDebug('Completion with result')
@@ -308,7 +305,7 @@ def ResolveCompletion(sid: number, buf: number, item: any): void
   endif
 enddef
 
-def ResolveCompletionReply(server: any, reply: dict<any>): void
+def ResolveCompletionReply(server: abs.Server, reply: dict<any>): void
   var changes: list<any> = []
   if has_key(reply.result, 'textEdit') && reply.result.textEdit != null_dict
     l.PrintDebug("Process completion change")
