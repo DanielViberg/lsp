@@ -31,9 +31,11 @@ const KIND_INCOMPLETE_COMPLETION = 3
 
 export var bufferWords: list<string> = []
 export var cacheWords: list<dict<any>> = []
+
 var initOnce: bool = false
 var isIncomplete: bool = false
 var noServer: bool = false
+var currentReqId: number = 0
 
 export class Completion extends ft.Feature implements if.IFeature
 
@@ -75,6 +77,7 @@ export class Completion extends ft.Feature implements if.IFeature
         this.GetTriggerKind(server, bId),
         str.GetTriggerChar(server.serverCapabilites.completionProvider.triggerCharacters),
         tdpos)
+      currentReqId = compReq.GetRequestId()
       r.RpcAsync(server, compReq, RequestCompletionReply)
     endif
   enddef
@@ -110,6 +113,10 @@ def CheckEmptyLineForPUM()
 enddef
 
 def RequestCompletionReply(server: any, reply: dict<any>)
+  if reply.id != currentReqId
+    l.PrintDebug('Skip compl response')
+    return
+  endif
   # TODO: handle itemDefaults
   if has_key(reply, 'result')
     l.PrintDebug('Completion with result')
