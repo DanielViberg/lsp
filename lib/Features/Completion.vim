@@ -80,6 +80,7 @@ export class Completion extends ft.Feature implements if.IFeature
       currentReqId = compReq.GetRequestId()
       r.RpcAsync(server, compReq, RequestCompletionReply)
     endif
+    CompleteNoServer()
   enddef
 
   def GetTriggerKind(server: any, bId: number): number
