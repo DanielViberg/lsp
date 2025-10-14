@@ -9,6 +9,7 @@ import "./Abstract/Feature.vim" as ft
 import "./Interfaces/IFeature.vim" as if
 import "../Protocol/Requests/Completion.vim" as c
 import "../Protocol/Requests/CompletionResolve.vim" as cr
+import "../Protocol/Abstracts/RequestMessage.vim" as req
 import "../Features/DocumentSync.vim" as d
 import "../Protocol/Objects/Position.vim" as p
 import "../Protocol/Objects/TextDocumentPosition.vim" as tdp
@@ -35,7 +36,6 @@ export var cacheWords: list<dict<any>> = []
 var initOnce: bool = false
 var isIncomplete: bool = false
 var noServer: bool = false
-var currentReqId: number = 0
 
 export class Completion extends ft.Feature implements if.IFeature
 
@@ -77,7 +77,6 @@ export class Completion extends ft.Feature implements if.IFeature
         this.GetTriggerKind(server, bId),
         str.GetTriggerChar(server.serverCapabilites.completionProvider.triggerCharacters),
         tdpos)
-      currentReqId = compReq.GetRequestId()
       r.RpcAsync(server, compReq, RequestCompletionReply)
     endif
     CompleteNoServer()
@@ -114,7 +113,7 @@ def CheckEmptyLineForPUM()
 enddef
 
 def RequestCompletionReply(server: any, reply: dict<any>)
-  if reply.id != currentReqId
+  if reply.id != server.reqNr
     l.PrintDebug('Skip compl response')
     return
   endif

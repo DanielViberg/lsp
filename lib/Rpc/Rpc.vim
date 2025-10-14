@@ -19,6 +19,8 @@ enddef
 
 export def RpcAsync(server: any, req: rm.RequestMessage, Cb: func)
   l.PrintDebug('Request ' .. req.method)
+  server.AddReq()
+  req.id = server.reqNr
   var Fn = function('RpcAsyncCb', [server, Cb])
   server.isWaiting = true
   server.job->ch_sendexpr(req.ToJson(), {callback: Fn})

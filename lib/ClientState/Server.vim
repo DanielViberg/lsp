@@ -30,6 +30,7 @@ export class Server
   public var serverCapabilites: dict<any> = null_dict
   public var clientCapabilites: dict<any> = null_dict
   public var fileType: string = null_string
+  public var reqNr: number = 0
     
   var id: number = -1
 
@@ -81,6 +82,10 @@ export class Server
     var initReq = reqI.Initialize.new(this.config)
     r.RpcAsync(this, initReq, this.InitResponse)
     l.PrintInfo("Server " .. get(this.config, 'name') .. " init")
+  enddef
+
+  def AddReq(): void
+    this.reqNr += 1
   enddef
 
   def InitResponse(server: Server, reply: dict<any>): void
