@@ -10,7 +10,7 @@ export abstract class RequestMessage extends mes.Message
   var params: dict<any>
 
   def GetRequestId(): number
-    return reqVer
+    return reqVer + 1
   enddef 
 
   def ToJson(): dict<any>
