@@ -29,19 +29,21 @@ export def RpcAsync(server: serv.Server, req: rm.RequestMessage, Cb: func)
   endif
   req.id = serverReqNrState[server.id]
 
-  var Fn = function('RpcAsyncCb', [server, Cb])
-  server.isWaiting = true
+  var Fn = function('RpcAsyncCb', [server, Cb, req.onlyLatest])
   server.job->ch_sendexpr(req.ToJson(), {callback: Fn})
 enddef
 
-def RpcAsyncCb(server: serv.Server, RpcCb: func, chan: channel, reply: dict<any>)
+def RpcAsyncCb(server: serv.Server, RpcCb: func, needLatest: bool, chan: channel, reply: dict<any>)
   var sName = has_key(server.config, 'name') ? server.config.name : ''
   if has_key(reply, 'error')
     l.PrintError('(' .. sName .. ') ' .. string(reply.error.message))
-  elseif reply.id >= serverReqNrState[server.id]
-    RpcCb(server, reply)
   endif
-  server.isWaiting = false
+
+  if needLatest && reply.id < serverReqNrState[server.id]
+    return
+  endif
+
+  RpcCb(server, reply)
 enddef
 
 export def RpcOutCb(server: serv.Server, chan: channel, msg: any): void

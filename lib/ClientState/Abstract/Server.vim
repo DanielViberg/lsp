@@ -7,7 +7,6 @@ export abstract class Server
   public var isRunning: bool = false
   public var isInit: bool = false
   public var isFeatInit: bool = false
-  public var isWaiting: bool = false
   public var job: job = null_job
   public var config: dict<any> = null_dict
   public var serverCapabilites: dict<any> = null_dict

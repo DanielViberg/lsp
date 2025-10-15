@@ -6,6 +6,7 @@ export abstract class RequestMessage extends mes.Message
 
   public var id: number
   var params: dict<any>
+  var onlyLatest: bool = false #Ignore intermediate requests
 
   def ToJson(): dict<any>
     return extend(super.ToJson(), {

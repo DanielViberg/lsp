@@ -37,6 +37,7 @@ export var cacheWords: list<dict<any>> = []
 var initOnce: bool = false
 var isIncomplete: bool = false
 var noServer: bool = false
+var waiting: bool = false
 
 export class Completion extends ft.Feature implements if.IFeature
 
@@ -78,9 +79,15 @@ export class Completion extends ft.Feature implements if.IFeature
         this.GetTriggerKind(server, bId),
         str.GetTriggerChar(server.serverCapabilites.completionProvider.triggerCharacters),
         tdpos)
+      waiting = true
       r.RpcAsync(server, compReq, RequestCompletionReply)
     endif
-    CompleteNoServer()
+    # Dont spam pum if using fast servers
+    timer_start(400, (_) => {
+      if waiting
+        CompleteNoServer()
+      endif
+    })
   enddef
 
   def GetTriggerKind(server: abs.Server, bId: number): number
@@ -114,6 +121,7 @@ def CheckEmptyLineForPUM()
 enddef
 
 def RequestCompletionReply(server: abs.Server, reply: dict<any>)
+  waiting = false
   # TODO: handle itemDefaults
   if has_key(reply, 'result')
     l.PrintDebug('Completion with result')

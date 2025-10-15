@@ -19,6 +19,7 @@ export class Completion extends req.RequestMessage
     this.context.triggerCharacter = char
     this.textDocumentPosition = tp
     this.method = met.COMPLETION
+    this.onlyLatest = true
   enddef
 
   def ToJson(): dict<any>
