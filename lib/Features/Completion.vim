@@ -73,7 +73,7 @@ export class Completion extends ft.Feature implements if.IFeature
 
   def RequestCompletion(server: abs.Server, bId: number): void 
     l.PrintDebug('Request completion')
-    if mode() == 'i' || e.TESTING
+    if mode() == 'i' || e.TESTING 
       var tdpos = tdp.TextDocumentPosition.new(server, bId)
       var compReq = c.Completion.new(
         this.GetTriggerKind(server, bId),
@@ -260,6 +260,7 @@ enddef
 
 def CompleteAccept(ci: any): void
   if !ci->empty() && type(ci.user_data) == v:t_dict
+
     if ci.user_data.item->get('is_buf') || ci.user_data.item->has_key('insertText')
       var word = ci->get('word')
       if ci.user_data.item->has_key('insertText')
@@ -268,6 +269,7 @@ def CompleteAccept(ci: any): void
       CompleteAcceptBuf(word)
       return
     endif
+
     if !ci.user_data.item->has_key('additionalTextEdits')
       ResolveCompletion(ci.user_data.server_id, bufnr(), ci.user_data.item)
       return

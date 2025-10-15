@@ -41,7 +41,7 @@ export class DocumentSync extends ft.Feature implements if.IFeature
       autocmd BufWritePost * ft.FeatAu(DidSave)
       autocmd TextChangedI * ft.FeatAu(DidChange, true)
       autocmd TextChanged * ft.FeatAu(DidChange, true)
-      #autocmd TextChangedP * ft.FeatAu(DidChange, true)
+      autocmd TextChangedP * ft.FeatAu(DidChange, true)
     endif
   enddef
 
