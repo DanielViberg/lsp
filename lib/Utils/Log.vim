@@ -21,6 +21,7 @@ enddef
 export def PrintDebug(msg: string): void
   if e.DEBUG
     echomsg msg | redraw
+    Log(Type.Info, msg)
   endif
 enddef
 
