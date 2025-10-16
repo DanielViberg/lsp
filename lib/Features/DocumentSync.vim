@@ -39,9 +39,6 @@ export class DocumentSync extends ft.Feature implements if.IFeature
       autocmd BufWipeout * ft.FeatAu(DidClose)
       autocmd BufWritePre * ft.FeatAu(WillSave)
       autocmd BufWritePost * ft.FeatAu(DidSave)
-      autocmd TextChangedI * ft.FeatAu(DidChange, true)
-      autocmd TextChanged * ft.FeatAu(DidChange, true)
-      autocmd TextChangedP * ft.FeatAu(DidChange, true)
     endif
   enddef
 
@@ -57,6 +54,11 @@ endclass
 export def DidOpen(server: abs.Server, bId: number, par: any): void
   if b.IsAFileBuffer() && index(didOpenBuffers, bId) == -1
     didOpenBuffers->add(bId)
+
+    listener_add((_bnr: number, start: number, end: number, added: number, changes: list<dict<number>>) => {
+      DidChange(server, bId, true)
+    }, bId)
+
     l.PrintDebug("Did open sid: " .. server.id .. " bId " .. bId )
     l.PrintDebug("Server is running: " .. server.isRunning)
     l.PrintDebug("Server is init: " .. server.isInit)
@@ -72,6 +74,7 @@ enddef
 export def DidClose(server: abs.Server, bId: number, par: any): void
   if index(didOpenBuffers, bId) != -1
     remove(didOpenBuffers, index(didOpenBuffers, bId))
+    listener_remove(bId);
     l.PrintDebug("Did close sid: " .. server.id .. " bId " .. bId )
     var didCloseNotif = ddcl.DocumentDidClose.new(s.Uri(expand('%:p')))
     r.RpcAsyncMes(server, didCloseNotif)
