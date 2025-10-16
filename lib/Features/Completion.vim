@@ -136,6 +136,8 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>)
       items = result
     endif
 
+    l.PrintDebug('Completion lsp item count ' .. items->len())
+
     # Add buffer words
     var onlyBuffer = items->len() == 0
     items = items + GetCacheBufferW()
@@ -153,13 +155,13 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>)
 
     var word = line[ endCol : startCol ]
 
-    var query = substitute(word, '[^a-zA-Z]', '', 'g')
+    var query = substitute(word, '[^a-zA-Z0-9-_]', '', 'g')
     l.PrintDebug('Completion query ' .. word)
     
     # Compare query to items label w/o trigger char or additional space
     items->filter((_, v) => {
       if has_key(v, 'label') && type(v.label) == v:t_string
-        var labelName = substitute(v.label, '[^a-zA-Z]', '', 'g')
+        var labelName = substitute(v.label, '[^a-zA-Z0-9-_]', '', 'g')
         if empty(query) && !v->has_key('is_buf')
           return true # Case: typed $ and is not a bufferComp
         endif
