@@ -49,11 +49,10 @@ export class Completion extends ft.Feature implements if.IFeature
   def AutoCmds()
     if !initOnce
       initOnce = true
-      set completeopt+=noinsert,menuone,popup
+      set completeopt+=noinsert,menuone,popuphidden
       set shortmess+=cC
       inoremap <expr> <CR> pumvisible() ? PumCallback() : "\<CR>"
-      inoremap <expr> <Up> pumvisible() ? PumShowDoc("\<Up>") : "\<Up>"
-      inoremap <expr> <Down> pumvisible() ? PumShowDoc("\<Down>") : "\<Down>"
+      autocmd CompleteChanged * call PumShowDoc()
       autocmd TextChangedI * call CheckEmptyLineForPUM()
       autocmd BufEnter * call CacheBufferWords()
       autocmd BufAdd * call CacheBufferWords()
@@ -107,9 +106,11 @@ export class Completion extends ft.Feature implements if.IFeature
 
 endclass
 
-def PumShowDoc(key: string): string
-  var info = complete_info(['completed'])
-  return key
+def PumShowDoc(): void
+  var ci = v:event.completed_item
+  if ci->has_key('user_data')
+    ResolveCompletionDoc(ci.user_data.server_id, bufnr(), ci.user_data.item)
+  endif
 enddef
 
 def CheckEmptyLineForPUM()
@@ -146,7 +147,7 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>)
     var startCol = cursorCol - 1
     var endCol = startCol
 
-    while startCol >= 0 && endCol >= 0 && line[endCol] =~ '[a-zA-Z0-9-]' 
+    while startCol > 0 && endCol > 0 && line[endCol] =~ '[a-zA-Z0-9-_]' 
       endCol -= 1
     endwhile
 
@@ -219,13 +220,7 @@ def GetCacheBufferW(): list<dict<any>>
 enddef
 
 def LspItemToCompItem(item: dict<any>, sId: number): dict<any>
-  var info: string = ''
-  if has_key(item, 'documentation')
-    var doc = item.documentation
-    if type(doc) == v:t_dict && has_key(doc, 'value')
-      info = doc.value
-    endif
-  endif
+  var info: string = " "
   return {
     word: item.label, 
     kind: has_key(item, 'is_buf') ? '[buf]' : '[lsp]',
@@ -349,6 +344,39 @@ def ResolveCompletionReply(server: abs.Server, reply: dict<any>): void
     CompleteAcceptBuf(reply.result.label)
   endif
 enddef
+
+def ResolveCompletionDoc(sid: number, buf: number, item: any): void
+  l.PrintDebug("Resolve completion doc")
+  var server = ses.GetSessionServerById(sid)
+
+  if !server.isFeatInit
+    return
+  endif
+
+  if !server.serverCapabilites.completionProvider.resolveProvider
+    return
+  else
+    var compRes = cr.CompletionResolve.new(item)
+    r.RpcAsync(server, compRes, ResolveCompletionDocReply) 
+  endif
+enddef
+
+def ResolveCompletionDocReply(server: abs.Server, reply: dict<any>): void
+  var id = popup_findinfo()
+  var item = reply.result
+  var info: list<string> = []
+  if has_key(item, 'documentation')
+    var doc = item.documentation
+    if type(doc) == v:t_dict && has_key(doc, 'value')
+      info = doc.value->split("\n")
+    endif
+  endif
+  if id > 0 && info->len() > 0
+    popup_settext(id, info)
+    popup_show(id)
+  endif
+enddef
+
 
 def CompleteAcceptBuf(word: string): void
   l.PrintDebug("Completion Accept Buf")

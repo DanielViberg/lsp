@@ -10,6 +10,10 @@ export def SetSessionServer(server: ser.Server): void
   SessionServers->add(server)
 enddef
 
+export def RemoveSessionServer(server: ser.Server): void
+  SessionServers->filter((_, s) => s.id != server.id)
+enddef
+
 export def GetSessionServerById(id: number): ser.Server
   for s in SessionServers
     if s.id == id

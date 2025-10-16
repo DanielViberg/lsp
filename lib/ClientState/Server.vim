@@ -13,6 +13,7 @@ import "../Protocol/Requests/Initialize.vim" as reqI
 import "../Protocol/Requests/Shutdown.vim" as reqSu
 import "../ClientState/Config.vim" as c
 import "../ClientState/Abstract/Server.vim" as serv
+import "../ClientState/Session.vim" as ses
 import "../Protocol/Config/cc.vim" as cap
 import "../Rpc/Rpc.vim" as r
 import "../Utils/Str.vim" as str
@@ -81,6 +82,10 @@ export class Server extends serv.Server
     this.formatting = for.Formatting.new()
     this.goToDefinition = gtd.GoToDefinition.new()
     this.isFeatInit = true
+
+    ses.RemoveSessionServer(this)
+    ses.SetSessionServer(this)
+
     l.PrintDebug('Ready and do open')
     dc.DidOpen(this, bufnr(), null)
     this.workspace.SendWorkspaceConfig(this, this.config->get('workspaceConfig', null_dict))
