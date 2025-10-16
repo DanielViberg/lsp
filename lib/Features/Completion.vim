@@ -50,6 +50,7 @@ export class Completion extends ft.Feature implements if.IFeature
     if !initOnce
       initOnce = true
       set completeopt+=noinsert,menuone,popup
+      set shortmess+=cC
       inoremap <expr> <CR> pumvisible() ? PumCallback() : "\<CR>"
       inoremap <expr> <Up> pumvisible() ? PumShowDoc("\<Up>") : "\<Up>"
       inoremap <expr> <Down> pumvisible() ? PumShowDoc("\<Down>") : "\<Down>"
