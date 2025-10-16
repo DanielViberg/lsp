@@ -140,13 +140,19 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>)
 
     l.PrintDebug('Completion item count ' .. items->len())
 
-    var savePos = getpos('.')
-    call cursor(line('.'), col('.'))
-    normal! b
-    l.PrintDebug('Completion cword ' .. expand("<cword>"))
-    var query = substitute(expand("<cword>"), '[^a-zA-Z]', '', 'g')
-    call setpos('.', savePos)
-    l.PrintDebug('Completion query ' .. query)
+    var line = getline('.')
+    var cursorCol = col('.') - 1
+    var startCol = cursorCol - 1
+    var endCol = startCol
+
+    while startCol >= 0 && endCol >= 0 && line[endCol] =~ '[a-zA-Z0-9-]' 
+      endCol -= 1
+    endwhile
+
+    var word = line[ endCol : startCol ]
+
+    var query = substitute(word, '[^a-zA-Z]', '', 'g')
+    l.PrintDebug('Completion query ' .. word)
     
     # Compare query to items label w/o trigger char or additional space
     items->filter((_, v) => {
@@ -164,11 +170,11 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>)
     l.PrintDebug('Completion items count after filter ' .. items->len())
     var compItems = items->map((_, i) => LspItemToCompItem(i, server.id))
     l.PrintDebug('Completion mode ' .. mode())
+    cacheWords = compItems
     if mode() == 'i' 
       l.PrintDebug('Prompt completions')
       compItems->complete(col('.'))
     endif
-    cacheWords = compItems
   endif
 enddef
 
