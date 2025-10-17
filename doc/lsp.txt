@@ -1,0 +1,52 @@
+*lsp.txt*	Vim 9 Language Server Protocol Client
+
+==============================================================================
+SETTINGS							  *lsp-settings*
+
+g:lsp_format_pre_save (bool)				   *lsp_format_pre_save*
+Perform lsp format on buffer pre write.
+
+g:lsp_autocomplete (bool)				      *lsp_autocomplete*
+Autocomplete when writing.
+
+g:lsp_diagnostics (bool)				       *lsp_diagnostics*
+Show lsp diagnostic.
+
+==============================================================================
+CONFIGURATION                                                *lsp-configuration*
+
+Example configuration of a server in the lsp-config.json:
+
+{
+  "name": "phpls",	      # (Required) A name of the lsp server, needs to 
+			      # be unique.
+  "filetype": ["php"],	      # (Required) The filetype for this server.
+  "path": "/usr/local/php",   # (Required) Path to server binary.
+  "args": ["--stdio"]	      # (Optional) Server arguments.
+  "workspaceConfig": {}	      # (Optional) Workspace configuration for this 
+			      # server
+  "initializationOptions": {} # (Optional) Server specific options
+}
+
+==============================================================================
+COMMANDS                                                          *lsp-commands*
+
+*:LspConfig*
+Open the global lsp configuration file.
+
+*:LspRestart*
+Restart the language server.
+
+*:LspDisable*
+Disable the language server.
+
+*:LspEnable*
+Enable the language server.
+
+*:LspFormat*
+Format current buffer.
+
+*:LspGoToDefinition*
+Go to definition of symbol under cursor.
+
+vim:tw=78:ts=8:ft=help:norl:

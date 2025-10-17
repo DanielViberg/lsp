@@ -25,5 +25,4 @@ enddef
 command! LspConfig call c.OpenLspConfig()
 command! LspFormat call f.FormatCmd()
 
-
 au BufEnter * call InitServers()
