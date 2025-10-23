@@ -7,13 +7,15 @@ import "../Utils/Str.vim" as str
 import "../Utils/Log.vim" as l
 import "../Features/Completion.vim" as c
 
+export var disable: bool = false
+
 export class Buffer
   def new()
     l.PrintDebug('New buffer')
     conf.Init()
   
-    if !IsAFileBuffer()
-      l.PrintDebug('Not a file buffer')
+    if !IsAFileBuffer() || disable
+      l.PrintDebug('Not a file buffer or disabled')
       return
     endif
 

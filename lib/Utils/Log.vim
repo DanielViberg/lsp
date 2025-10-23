@@ -19,7 +19,7 @@ export def PrintInfo(msg: string): void
 enddef
 
 export def PrintDebug(msg: string): void
-  if e.DEBUG
+  if e.DEBUG || e.TESTING
     echomsg msg | redraw
     Log(Type.Info, msg)
   endif

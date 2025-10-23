@@ -7,7 +7,7 @@ import "../Protocol/Abstracts/Message.vim" as mes
 import "../Utils/Log.vim" as l
 import "../../env.vim" as e
 
-var serverReqNrState: dict<any> = {}
+export var serverReqNrState: dict<any> = {}
 
 export def RpcSync(server: serv.Server, req: rm.RequestMessage): any
   server.userMiddleware.PreRequest(server, req)
@@ -24,10 +24,15 @@ export def RpcAsync(server: serv.Server, req: rm.RequestMessage, Cb: func)
 
   if !has_key(serverReqNrState, server.id)
     serverReqNrState[server.id] = 1
+  elseif req.resetClientReqNr 
+    serverReqNrState[server.id] = 1
   else
     serverReqNrState[server.id] += 1
   endif
+
   req.id = serverReqNrState[server.id]
+
+  l.PrintDebug('Request state nr ' .. req.id)
 
   var Fn = function('RpcAsyncCb', [server, Cb, req.onlyLatest])
   server.job->ch_sendexpr(req.ToJson(), {callback: Fn})
@@ -38,6 +43,9 @@ def RpcAsyncCb(server: serv.Server, RpcCb: func, needLatest: bool, chan: channel
   if has_key(reply, 'error')
     l.PrintError('(' .. sName .. ') ' .. string(reply.error.message))
   endif
+
+  l.PrintDebug('Response client state nr ' .. serverReqNrState[server.id])
+  l.PrintDebug('Response server state nr ' .. reply.id)
 
   if needLatest && reply.id < serverReqNrState[server.id]
     return

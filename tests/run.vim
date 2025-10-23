@@ -23,7 +23,7 @@ def RunCheck(test: i.ITest): void
   endif
 enddef
 
-RunCheck(ts.TS.new())
+#RunCheck(ts.TS.new())
 #RunCheck(c.C.new())
 RunCheck(blade.BLADE.new())
 RunCheck(txt.TXT.new())

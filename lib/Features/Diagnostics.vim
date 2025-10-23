@@ -70,6 +70,7 @@ export class Diagnostics extends ft.Feature implements if.IFeature
 
   def ProcessNotification(server: any, data: any): void 
     if has_key(data, 'method') && data.method == 'textDocument/publishDiagnostics'
+			&& g:lsp_diagnostics
       this.PublishDiagnostics(data)
     endif
   enddef

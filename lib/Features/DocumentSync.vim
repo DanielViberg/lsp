@@ -74,7 +74,7 @@ enddef
 export def DidClose(server: abs.Server, bId: number, par: any): void
   if index(didOpenBuffers, bId) != -1
     remove(didOpenBuffers, index(didOpenBuffers, bId))
-    listener_remove(bId)
+    listener_remove(bId);
     l.PrintDebug("Did close sid: " .. server.id .. " bId " .. bId )
     var didCloseNotif = ddcl.DocumentDidClose.new(s.Uri(expand('%:p')))
     r.RpcAsyncMes(server, didCloseNotif)

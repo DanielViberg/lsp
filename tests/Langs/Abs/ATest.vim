@@ -93,6 +93,7 @@ export abstract class ATest
           var r = { index: mix, word: mi.word }
           return r
         })
+        feedkeys("\<Down>", "") #Not auto select
         for item in items
           if item.word == accept[1]
             feedkeys("\<Enter>", "")

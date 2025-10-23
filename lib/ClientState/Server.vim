@@ -95,6 +95,7 @@ export class Server extends serv.Server
 
   def Stop(): void
     this.isRunning = false
+		this.isInit = false
     r.RpcAsync(this, reqSu.Shutdown.new(), this.StopResponse)
   enddef
 
@@ -115,5 +116,4 @@ export class Server extends serv.Server
       this.isRunning && 
       this.job->job_status() == 'run'
   enddef
-
 endclass

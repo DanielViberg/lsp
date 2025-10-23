@@ -49,11 +49,10 @@ export class Completion extends ft.Feature implements if.IFeature
   def AutoCmds()
     if !initOnce
       initOnce = true
-      set completeopt+=noinsert,menuone,popuphidden
+      set completeopt+=noinsert,noselect,menuone,popuphidden
       set shortmess+=cC
       inoremap <expr> <CR> pumvisible() ? PumCallback() : "\<CR>"
       autocmd CompleteChanged * call PumShowDoc()
-      autocmd TextChangedI * call CheckEmptyLineForPUM()
       autocmd BufEnter * call CacheBufferWords()
       autocmd BufAdd * call CacheBufferWords()
       autocmd VimEnter * call CacheBufferWords()
@@ -72,6 +71,9 @@ export class Completion extends ft.Feature implements if.IFeature
   enddef
 
   def RequestCompletion(server: abs.Server, bId: number): void 
+		if !g:lsp_autocomplete
+			return
+		endif
     l.PrintDebug('Request completion')
     if mode() == 'i' || e.TESTING 
       var tdpos = tdp.TextDocumentPosition.new(server, bId)
@@ -113,14 +115,6 @@ def PumShowDoc(): void
   endif
 enddef
 
-def CheckEmptyLineForPUM()
-  if getline('.') =~ '^\s*$' # Line is empty
-    set completeopt+=noselect
-  else
-    set completeopt-=noselect
-  endif
-enddef
-
 def RequestCompletionReply(server: abs.Server, reply: dict<any>)
   waiting = false
   # TODO: handle itemDefaults
@@ -151,8 +145,10 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>)
     while startCol > 0 && endCol > 0 && line[endCol] =~ '[a-zA-Z0-9-_]' 
       endCol -= 1
     endwhile
+    l.PrintDebug('Completion startCol:' .. startCol)
+    l.PrintDebug('Completion endCol:' .. endCol)
 
-    var word = line[ endCol : startCol ]
+    var word = trim(line[ endCol : startCol ])
 
     var query = substitute(word, '[^a-zA-Z0-9-_]', '', 'g')
     l.PrintDebug('Completion query ' .. word)
@@ -364,18 +360,20 @@ enddef
 
 def ResolveCompletionDocReply(server: abs.Server, reply: dict<any>): void
   var id = popup_findinfo()
-  var item = reply.result
-  var info: list<string> = []
-  if has_key(item, 'documentation')
-    var doc = item.documentation
-    if type(doc) == v:t_dict && has_key(doc, 'value')
-      info = doc.value->split("\n")
-    endif
-  endif
-  if id > 0 && info->len() > 0
-    popup_settext(id, info)
-    popup_show(id)
-  endif
+	if reply->has_key('result')
+		var item = reply.result
+		var info: list<string> = []
+		if has_key(item, 'documentation')
+			var doc = item.documentation
+			if type(doc) == v:t_dict && has_key(doc, 'value')
+				info = doc.value->split("\n")
+			endif
+		endif
+		if id > 0 && info->len() > 0
+			popup_settext(id, info)
+			popup_show(id)
+		endif
+	endif
 enddef
 
 

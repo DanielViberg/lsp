@@ -34,7 +34,9 @@ export class Formatting extends ft.Feature implements if.IFeature
 endclass
   
 def PreSave(server: any, bId: number, par: any): void
-  Format(server, bId)
+	if g:lsp_format_pre_save
+		Format(server, bId)
+	endif
   noautocmd write
 enddef
 
