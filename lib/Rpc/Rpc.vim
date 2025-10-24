@@ -20,6 +20,11 @@ export def RpcAsyncMes(server: serv.Server, notif: mes.Message)
 enddef
 
 export def RpcAsync(server: serv.Server, req: rm.RequestMessage, Cb: func)
+
+  if server.job != 'run'
+    return
+  endif
+
   l.PrintDebug('Request ' .. req.method)
 
   if !has_key(serverReqNrState, server.id)
