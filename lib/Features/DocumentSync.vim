@@ -157,8 +157,9 @@ export def DidSave(server: abs.Server, bId: number, par: any): void
   endif
   if has_key(server.serverCapabilites, 'textDocumentSync') &&
     type(server.serverCapabilites.textDocumentSync) == v:t_dict &&
-      server.serverCapabilites.textDocumentSync.save
+      server.serverCapabilites.textDocumentSync->has_key('save')
     var path = fnamemodify(bufname(bId), ':p')
     var ds = dstd.DidSaveTextDocument.new(s.Uri(path), join(getbufline(bId, 1, '$'), "\n"))
+    r.RpcAsyncMes(server, ds)
   endif
 enddef
