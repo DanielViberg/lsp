@@ -21,7 +21,7 @@ enddef
 
 export def RpcAsync(server: serv.Server, req: rm.RequestMessage, Cb: func)
 
-  if server.job != 'run'
+  if server.job->job_status() != 'run'
     return
   endif
 
