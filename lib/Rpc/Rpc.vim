@@ -15,6 +15,11 @@ export def RpcSync(server: serv.Server, req: rm.RequestMessage): any
 enddef
 
 export def RpcAsyncMes(server: serv.Server, notif: mes.Message)
+
+  if server.job->job_status() != 'run'
+    return
+  endif
+
   l.PrintDebug('Notification ' .. notif.method)
   server.job->ch_sendexpr(notif.ToJson())
 enddef
