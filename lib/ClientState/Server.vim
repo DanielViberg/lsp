@@ -72,6 +72,7 @@ export class Server extends serv.Server
   enddef
 
   def InitFeat(): void
+    l.PrintDebug('Init features')
     this.documentSync = dc.DocumentSync.new()
     this.workspace = w.Workspace.new()
     this.diagnostics = diag.Diagnostics.new()

@@ -58,6 +58,7 @@ def RpcAsyncCb(server: serv.Server, RpcCb: func, needLatest: bool, chan: channel
   l.PrintDebug('Response server state nr ' .. reply.id)
 
   if needLatest && reply.id < serverReqNrState[server.id]
+    l.PrintDebug('Response skipped')
     return
   endif
 
@@ -85,6 +86,7 @@ export def RpcOutCb(server: serv.Server, chan: channel, msg: any): void
 enddef
 
 export def RpcErrorCb(s: any, chan: channel, emsg: string)
+  l.PrintDebug(emsg)
   l.Log(l.Type.Error, emsg)
 enddef
 

@@ -1,0 +1,13 @@
+:LspConfig	lsp.txt	/*:LspConfig*
+:LspDisable	lsp.txt	/*:LspDisable*
+:LspEnable	lsp.txt	/*:LspEnable*
+:LspFormat	lsp.txt	/*:LspFormat*
+:LspGoToDefinition	lsp.txt	/*:LspGoToDefinition*
+:LspRestart	lsp.txt	/*:LspRestart*
+lsp-commands	lsp.txt	/*lsp-commands*
+lsp-configuration	lsp.txt	/*lsp-configuration*
+lsp-settings	lsp.txt	/*lsp-settings*
+lsp.txt	lsp.txt	/*lsp.txt*
+lsp_autocomplete	lsp.txt	/*lsp_autocomplete*
+lsp_diagnostics	lsp.txt	/*lsp_diagnostics*
+lsp_format_pre_save	lsp.txt	/*lsp_format_pre_save*

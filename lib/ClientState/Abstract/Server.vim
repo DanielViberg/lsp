@@ -25,9 +25,13 @@ export abstract class Server
   var userMiddleware: any
 
   def ProcessRequest(data: any): void 
+    l.PrintDebug('Server request ' .. data)
+
     if !this.isFeatInit
+      l.PrintInfo('Features not init')
       return
     endif
+
     this.documentSync.ProcessRequest(this, data)
     this.workspace.ProcessRequest(this, data)
     this.diagnostics.ProcessRequest(this, data)
@@ -41,9 +45,17 @@ export abstract class Server
   enddef
 
   def ProcessNotification(data: any): void 
+    l.PrintDebug('Server notification ' .. data)
+
+    if data.method == 'window/logMessage'
+      l.PrintInfo(data.params.message)
+    endif
+
     if !this.isFeatInit
+      l.PrintInfo('Features not init')
       return
     endif
+
     this.documentSync.ProcessNotification(this, data)
     this.workspace.ProcessNotification(this, data)
     this.diagnostics.ProcessNotification(this, data)
