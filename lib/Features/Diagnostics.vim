@@ -68,8 +68,8 @@ export class Diagnostics extends ft.Feature implements if.IFeature
   def ServerPreStop(): void
     var bufLines: number
     for buf in getbufinfo({ buflisted: 1, bufloaded: 1})
-      bufLines = len(getbufline(buf, 1, '$'))
-      prop_clear(1, bufLines, {'bufnr': buf})
+      bufLines = len(getbufline(buf.bufnr, 1, '$'))
+      prop_clear(1, bufLines, {'bufnr': buf.bufnr})
     endfor
   enddef
 
