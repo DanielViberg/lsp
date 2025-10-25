@@ -51,5 +51,7 @@ export def IsAFileBuffer(): bool
 enddef 
 
 export def GetBuffersByUri(uri: string): list<number>
-    return getbufinfo()->filter((_, buf) => str.Uri(buf.name) ==# uri)->map((_, buf) => buf.bufnr)
+    return getbufinfo({ buflisted: 1, bufloaded: 1})
+      ->filter((_, buf) => str.Uri(buf.name) == uri)
+      ->map((_, buf) => buf.bufnr)
 enddef

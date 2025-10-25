@@ -60,19 +60,19 @@ export class Server extends serv.Server
     this.isRunning = true
 
     var initReq = reqI.Initialize.new(this.config)
-    r.RpcAsync(this, initReq, this.InitResponse)
+    r.RpcAsync(this, initReq, this.InitResponse, bnr)
     l.PrintInfo("Server " .. get(this.config, 'name') .. " init")
   enddef
 
-  def InitResponse(server: Server, reply: dict<any>): void
+  def InitResponse(server: Server, reply: dict<any>, bnr: any): void
     server.isInit = true
     server.serverCapabilites = reply.result.capabilities
     r.RpcAsyncMes(server, notif.Notification.new('initialized'))
-    server.InitFeat()
+    server.InitFeat(bnr)
   enddef
 
-  def InitFeat(): void
-    l.PrintDebug('Init features')
+  def InitFeat(bnr: any): void
+    l.PrintDebug('Init features ' .. this.id)
     this.documentSync = dc.DocumentSync.new()
     this.workspace = w.Workspace.new()
     this.diagnostics = diag.Diagnostics.new()
@@ -88,7 +88,7 @@ export class Server extends serv.Server
     ses.SetSessionServer(this)
 
     l.PrintDebug('Ready and do open')
-    dc.DidOpen(this, bufnr(), null)
+    dc.DidOpen(this, bnr, null)
     this.workspace.SendWorkspaceConfig(this, this.config->get('workspaceConfig', null_dict))
     this.userMiddleware = m.UserMiddleware.new()
   enddef

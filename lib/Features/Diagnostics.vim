@@ -78,6 +78,9 @@ export class Diagnostics extends ft.Feature implements if.IFeature
   def PublishDiagnostics(data: any): void
     var buffers = b.GetBuffersByUri(data.params.uri)
     for buf in buffers
+      if data.params.diagnostics->len() == 0
+        continue
+      endif
       prop_clear(1, line('$'), {'bufnr': buf})
       sign_unplace('s_g', { buffer: buf })
       for diag in data.params.diagnostics

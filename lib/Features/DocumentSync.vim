@@ -42,7 +42,6 @@ export class DocumentSync extends ft.Feature implements if.IFeature
     endif
   enddef
 
-
   def ProcessRequest(server: abs.Server, data: any): void 
   enddef
 
@@ -52,22 +51,25 @@ endclass
 
 
 export def DidOpen(server: abs.Server, bId: number, par: any): void
-  if b.IsAFileBuffer() && index(didOpenBuffers, bId) == -1
-    didOpenBuffers->add(bId)
+  if !b.IsAFileBuffer() || index(didOpenBuffers, bId) != -1
+    l.PrintDebug('s:' .. server.id .. 'b:' .. bId .. ' not a buffer or already open')
+    return
+  endif
+  didOpenBuffers->add(bId)
 
-    listener_add((_bnr: number, start: number, end: number, added: number, changes: list<dict<number>>) => {
-      DidChange(server, bId, true)
-    }, bId)
+  listener_add((_bnr: number, start: number, end: number, added: number, changes: list<dict<number>>) => {
+    DidChange(server, bId, true)
+  }, bId)
 
-    l.PrintDebug("Did open sid: " .. server.id .. " bId " .. bId )
-    l.PrintDebug("Server is running: " .. server.isRunning)
-    l.PrintDebug("Server is init: " .. server.isInit)
-    l.PrintDebug("Server is featInit: " .. server.isFeatInit)
-    var didOpenNotif = ddo.DocumentDidOpen.new(s.Uri(expand('%:p')), server.fileType, bId)
-    r.RpcAsyncMes(server, didOpenNotif)
-    if GetSyncKind(server) == KIND_INC
-      CachedBufferContent[bId] = bId->getbufline(1, '$')
-    endif
+  l.PrintDebug("Did open sid: " .. server.id .. " bId " .. bId )
+  l.PrintDebug("Server is running: " .. server.isRunning)
+  l.PrintDebug("Server is init: " .. server.isInit)
+  l.PrintDebug("Server is featInit: " .. server.isFeatInit)
+  var didOpenNotif = ddo.DocumentDidOpen.new(s.Uri(expand('%:p')), server.fileType, bId)
+  r.RpcAsyncMes(server, didOpenNotif)
+  if GetSyncKind(server) == KIND_INC
+    l.PrintDebug("Cache buffer" .. bId)
+    CachedBufferContent[bId] = bId->getbufline(1, '$')
   endif
 enddef
 
