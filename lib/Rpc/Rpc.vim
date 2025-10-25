@@ -10,30 +10,26 @@ import "../../env.vim" as e
 export var serverReqNrState: dict<any> = {}
 
 export def RpcSync(server: serv.Server, req: rm.RequestMessage): any
-  server.userMiddleware.PreRequest(server, req)
-  return server.job->ch_evalexpr(req.ToJson())
+  var request = req.ToJson()
+  var reply = server.job->ch_evalexpr(request)
+  return reply
 enddef
 
 export def RpcAsyncMes(server: serv.Server, notif: mes.Message)
-
   if server.job->job_status() != 'run'
     return
   endif
-
-  l.PrintDebug('Notification ' .. 's: ' .. server.id .. ' ' .. notif.method)
-  server.job->ch_sendexpr(notif.ToJson())
+  var not = notif.ToJson()
+  server.job->ch_sendexpr(not)
 enddef
 
 export def RpcAsync(server: serv.Server, 
                     req: rm.RequestMessage, 
                     Cb: func, 
                     bnr = v:none)
-
   if server.job->job_status() != 'run'
     return
   endif
-
-  l.PrintDebug('Request ' .. 's: ' .. server.id .. ' ' .. req.method)
 
   if !has_key(serverReqNrState, server.id)
     serverReqNrState[server.id] = 1
@@ -44,11 +40,9 @@ export def RpcAsync(server: serv.Server,
   endif
 
   req.id = serverReqNrState[server.id]
-
-  l.PrintDebug('Request state nr ' .. req.id)
-
+  var request = req.ToJson()
   var Fn = function('RpcAsyncCb', [server, Cb, req.onlyLatest, bnr])
-  server.job->ch_sendexpr(req.ToJson(), {callback: Fn})
+  server.job->ch_sendexpr(request, {callback: Fn})
 enddef
 
 def RpcAsyncCb(server: serv.Server, 

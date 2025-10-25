@@ -65,7 +65,7 @@ export def DidOpen(server: abs.Server, bId: number, par: any): void
   l.PrintDebug("Server is running: " .. server.isRunning)
   l.PrintDebug("Server is init: " .. server.isInit)
   l.PrintDebug("Server is featInit: " .. server.isFeatInit)
-  var didOpenNotif = ddo.DocumentDidOpen.new(s.Uri(expand('%:p')), server.fileType, bId)
+  var didOpenNotif = ddo.DocumentDidOpen.new(s.Uri(expand('#' .. bId .. ':p')), server.fileType, bId)
   r.RpcAsyncMes(server, didOpenNotif)
   if GetSyncKind(server) == KIND_INC
     l.PrintDebug("Cache buffer" .. bId)

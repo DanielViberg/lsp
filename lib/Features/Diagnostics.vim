@@ -78,10 +78,8 @@ export class Diagnostics extends ft.Feature implements if.IFeature
   def PublishDiagnostics(data: any): void
     var buffers = b.GetBuffersByUri(data.params.uri)
     for buf in buffers
-      if data.params.diagnostics->len() == 0
-        continue
-      endif
-      prop_clear(1, line('$'), {'bufnr': buf})
+      var bufLines = len(getbufline(buf, 1, '$'))
+      prop_clear(1, bufLines, {'bufnr': buf})
       sign_unplace('s_g', { buffer: buf })
       for diag in data.params.diagnostics
 
@@ -109,12 +107,12 @@ export class Diagnostics extends ft.Feature implements if.IFeature
         endif
 
         var line = diag.range.start.line + 1
-        if line > line('$')
-          line = line('$')
+        if line > bufLines
+          line = bufLines
         endif
 
         if diag.message->len() > 0 && 
-           line > 0 && line <= line('$') &&
+           line > 0 && line <= bufLines &&
            buf->bufloaded()
          prop_add(line, 0, {
             type: type,
