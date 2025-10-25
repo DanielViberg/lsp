@@ -2,6 +2,12 @@
   "servers":
   [
     {
+      "name": "py-ls",
+      "filetype": ["py"],
+      "path": "pylsp",
+      "args": []
+    },
+    {
       "name": "vim-ls",
       "filetype": ["vim"],
       "path": "vim-language-server",
