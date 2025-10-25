@@ -66,9 +66,9 @@ export class Diagnostics extends ft.Feature implements if.IFeature
   enddef
   
   def ServerPreStop(): void
-    var buflines: number
+    var bufLines: number
     for buf in getbufinfo({ buflisted: 1, bufloaded: 1})
-      buflines = len(getbufline(buf, 1, '$'))
+      bufLines = len(getbufline(buf, 1, '$'))
       prop_clear(1, bufLines, {'bufnr': buf})
     endfor
   enddef
@@ -85,8 +85,9 @@ export class Diagnostics extends ft.Feature implements if.IFeature
 
   def PublishDiagnostics(data: any): void
     var buffers = b.GetBuffersByUri(data.params.uri)
+    var bufLines: number
     for buf in buffers
-      var buflines = len(getbufline(buf, 1, '$'))
+      bufLines = len(getbufline(buf, 1, '$'))
       prop_clear(1, bufLines, {'bufnr': buf})
       sign_unplace('s_g', { buffer: buf })
       for diag in data.params.diagnostics
