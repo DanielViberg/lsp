@@ -16,6 +16,9 @@ export class Workspace extends ft.Feature implements if.IFeature
   def AutoCmds()
   enddef
 
+  def ServerPreStop(): void
+  enddef
+
   def ProcessRequest(server: any, data: any): void
     if has_key(data, 'method') && data.method == 'workspace/configuration'
       var items = data.params.items->map((_, item) => c.GetConfigItem(server, item))

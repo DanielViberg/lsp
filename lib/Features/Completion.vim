@@ -69,6 +69,9 @@ export class Completion extends ft.Feature implements if.IFeature
 
   def ProcessNotification(server: abs.Server, data: any): void 
   enddef
+  
+  def ServerPreStop(): void
+  enddef
 
   def RequestCompletion(server: abs.Server, bId: number): void 
 		if !g:lsp_autocomplete

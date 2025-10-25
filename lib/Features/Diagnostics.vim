@@ -64,6 +64,12 @@ export class Diagnostics extends ft.Feature implements if.IFeature
 
   def AutoCmds()
   enddef
+  
+  def ServerPreStop(): void
+    for buf in getbufinfo({ buflisted: 1, bufloaded: 1})
+      prop_clear(1, '$', {'bufnr': buf})
+    endfor
+  enddef
 
   def ProcessRequest(server: any, data: any): void 
   enddef

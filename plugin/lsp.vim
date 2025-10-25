@@ -42,7 +42,7 @@ enddef
 def Enable(): void
 	buf.disable = true
 	for server in ses.SessionServers
-		server.Init()
+		server.Init(bufnr())
 	endfor
 enddef
 

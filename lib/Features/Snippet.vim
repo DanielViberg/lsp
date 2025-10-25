@@ -11,6 +11,9 @@ export class Snippet extends ft.Feature implements if.IFeature
   def AutoCmds()
   enddef
 
+  def ServerPreStop(): void
+  enddef
+
   def ProcessRequest(server: any, data: any): void 
   enddef
 

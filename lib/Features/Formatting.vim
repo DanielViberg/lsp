@@ -24,6 +24,9 @@ export class Formatting extends ft.Feature implements if.IFeature
     initOnce = true
     autocmd BufWritePre * ft.FeatAu(PreSave)
   enddef
+
+  def ServerPreStop(): void
+  enddef
   
   def ProcessRequest(server: any, data: any): void 
   enddef

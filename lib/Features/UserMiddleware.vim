@@ -12,6 +12,9 @@ export class UserMiddleware extends ft.Feature implements if.IFeature
   def AutoCmds()
   enddef
 
+  def ServerPreStop(): void
+  enddef
+
   def PreRequest(server: any, req: rm.RequestMessage): void
   enddef
 

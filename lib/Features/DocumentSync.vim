@@ -41,6 +41,9 @@ export class DocumentSync extends ft.Feature implements if.IFeature
       autocmd BufWritePost * ft.FeatAu(DidSave)
     endif
   enddef
+  
+  def ServerPreStop(): void
+  enddef
 
   def ProcessRequest(server: abs.Server, data: any): void 
   enddef

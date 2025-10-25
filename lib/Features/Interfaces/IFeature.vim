@@ -6,4 +6,5 @@ export interface IFeature
   def AutoCmds(): void 
   def ProcessRequest(server: abs.Server, data: any): void 
   def ProcessNotification(server: abs.Server, data: any): void 
+  def ServerPreStop(): void
 endinterface

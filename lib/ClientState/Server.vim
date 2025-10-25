@@ -95,6 +95,15 @@ export class Server extends serv.Server
   
 
   def Stop(): void
+    this.documentSync.ServerPreStop()
+    this.workspace.ServerPreStop()
+    this.diagnostics.ServerPreStop()
+    this.completion.ServerPreStop()
+    this.snippet.ServerPreStop()
+    this.formatting.ServerPreStop()
+    this.goToDefinition.ServerPreStop()
+    this.userMiddleware.ServerPreStop()
+
     this.isRunning = false
 		this.isInit = false
     r.RpcAsync(this, reqSu.Shutdown.new(), this.StopResponse)

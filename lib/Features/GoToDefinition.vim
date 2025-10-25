@@ -23,6 +23,9 @@ export class GoToDefinition extends ft.Feature implements if.IFeature
       autocmd KeyInputPre * call ft.FeatAu(GoTo)
     endif
   enddef
+  
+  def ServerPreStop(): void
+  enddef
 
   def ProcessRequest(server: any, data: any): void 
   enddef
