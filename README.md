@@ -44,10 +44,15 @@ call plug#end()
 
 ### Configuration
 Configuration file mirrors the format used in this project: [**lsp.vim**](https://github.com/yegappan/lsp) 
-TBD
+WIP
 
 ### Commands
-- :LspConf (Edit lsp-config.json)
+- :LspConf           (Edit lsp-config.json)
+- :LspRestart        (Restart the lsp server)
+- :LspDisable        (Disabel the lsp server)
+- :LspEnable         (Enable the lsp server)
+- :LspFormat         (Format the current buffer)
+- :LspGoToDefinition (Go to symbol definition)
 
 ### Similar Plugins
 
