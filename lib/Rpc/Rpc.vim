@@ -10,8 +10,20 @@ import "../../env.vim" as e
 export var serverReqNrState: dict<any> = {}
 
 export def RpcSync(server: serv.Server, req: rm.RequestMessage): any
+
+  if !has_key(serverReqNrState, server.id)
+    serverReqNrState[server.id] = 1
+  elseif req.resetClientReqNr 
+    serverReqNrState[server.id] = 1
+  else
+    serverReqNrState[server.id] += 1
+  endif
+  req.id = serverReqNrState[server.id]
+
   var request = req.ToJson()
+  l.LogRpc(true, request)
   var reply = server.job->ch_evalexpr(request)
+  l.LogRpc(false, reply)
   return reply
 enddef
 
@@ -20,6 +32,7 @@ export def RpcAsyncMes(server: serv.Server, notif: mes.Message)
     return
   endif
   var not = notif.ToJson()
+  l.LogRpc(true, not)
   server.job->ch_sendexpr(not)
 enddef
 
@@ -40,7 +53,9 @@ export def RpcAsync(server: serv.Server,
   endif
 
   req.id = serverReqNrState[server.id]
+  l.PrintDebug('Request client state nr ' .. req.id)
   var request = req.ToJson()
+  l.LogRpc(true, request)
   var Fn = function('RpcAsyncCb', [server, Cb, req.onlyLatest, bnr])
   server.job->ch_sendexpr(request, {callback: Fn})
 enddef
@@ -52,6 +67,7 @@ def RpcAsyncCb(server: serv.Server,
                chan: channel, 
                reply: dict<any>)
 
+  l.LogRpc(false, reply)
   var sName = has_key(server.config, 'name') ? server.config.name : ''
   if has_key(reply, 'error')
     l.PrintError('(' .. sName .. ') ' .. string(reply.error.message))

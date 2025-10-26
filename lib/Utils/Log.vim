@@ -12,6 +12,14 @@ export def Log(type: Type, msg: string)
   writefile(msg->split("\n"), '/tmp/lspc.log', 'a')
 enddef
 
+export def LogRpc(out: bool, msg: any)
+  if e.DEBUG || e.TESTING || e.DEBUG_RPC
+    var m = out ? 'REQUEST: ' .. json_encode(msg) : 'RESPONSE: ' .. json_encode(msg)
+    writefile(m->split("\n"), '/tmp/lspc.log', 'a')
+    writefile(m->split("\n"), '/tmp/lspc_rpc.log', 'a') 
+  endif
+enddef
+
 export def PrintInfo(msg: string): void
   echohl DiagnosticsOk
   echomsg msg | redraw
