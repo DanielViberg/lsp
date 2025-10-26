@@ -46,12 +46,19 @@ export class Server extends serv.Server
 		             err_cb: function(r.RpcErrorCb, [this]),
                  exit_cb: function(r.RpcExitCb, [this])}
 
-    if !executable(this.config.path)
+    var bin: any = this.config.path
+    var cmd: any = [bin]
+
+    if type(bin) == v:t_list 
+      cmd = bin
+      bin = bin[0]
+    endif
+
+    if !executable(bin)
       l.PrintError("Binary for " .. this.config.path .. " is missing")
       return
     endif
 
-    var cmd = [this.config.path]
     if has_key(this.config, 'args')
       cmd->extend(this.config.args)
     endif
@@ -88,7 +95,9 @@ export class Server extends serv.Server
     ses.SetSessionServer(this)
 
     l.PrintDebug('Ready and do open')
+
     dc.DidOpen(this, bnr, null)
+
     this.workspace.SendWorkspaceConfig(this, this.config->get('workspaceConfig', null_dict))
     this.userMiddleware = m.UserMiddleware.new()
   enddef

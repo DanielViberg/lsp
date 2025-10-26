@@ -75,6 +75,10 @@ export abstract class Server
     if has_key(this.serverCapabilites, 'completionProvider')
       this.completion.RequestCompletion(this, bId)
     endif
+      
+    if has_key(this.serverCapabilites, 'diagnosticProvider')
+      this.diagnostics.RequestDiagnostics(this, bId)
+    endif
   enddef
 
 endclass

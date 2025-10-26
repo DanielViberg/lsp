@@ -13,7 +13,7 @@ export def Log(type: Type, msg: string)
 enddef
 
 export def LogRpc(out: bool, msg: any)
-  if e.DEBUG || e.TESTING || e.DEBUG_RPC
+  if e.TESTING || e.DEBUG_RPC
     var m = out ? 'REQUEST: ' .. json_encode(msg) : 'RESPONSE: ' .. json_encode(msg)
     writefile(m->split("\n"), '/tmp/lspc.log', 'a')
     writefile(m->split("\n"), '/tmp/lspc_rpc.log', 'a') 
