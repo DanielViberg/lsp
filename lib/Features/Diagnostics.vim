@@ -7,6 +7,7 @@ import "../ClientState/Buffer.vim" as b
 import "../Protocol/Requests/Diagnostic.vim" as d
 import "../Protocol/Objects/TextDocumentIdentifier.vim" as tdi
 import "../Rpc/Rpc.vim" as r
+import "../Utils/Log.vim" as l
 
 var initOnce = false
 
@@ -94,12 +95,14 @@ export class Diagnostics extends ft.Feature implements if.IFeature
   enddef
 
   def RequestDiagnostics(server: any, bId: number): void
+    l.PrintDebug('Request diagnostics')
     var td = tdi.TextDocumentIdentifier.new(bId)
     var diag = d.Diagnostic.new(td) 
     r.RpcAsync(server, diag, this.RequestDiagnosticsResponse, bId)
   enddef
 
   def RequestDiagnosticsResponse(server: any, reply: dict<any>, bId: number)
+    l.PrintDebug('Response diagnostics')
     this.PublishDiagnostics(bId, reply.result.items)
   enddef
 

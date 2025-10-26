@@ -77,8 +77,9 @@ def RpcAsyncCb(server: serv.Server,
   l.PrintDebug('Response server state nr ' .. reply.id)
 
   if needLatest && reply.id < serverReqNrState[server.id]
-    l.PrintDebug('Response skipped')
-    return
+    #l.PrintDebug('Response skipped')
+    # return
+    # TODO: vue has bad completion performance, but csharp need for pull diag
   endif
 
   if bnr->type() == v:t_number
