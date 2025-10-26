@@ -23,6 +23,7 @@ A pure vim9script, lightweight lsp client.
 
 ### Requirements
 - Vim version 9.0 or higher
+- Linux
 
 ### Installation
 Install using [vim-plug](https://github.com/junegunn/vim-plug). Add the following lines to your `.vimrc` file:
