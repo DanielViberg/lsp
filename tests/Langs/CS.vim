@@ -3,16 +3,14 @@ vim9script
 import "./Abs/ATest.vim" as a
 import "./Abs/ITest.vim" as i
 
-# TODO
-
-export class JS extends a.ATest implements i.ITest
+export class CS extends a.ATest implements i.ITest
 
   def Config(): dict<any>
     return {
-      name: "js-ls",
-      filetype: ["js"],
-      path: "typescript-language-server",
-      args: ["--stdio"],
+      name: "mscs-ls",
+      filetype: ["cs"],
+      path: ["dotnet", "Microsoft.CodeAnalysis.LanguageServer.dll"],
+      args: ["--logLevel", "Information", "--extensionLogDirectory", "/tmp/ms-cs-ls", "--stdio"],
       initializationOptions: {},
       workspaceConfig: {}
     }
