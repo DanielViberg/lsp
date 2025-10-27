@@ -37,10 +37,7 @@ export def Init(): void
       var sel = confirm("There is no lsp-config.json, create it now?", "&Yes\n&No", 2)
       if sel == 1
         var exConfigFile = expand("%:p:h") .. '/../assets/lsp-config.json'
-        var cp = "cp"
-        if has("win32")
-          cp = "copy"
-        endif
+        var cp = has("win32") ? "copy" : "cp"
         system(cp .. " " .. shellescape(exConfigFile) .. " " .. shellescape(configDir))
       else
         return
