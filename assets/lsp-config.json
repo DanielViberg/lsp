@@ -67,7 +67,7 @@
       "name": "mscs-ls",
       "filetype": ["cs"],
       "path": ["dotnet","Microsoft.CodeAnalysis.LanguageServer.dll"],
-      "args": ["--logLevel", "Information", "--extensionLogDirectory","/tmp/ms-cs-ls","--stdio"],
+      "args": ["--logLevel", "Information", "--extensionLogDirectory", "/tmp/ms-cs-ls", "--stdio"],
       "initializationOptions": {},
       "workspaceConfig": {}
     },
