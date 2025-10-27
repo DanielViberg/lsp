@@ -11,7 +11,7 @@ export def FromUri(uri: string): string
 enddef
 
 export def TempDir(): string
-  return has('win32') ? $TEMP ? '/tmp/'
+  return has('win32') ? $TEMP : '/tmp/'
 enddef
 
 # From the cursor, track backwards until triggerchar or space is found
