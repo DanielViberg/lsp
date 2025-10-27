@@ -3,6 +3,7 @@ vim9script
 import "../../env.vim" as e
 
 var CachedConfig: list<dict<any>> = null_list
+var DontBotherMe: bool = false
 
 export class Config 
 endclass
@@ -14,6 +15,9 @@ export def OpenLspConfig()
 enddef
 
 export def Init(): void
+  if DontBotherMe
+    return
+  endif
 
   var pointerFile = expand("$HOME/.vim/.lsp-config-dir")
 
@@ -35,10 +39,11 @@ export def Init(): void
     if !filereadable(configFile)
     # Ask to create if dir has no file
       var sel = confirm("There is no lsp-config.json, create it now?", "&Yes\n&No", 2)
-      if sel == 1
         var exConfigFile = expand("$HOME/.vim/plugged/lsp/assets/lsp-config.json")
-        system("cp " .. shellescape(exConfigFile) .. " " .. shellescape(configDir))
+        var cp = has("win32") ? "copy" : "cp"
+        system(cp .. " " .. shellescape(exConfigFile) .. " " .. shellescape(configDir))
       else
+        DontBotherMe = true
         return
       endif
     endif
