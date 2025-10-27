@@ -3,6 +3,7 @@ vim9script
 import "../ClientState/Server.vim" as s
 import "../ClientState/Abstract/Server.vim" as abs
 import "../ClientState/Session.vim" as ses
+import "../ClientState/Buffer.vim" as b
 import "../Utils/Str.vim" as str
 import "../Utils/Log.vim" as l
 import "../Rpc/Rpc.vim" as r
@@ -181,6 +182,9 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>)
 enddef
 
 def CompleteNoServer()
+  if b.disable
+    return
+  endif
   var items: list<any> = GetCacheBufferW()
   var compItems = items->map((_, i) => LspItemToCompItem(i, -1))
   var match = complete_match()
