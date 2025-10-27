@@ -23,6 +23,7 @@ A pure vim9script, lightweight lsp client.
 
 ### Requirements
 - Vim version 9.0 or higher
+- Linux
 
 ### Installation
 Install using [vim-plug](https://github.com/junegunn/vim-plug). Add the following lines to your `.vimrc` file:
@@ -44,10 +45,15 @@ call plug#end()
 
 ### Configuration
 Configuration file mirrors the format used in this project: [**lsp.vim**](https://github.com/yegappan/lsp) 
-TBD
+WIP
 
 ### Commands
-- :LspConf (Edit lsp-config.json)
+- :LspConf           (Edit lsp-config.json)
+- :LspRestart        (Restart the lsp server)
+- :LspDisable        (Disabel the lsp server)
+- :LspEnable         (Enable the lsp server)
+- :LspFormat         (Format the current buffer)
+- :LspGoToDefinition (Go to symbol definition)
 
 ### Similar Plugins
 
