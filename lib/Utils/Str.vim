@@ -10,6 +10,10 @@ export def FromUri(uri: string): string
   return substitute(uri, '^file://', '', '')
 enddef
 
+export def TempDir(): string
+  return has('win32') ? $TEMP ? '/tmp/'
+enddef
+
 # From the cursor, track backwards until triggerchar or space is found
 # Return the column nr
 export def GetTriggerCharIdx(triggerChars: any, line: number, col: number): dict<any>

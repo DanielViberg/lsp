@@ -1,6 +1,7 @@
 vim9script
 
 import "../../env.vim" as e
+import "./Str.vim" as s
 
 export enum Type
   Info,
@@ -9,14 +10,14 @@ export enum Type
 endenum
 
 export def Log(type: Type, msg: string)
-  writefile(msg->split("\n"), '/tmp/lspc.log', 'a')
+  writefile(msg->split("\n"), s.TempDir() .. 'lspc.log', 'a')
 enddef
 
 export def LogRpc(out: bool, msg: any)
   if e.TESTING || e.DEBUG_RPC
     var m = out ? 'REQUEST: ' .. json_encode(msg) : 'RESPONSE: ' .. json_encode(msg)
-    writefile(m->split("\n"), '/tmp/lspc.log', 'a')
-    writefile(m->split("\n"), '/tmp/lspc_rpc.log', 'a') 
+    writefile(m->split("\n"), s.TempDir() .. 'lspc.log', 'a')
+    writefile(m->split("\n"), s.TempDir() .. 'lspc_rpc.log', 'a') 
   endif
 enddef
 
