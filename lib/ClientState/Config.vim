@@ -36,7 +36,7 @@ export def Init(): void
     # Ask to create if dir has no file
       var sel = confirm("There is no lsp-config.json, create it now?", "&Yes\n&No", 2)
       if sel == 1
-        var exConfigFile = expand("%:p:h") .. '/../assets/lsp-config.json'
+        var exConfigFile = expand("$HOME/.vim/plugged/lsp/assets/lsp-config.json")
         system("cp " .. shellescape(exConfigFile) .. " " .. shellescape(configDir))
       else
         return
