@@ -4,12 +4,10 @@ import "../Protocol/Objects/Position.vim" as p
 
 export def Uri(path: string): string
   var osPath = path
-
   if has('win32')
-   osPath = UrlEncode(osPath)
    osPath = '/' .. osPath 
+   osPath = substitute(osPath, '\', '\/', 'g')
   endif
-
   return 'file://' .. osPath
 enddef 
 

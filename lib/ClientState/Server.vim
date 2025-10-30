@@ -62,6 +62,7 @@ export class Server extends serv.Server
     if has_key(this.config, 'args')
       cmd->extend(this.config.args)
     endif
+    echomsg cmd
     this.job = cmd->job_start(opts)
 
     this.isRunning = true
