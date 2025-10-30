@@ -28,6 +28,7 @@ enddef
 export def UrlDecode(str: string): string
     var osPath = substitute(str, '%\(\x\x\)', '\=nr2char(str2nr(submatch(1), 16))', 'g')
     if has('win32')
+      osPath = substitute(osPath, '/', '\\', 'g')
       # Make c: to C:
       return toupper(osPath[0]) .. strpart(osPath, 1)
     endif
