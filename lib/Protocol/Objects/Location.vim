@@ -14,8 +14,8 @@ export class Location
 
   def GoTo(): void
     # Unopened buffer
-    if expand('%:p') != fnamemodify(this.uri, ':p')
-      execute 'edit' this.uri
+    if expand('%:p') != fnamemodify(s.UrlDecode(this.uri), ':p')
+      execute 'edit' s.UrlDecode(this.uri)
     endif
 
     # Same buffer

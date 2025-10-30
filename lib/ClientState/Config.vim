@@ -15,6 +15,7 @@ export def OpenLspConfig()
 enddef
 
 export def Init(): void
+
   if DontBotherMe
     return
   endif

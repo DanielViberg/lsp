@@ -41,6 +41,7 @@ export def RpcAsync(server: serv.Server,
                     Cb: func, 
                     bnr = v:none)
   if server.job->job_status() != 'run'
+    l.PrintDebug('Server job not running')
     return
   endif
 
