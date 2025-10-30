@@ -8,6 +8,7 @@ import "../Protocol/Requests/Diagnostic.vim" as d
 import "../Protocol/Objects/TextDocumentIdentifier.vim" as tdi
 import "../Rpc/Rpc.vim" as r
 import "../Utils/Log.vim" as l
+import "../Utils/Str.vim" as s
 
 var initOnce = false
 
@@ -88,7 +89,7 @@ export class Diagnostics extends ft.Feature implements if.IFeature
   enddef
 
   def PushDiagnostics(data: any): void
-    var buffers = b.GetBuffersByUri(data.params.uri)
+    var buffers = b.GetBuffersByPath(s.UrlDecode(s.FromUri(data.params.uri)))
     for buf in buffers
       this.PublishDiagnostics(buf, data.params.diagnostics)
     endfor

@@ -3,15 +3,44 @@ vim9script
 import "../Protocol/Objects/Position.vim" as p
 
 export def Uri(path: string): string
-  return 'file://' .. path
+  var osPath = path
+
+  if has('win32')
+   osPath = UrlEncode(osPath)
+   osPath = '/' .. osPath 
+  endif
+
+  return 'file://' .. osPath
 enddef 
 
+export def UrlEncode(str: string): string
+  var result = ''
+  for ch in split(str, '\zs')
+    if ch =~# '^[A-Za-z0-9_.~-]$'
+      result ..= ch
+    else
+      result ..= printf('%%%02X', char2nr(ch))
+    endif
+  endfor
+  return result
+enddef
+
+export def UrlDecode(str: string): string
+    var osPath = substitute(str, '%\(\x\x\)', '\=nr2char(str2nr(submatch(1), 16))', 'g')
+    if has('win32')
+      # Make c: to C:
+      return toupper(osPath[0]) .. strpart(osPath, 1)
+    endif
+    return osPath
+enddef
+
 export def FromUri(uri: string): string
-  return substitute(uri, '^file://', '', '')
+  return has('win32') ? substitute(uri, '^file:///', '', '') : 
+                        substitute(uri, '^file://', '', '')
 enddef
 
 export def TempDir(): string
-  return has('win32') ? $TEMP : '/tmp/'
+  return has('win32') ? $TEMP .. '\' : '/tmp/'
 enddef
 
 # From the cursor, track backwards until triggerchar or space is found
