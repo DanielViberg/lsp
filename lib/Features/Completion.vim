@@ -86,7 +86,7 @@ export class Completion extends ft.Feature implements if.IFeature
         str.GetTriggerChar(server.serverCapabilites.completionProvider.triggerCharacters),
         tdpos)
       waiting = true
-      r.RpcAsync(server, compReq, RequestCompletionReply)
+      r.RpcAsync(server, compReq, RequestCompletionReply, bId)
     endif
     # Dont spam pum if using fast servers
     timer_start(400, (_) => {
@@ -119,13 +119,18 @@ def PumShowDoc(): void
   endif
 enddef
 
-def RequestCompletionReply(server: abs.Server, reply: dict<any>)
+def RequestCompletionReply(server: abs.Server, reply: dict<any>, bId: any)
   waiting = false
   # TODO: handle itemDefaults
-  if has_key(reply, 'result')
+  if has_key(reply, 'result') && mode() == 'i'
     l.PrintDebug('Completion with result')
     var result = reply.result
     var items: list<any> = []
+
+    if has_key(result, 'isIncomplete') && result.isIncomplete
+      server.completion.RequestCompletion(server, bId)
+      return
+    endif
 
     if type(result) == v:t_dict && has_key(result, 'items')
       items = result.items
