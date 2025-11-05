@@ -127,11 +127,6 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, bId: any)
     var result = reply.result
     var items: list<any> = []
 
-    if has_key(result, 'isIncomplete') && result.isIncomplete
-      server.completion.RequestCompletion(server, bId)
-      return
-    endif
-
     if type(result) == v:t_dict && has_key(result, 'items')
       items = result.items
     elseif type(result) == v:t_list
