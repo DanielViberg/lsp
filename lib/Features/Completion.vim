@@ -39,6 +39,7 @@ var initOnce: bool = false
 var isIncomplete: bool = false
 var noServer: bool = false
 var waiting: bool = false
+var reqNr: number = 0
 
 export class Completion extends ft.Feature implements if.IFeature
 
@@ -86,7 +87,8 @@ export class Completion extends ft.Feature implements if.IFeature
         str.GetTriggerChar(server.serverCapabilites.completionProvider.triggerCharacters),
         tdpos)
       waiting = true
-      r.RpcAsync(server, compReq, RequestCompletionReply, bId)
+      reqNr += 1
+      r.RpcAsync(server, compReq, RequestCompletionReply, reqNr)
     endif
     # Dont spam pum if using fast servers
     timer_start(400, (_) => {
@@ -119,8 +121,12 @@ def PumShowDoc(): void
   endif
 enddef
 
-def RequestCompletionReply(server: abs.Server, reply: dict<any>, bId: any)
+def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
   waiting = false
+  # Skip intermediat requests
+  if sreqNr < reqNr
+    return
+  endif
   # TODO: handle itemDefaults
   if has_key(reply, 'result') && mode() == 'i'
     l.PrintDebug('Completion with result')

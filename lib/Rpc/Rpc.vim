@@ -7,19 +7,7 @@ import "../Protocol/Abstracts/Message.vim" as mes
 import "../Utils/Log.vim" as l
 import "../../env.vim" as e
 
-export var serverReqNrState: dict<any> = {}
-
 export def RpcSync(server: serv.Server, req: rm.RequestMessage): any
-
-  if !has_key(serverReqNrState, server.id)
-    serverReqNrState[server.id] = 1
-  elseif req.resetClientReqNr 
-    serverReqNrState[server.id] = 1
-  else
-    serverReqNrState[server.id] += 1
-  endif
-  req.id = serverReqNrState[server.id]
-
   var request = req.ToJson()
   l.LogRpc(true, request)
   var reply = server.job->ch_evalexpr(request)
@@ -44,42 +32,24 @@ export def RpcAsync(server: serv.Server,
     return
   endif
 
-  if !has_key(serverReqNrState, server.id)
-    serverReqNrState[server.id] = 1
-  elseif req.resetClientReqNr 
-    serverReqNrState[server.id] = 1
-  else
-    serverReqNrState[server.id] += 1
-  endif
-
-  req.id = serverReqNrState[server.id]
   l.PrintDebug('Request client state nr ' .. req.id)
   var request = req.ToJson()
   l.LogRpc(true, request)
-  var Fn = function('RpcAsyncCb', [server, Cb, req.onlyLatest, bnr])
+  var Fn = function('RpcAsyncCb', [server, Cb, bnr])
   server.job->ch_sendexpr(request, {callback: Fn})
 enddef
 
 def RpcAsyncCb(server: serv.Server, 
                RpcCb: func, 
-               needLatest: bool, 
                bnr: any,
                chan: channel, 
                reply: dict<any>)
 
   l.LogRpc(false, reply)
+
   var sName = has_key(server.config, 'name') ? server.config.name : ''
   if has_key(reply, 'error')
     l.PrintError('(' .. sName .. ') ' .. string(reply.error.message))
-  endif
-
-  l.PrintDebug('Response client state nr ' .. serverReqNrState[server.id])
-  l.PrintDebug('Response server state nr ' .. reply.id)
-
-  if needLatest && reply.id < serverReqNrState[server.id]
-    #l.PrintDebug('Response skipped')
-    # return
-    # TODO: vue has bad completion performance, but csharp need for pull diag
   endif
 
   if bnr->type() == v:t_number

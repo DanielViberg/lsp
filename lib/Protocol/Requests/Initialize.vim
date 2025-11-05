@@ -12,8 +12,6 @@ const currentDir = expand('<sfile>')
 export class Initialize extends req.RequestMessage 
   def new(config: dict<any>)
     this.method = 'initialize'
-    this.resetClientReqNr = true
-
     var rootUri = ''
     var rootSearchFiles = config->get('rootSearch')
     var bufDir = bufnr('.')->bufname()->fnamemodify(':p:h')
