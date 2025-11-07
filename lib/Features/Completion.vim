@@ -86,6 +86,7 @@ export class Completion extends ft.Feature implements if.IFeature
         this.GetTriggerKind(server, bId),
         str.GetTriggerChar(server.serverCapabilites.completionProvider.triggerCharacters),
         tdpos)
+      l.PrintDebug('COMPREQ: ' .. json_encode(compReq.ToJson()))
       waiting = true
       reqNr += 1
       r.RpcAsync(server, compReq, RequestCompletionReply, reqNr)
@@ -99,8 +100,7 @@ export class Completion extends ft.Feature implements if.IFeature
   enddef
 
   def GetTriggerKind(server: abs.Server, bId: number): number
-    # 1. Check current pum if its incomplete
-    if false # TODO: isIncomplete not correctly handled
+    if isIncomplete 
       return KIND_INCOMPLETE_COMPLETION
     endif
     
@@ -123,10 +123,12 @@ enddef
 
 def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
   waiting = false
+
   # Skip intermediat requests
   if sreqNr < reqNr
     return
   endif
+
   # TODO: handle itemDefaults
   if has_key(reply, 'result') && mode() == 'i'
     l.PrintDebug('Completion with result')
@@ -152,29 +154,48 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
     var startCol = cursorCol - 1
     var endCol = startCol
 
-    while startCol > 0 && endCol > 0 && line[endCol] =~ '[a-zA-Z0-9-_]' 
+    var wordChar: string = '[a-zA-Z0-9_-]'
+    # Some servers send wrong completion, missing trigger char
+    var notWordChar: list<string> = ['"', '.', '!', ':', '>']
+
+    while startCol > 0 && endCol > 0
+      if index(server.serverCapabilites.completionProvider.triggerCharacters, line[endCol]) != -1
+        if index(notWordChar, line[endCol]) != -1
+          endCol += 1
+        endif
+        break
+      endif
+      if !(line[endCol] =~ wordChar)
+        if index(notWordChar, line[endCol]) != -1
+          endCol += 1
+        endif
+        break
+      endif
       endCol -= 1
     endwhile
+
     l.PrintDebug('Completion startCol:' .. startCol)
     l.PrintDebug('Completion endCol:' .. endCol)
 
     var word = trim(line[ endCol : startCol ])
-
-    var query = substitute(word, '[^a-zA-Z0-9-_]', '', 'g')
-    l.PrintDebug('Completion query ' .. word)
+    var query = word
+    l.PrintDebug('Completion query ' .. query)
     
     # Compare query to items label w/o trigger char or additional space
     items->filter((_, v) => {
-      if has_key(v, 'label') && type(v.label) == v:t_string
-        var labelName = substitute(v.label, '[^a-zA-Z0-9-_]', '', 'g')
-        if empty(query) && !v->has_key('is_buf')
-          return true # Case: typed $ and is not a bufferComp
-        endif
-        return query == labelName[ : len(query) - 1] # Substring and same index
-      else
-        return false
+      if has_key(v, 'filterText') && !empty(v.filterText)
+        return v.filterText != query && v.filterText->strpart(0, len(query)) == query
+      else 
+        return v.label != query && v.label->strpart(0, len(query)) == query
       endif
     })
+    #->sort((_a, _b) => {
+    #  if has_key(_a, 'sortText') && has_key(_b, 'sortText')
+    #    return _a->get('sortText') == _b->get('sortText') ? 0 : (_a->get('sortText') > _b->get('sortText') ? -1 : 1) 
+    #  else
+    #    return 1
+    #  endif
+    #})
 
     l.PrintDebug('Completion items count after filter ' .. items->len())
     var compItems = items->map((_, i) => LspItemToCompItem(i, server.id))
@@ -224,6 +245,8 @@ def GetCacheBufferW(): list<dict<any>>
     comps->add({
        label: w,
        is_buf: true,
+       filterText: w,
+       sortText: 0
     })
   endfor
   return comps
@@ -273,7 +296,7 @@ enddef
 def CompleteAccept(ci: any): void
   if !ci->empty() && type(ci.user_data) == v:t_dict
 
-    if ci.user_data.item->get('is_buf') || ci.user_data.item->has_key('insertText')
+    if ci.user_data.item->get('is_buf')
       var word = ci->get('word')
       if ci.user_data.item->has_key('insertText')
         word = ci.user_data.item.insertText
@@ -331,6 +354,7 @@ def ResolveCompletionReply(server: abs.Server, reply: dict<any>): void
   var changes: list<any> = []
   if has_key(reply.result, 'textEdit') && reply.result.textEdit != null_dict
     l.PrintDebug("Process completion change")
+    l.PrintDebug('Range ' .. reply.result.textEdit.range)
     changes->add(tdce.TextDocumentContentChangeEvent.new(
       reply.result.textEdit.newText,
       reply.result.textEdit.range,
@@ -431,6 +455,7 @@ def CompletionChange(changes: list<any>, server: any): void
     endif
   endfor
 
+  l.PrintDebug('Apply Text Edits')
   t.ApplyTextEdits(bufnr(), changes)
   cursor(line('.') + cursorLineDelta, newCol)
   

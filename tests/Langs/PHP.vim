@@ -32,9 +32,11 @@ export class PHP extends a.ATest implements i.ITest
 
   def CompletionStates(): list<tuple<string, list<string>>>
     return [
+      ("<?php\n class Test {\n\tconst test = '';\n\tpublic function test()\n{\n\tself::¤\n\t}\n}", ["class", "test", "php", "class", "Test", "const", "test", "public", "function", "self"]),
+      ("<?php\n class Test {\n\tpublic function myfunc()\n{\n\t$test = new Test();\n\t$test->¤\n\t}\n}", ["myfunc", "php", "class", "Test", "public", "function", "myfunc", "test", "new"]),
       ("<?php\n class Test {\n\tp¤\n}", ["public", "private", "protected", "php"]),
       ("<?php\n class Test {\n\tpublic fu¤\n}", ["function"]),
-      ("<?php\n class Test {\n\tpublic function test()\n{\n\t $testVar = null;\n\t $te¤\n}\n}", ["$testVar", "test", "testVar"]),
+      ("<?php\n class Test {\n\tpublic function test()\n{\n\t $testVar = null;\n\t $te¤\n}\n}", ["$testVar"]),
       ("<?php\n class Test {\n\tpublic function test()\n{\n\t $¤\n}\n}", ["$GLOBALS", 
                                                                           "$_SERVER", 
                                                                           "$_GET", 
@@ -47,7 +49,7 @@ export class PHP extends a.ATest implements i.ITest
                                                                           "$php_errormsg", 
                                                                           "$HTTP_RAW_POST_DATA", 
                                                                           "$http_response_header", 
-                                                                          "$this"])
+                                                                          "$this"]),
                                                                           ]
   enddef
 
@@ -68,16 +70,16 @@ export class PHP extends a.ATest implements i.ITest
                                                     ["public", "public"]]),
 
       ("<?php\n class Test {\n\tpublic function test()\n{\n\t$longVariable = 1;\n\t$lo¤\n}\n}\n", "ngVariable", [
-                                                    ["$longVariable", "longVariable"],
-                                                    ["$longVariable", "longVariable"],
-                                                    ["$longVariable", "longVariable"],
-                                                    ["$longVariable", "longVariable"],
-                                                    ["$longVariable", "longVariable"],
-                                                    ["$longVariable", "longVariable"],
-                                                    ["$longVariable", "longVariable"],
-                                                    ["$longVariable", "longVariable"],
-                                                    ["$longVariable", "longVariable"],
-                                                    ["$longVariable", "longVariable"],
+                                                    ["$longVariable"],
+                                                    ["$longVariable"],
+                                                    ["$longVariable"],
+                                                    ["$longVariable"],
+                                                    ["$longVariable"],
+                                                    ["$longVariable"],
+                                                    ["$longVariable"],
+                                                    ["$longVariable"],
+                                                    ["$longVariable"],
+                                                    ["$longVariable"],
                                                     ]),
 
     ("<?php\n noValidVar\n class Test {\n\tpublic function test()\n{\n\tnoV¤\n}\n}\n", "alidVar", [
