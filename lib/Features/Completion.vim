@@ -156,7 +156,7 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
 
     var wordChar: string = '[a-zA-Z0-9_-]'
     # Some servers send wrong completion, missing trigger char
-    var notWordChar: list<string> = ['"', '.', '!', ':', '>']
+    var notWordChar: list<string> = ['"', '.', '!', ':', '>', '<']
 
     while startCol > 0 && endCol > 0
       if index(server.serverCapabilites.completionProvider.triggerCharacters, line[endCol]) != -1
