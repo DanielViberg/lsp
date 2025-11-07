@@ -143,6 +143,8 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
 
     l.PrintDebug('Completion lsp item count ' .. items->len())
 
+    var lspItemCount = items->len()
+
     # Add buffer words
     var onlyBuffer = items->len() == 0
     items = items + GetCacheBufferW()
@@ -156,9 +158,9 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
 
     var wordChar: string = '[a-zA-Z0-9_-]'
     # Some servers send wrong completion, missing trigger char
-    var notWordChar: list<string> = ['"', '.', '!', ':', '>', '<']
+    var notWordChar: list<string> = ['"', '.', '!', ':', '>', '<', '/']
 
-    while startCol > 0 && endCol > 0
+    while startCol > 0 && endCol > -1
       if index(server.serverCapabilites.completionProvider.triggerCharacters, line[endCol]) != -1
         if index(notWordChar, line[endCol]) != -1
           endCol += 1
@@ -180,6 +182,10 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
     var word = trim(line[ endCol : startCol ])
     var query = word
     l.PrintDebug('Completion query ' .. query)
+
+    if empty(query) && lspItemCount == 0
+      return
+    endif
     
     # Compare query to items label w/o trigger char or additional space
     items->filter((_, v) => {
