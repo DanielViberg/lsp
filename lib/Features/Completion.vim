@@ -81,9 +81,6 @@ export class Completion extends ft.Feature implements if.IFeature
 		endif
     l.PrintDebug('Request completion')
     if mode() == 'i' || e.TESTING 
-      if pumvisible()
-        feedkeys("\<C-e>", 'in')
-      endif
       var tdpos = tdp.TextDocumentPosition.new(server, bId)
       var compReq = c.Completion.new(
         this.GetTriggerKind(server, bId),

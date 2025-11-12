@@ -7,7 +7,19 @@ import "../Protocol/Abstracts/Message.vim" as mes
 import "../Utils/Log.vim" as l
 import "../../env.vim" as e
 
+export var serverReqNrState: dict<any> = {}
+
 export def RpcSync(server: serv.Server, req: rm.RequestMessage): any
+
+  if !has_key(serverReqNrState, server.id)
+    serverReqNrState[server.id] = 1
+  elseif req.resetClientReqNr 
+    serverReqNrState[server.id] = 1
+  else
+    serverReqNrState[server.id] += 1
+  endif
+  req.id = serverReqNrState[server.id]
+
   var request = req.ToJson()
   l.LogRpc(true, request)
   var reply = server.job->ch_evalexpr(request)
@@ -31,6 +43,15 @@ export def RpcAsync(server: serv.Server,
   if server.job->job_status() != 'run'
     return
   endif
+
+  if !has_key(serverReqNrState, server.id)
+    serverReqNrState[server.id] = 1
+  elseif req.resetClientReqNr 
+    serverReqNrState[server.id] = 1
+  else
+    serverReqNrState[server.id] += 1
+  endif
+  req.id = serverReqNrState[server.id]
 
   var request = req.ToJson()
   l.LogRpc(true, request)
