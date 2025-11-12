@@ -158,7 +158,7 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
 
     var wordChar: string = '[a-zA-Z0-9_-]'
     # Some servers send wrong completion, missing trigger char
-    var notWordChar: list<string> = ['"', '.', '!', ':', '>', '<', '/']
+    var notWordChar: list<string> = ['"', '.', '!', ':', '>', '<', '/', "'", "("]
 
     while startCol > 0 && endCol > -1
       if index(server.serverCapabilites.completionProvider.triggerCharacters, line[endCol]) != -1
@@ -187,17 +187,22 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
       return
     endif
     
-    # Compare query to items label w/o trigger char or additional space
     items->filter((_, v) => {
       if has_key(v, 'filterText') && !empty(v.filterText)
-        return v.filterText != query && v.filterText->strpart(0, len(query)) == query
+        return v.filterText != query && v.filterText->stridx(query) >= 0
       else 
-        return v.label != query && v.label->strpart(0, len(query)) == query
+        return v.label != query && v.label->stridx(query) >= 0
       endif
     })
+    #->map((_, v) => {
+    #    if v->get('sortText')->empty() 
+    #      v.sortText = v.label
+    #    endif
+    #    return v
+    #  })
     #->sort((_a, _b) => {
     #  if has_key(_a, 'sortText') && has_key(_b, 'sortText')
-    #    return _a->get('sortText') == _b->get('sortText') ? 0 : (_a->get('sortText') > _b->get('sortText') ? -1 : 1) 
+    #    return _a->get('sortText') == _b->get('sortText') ? 0 : (_a->get('sortText') >? _b->get('sortText') ? 1 : -1) 
     #  else
     #    return 1
     #  endif
