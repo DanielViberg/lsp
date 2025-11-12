@@ -244,7 +244,7 @@ enddef
 def CacheBufferWords(): void
   var lines = getbufline(bufnr(), 1, '$')
   for l in lines
-    var words = split(l, '\W\+')
+    var words = split(l, '\v[^a-zA-Z0-9_-]+')
     for w in words
       if bufferWords->index(w) == -1 && # Dont already exists
          mode() != 'i' &&               # Check only finished words
@@ -331,6 +331,7 @@ def CompleteAccept(ci: any): void
       var changes: list<any> = []
       var newText = ci.user_data.item.textEdit.newText
       var range: any = {}
+
       if ci.user_data.item.textEdit->has_key('insert')
         l.PrintDebug("Process completion insert")
         range = ci.user_data.item.textEdit.insert
@@ -338,26 +339,77 @@ def CompleteAccept(ci: any): void
         l.PrintDebug("Process completion range")
         range = ci.user_data.item.textEdit.range
       endif
+
       changes->add(tdce.TextDocumentContentChangeEvent.new(
         newText,
         range,
         server,
         true))
+
       if has_key(ci.user_data.item, 'additionalTextEdits')
         for edit in ci.user_data.item->get('additionalTextEdits')
           l.PrintDebug("Process additionalTextEdits")
+          var anewText = edit.newText
+          var arange: any = {}
+
+          if edit->has_key('insert')
+            arange = edit.insert
+          elseif edit->has_key('range')
+            arange = edit.range
+          endif
+
           changes->add(tdce.TextDocumentContentChangeEvent.new(
-            edit.newText,
-            edit.range,
+            anewText,
+            arange,
             server))
+
         endfor
       endif
       CompletionChange(changes, server)
+
       if ci.user_data.item->get('insertTextFormat') == 2
         server.snippet.Handle()
       endif
+
+      if !has_key(ci.user_data.item, 'additionalTextEdits')
+        ResolveCompletion(ci.user_data.server_id, bufnr(), ci.user_data.item)
+      endif
     endif
   endif
+enddef
+
+def ResolveCompletion(sid: number, buf: number, item: any): void
+  l.PrintDebug("Resolve completion")
+  var server = ses.GetSessionServerById(sid)
+  if !server.serverCapabilites.completionProvider.resolveProvider
+    return
+  else
+    var compRes = cr.CompletionResolve.new(item)
+    var reply = r.RpcSync(server, compRes) 
+    ResolveCompletionReply(server, reply)
+  endif
+enddef
+
+def ResolveCompletionReply(server: abs.Server, reply: dict<any>): void
+  var changes: list<any> = []
+  if has_key(reply.result, 'additionalTextEdits')
+    for edit in reply.result->get('additionalTextEdits')
+      var anewText = edit.newText
+      var arange: any = {}
+
+      if edit->has_key('insert')
+        arange = edit.insert
+      elseif edit->has_key('range')
+        arange = edit.range
+      endif
+
+      changes->add(tdce.TextDocumentContentChangeEvent.new(
+        anewText,
+        arange,
+        server))
+    endfor
+  endif
+  CompletionChange(changes, server)
 enddef
 
 def ResolveCompletionDoc(sid: number, buf: number, item: any): void
