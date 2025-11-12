@@ -191,7 +191,6 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
         return v
       })
     ->filter((_, v) => {
-      l.PrintDebug('Filter item' .. v.filterText)
         # Ignore buffer words when query is empty
         if empty(query) && v->get('is_buf')
           return false
