@@ -391,8 +391,8 @@ def ResolveCompletion(sid: number, buf: number, item: any): void
 enddef
 
 def ResolveCompletionReply(server: abs.Server, reply: dict<any>): void
-  var changes: list<any> = []
-  if has_key(reply.result, 'additionalTextEdits')
+  if has_key(reply, 'result') && has_key(reply.result, 'additionalTextEdits')
+    var changes: list<any> = []
     for edit in reply.result->get('additionalTextEdits')
       var anewText = edit.newText
       var arange: any = {}
@@ -408,8 +408,8 @@ def ResolveCompletionReply(server: abs.Server, reply: dict<any>): void
         arange,
         server))
     endfor
+    CompletionChange(changes, server)
   endif
-  CompletionChange(changes, server)
 enddef
 
 def ResolveCompletionDoc(sid: number, buf: number, item: any): void
