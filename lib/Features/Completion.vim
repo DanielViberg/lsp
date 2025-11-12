@@ -246,6 +246,9 @@ def CacheBufferWords(): void
       if bufferWords->index(w) == -1 && # Dont already exists
          mode() != 'i' &&               # Check only finished words
          w =~# '[a-zA-Z]'               # Only letterWords
+        if g:lsp_comp_buf_cache_limit == bufferWords->len()
+          bufferWords->remove(0)
+        endif
         bufferWords->add(w)
       endif
     endfor
