@@ -155,58 +155,60 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
     var cursorCol = col('.') - 1
     var startCol = cursorCol - 1
     var endCol = startCol
+    var wordChar: string = '[a-zA-Z0-9_$@-]'
 
-    var wordChar: string = '[a-zA-Z0-9_-]'
-    # Some servers send wrong completion, missing trigger char
-    var notWordChar: list<string> = ['"', '.', '!', ':', '>', '<', '/', "'", "("]
-
-    while startCol > 0 && endCol > -1
-      if index(server.serverCapabilites.completionProvider.triggerCharacters, line[endCol]) != -1
-        if index(notWordChar, line[endCol]) != -1
-          endCol += 1
-        endif
-        break
-      endif
+    while startCol > 0 && endCol > 0
       if !(line[endCol] =~ wordChar)
-        if index(notWordChar, line[endCol]) != -1
-          endCol += 1
-        endif
+        endCol += 1
         break
       endif
       endCol -= 1
     endwhile
+
 
     l.PrintDebug('Completion startCol:' .. startCol)
     l.PrintDebug('Completion endCol:' .. endCol)
 
     var word = trim(line[ endCol : startCol ])
     var query = word
+    var queryStartsWithTrigger = false
+    if query->len() > 0 && server.serverCapabilites.completionProvider.triggerCharacters->index(query[0]) != -1
+      queryStartsWithTrigger = true
+      query = query[ 1 : ]
+    endif
     l.PrintDebug('Completion query ' .. query)
 
+    # Lsp dont want completion triggered
     if empty(query) && lspItemCount == 0
       return
     endif
     
-    items->filter((_, v) => {
-      if has_key(v, 'filterText') && !empty(v.filterText)
+    items->map((_, v) => {
+        if v->get('sortText')->empty() 
+          v.sortText = v.label
+        endif
+        if v->get('filterText')->empty()
+          v.filterText = v.label
+        endif
+        return v
+      })
+    ->filter((_, v) => {
+        #Ignore buffer words when query is empty
+        if (empty(query) || queryStartsWithTrigger) && v->get('is_buf')
+          return false
+        endif
         return v.filterText != query && v.filterText->stridx(query) >= 0
-      else 
-        return v.label != query && v.label->stridx(query) >= 0
-      endif
     })
-    #->map((_, v) => {
-    #    if v->get('sortText')->empty() 
-    #      v.sortText = v.label
-    #    endif
-    #    return v
-    #  })
-    #->sort((_a, _b) => {
-    #  if has_key(_a, 'sortText') && has_key(_b, 'sortText')
-    #    return _a->get('sortText') == _b->get('sortText') ? 0 : (_a->get('sortText') >? _b->get('sortText') ? 1 : -1) 
-    #  else
-    #    return 1
-    #  endif
-    #})
+    ->sort((_a, _b) => {
+        if _a->get('is_buf') && !_b->get('is_buf')
+          return 1
+        elseif !_a->get('is_buf') && _b->get('is_buf')
+          return -1
+        else
+          return _a->get('sortText') == _b->get('sortText') ? 0 : 
+            (_a->get('sortText') >? _b->get('sortText') ? 1 : -1) 
+        endif
+    })
 
     l.PrintDebug('Completion items count after filter ' .. items->len())
     var compItems = items->map((_, i) => LspItemToCompItem(i, server.id))
