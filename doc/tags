@@ -9,5 +9,6 @@ lsp-configuration	lsp.txt	/*lsp-configuration*
 lsp-settings	lsp.txt	/*lsp-settings*
 lsp.txt	lsp.txt	/*lsp.txt*
 lsp_autocomplete	lsp.txt	/*lsp_autocomplete*
+lsp_comp_buf_cache_limit	lsp.txt	/*lsp_comp_buf_cache_limit*
 lsp_diagnostics	lsp.txt	/*lsp_diagnostics*
 lsp_format_pre_save	lsp.txt	/*lsp_format_pre_save*
