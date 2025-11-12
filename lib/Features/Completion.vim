@@ -324,17 +324,17 @@ def CompleteAccept(ci: any): void
     if has_key(ci.user_data.item, 'textEdit') && 
        ci.user_data.item.textEdit != null_dict
       l.PrintDebug("Process completion change")
-      l.PrintDebug("Completion text Edit " .. json_encode(ci.user_data.item.textEdit))
       var server = ses.GetSessionServerById(ci.user_data.server_id)
       var changes: list<any> = []
       var newText = ci.user_data.item.textEdit.newText
       var range: any = {}
       if ci.user_data.item.textEdit->has_key('replace')
+        l.PrintDebug("Process completion replace")
         range = ci.user_data.item.textEdit.replace
       elseif ci.user_data.item.textEdit->has_key('range')
+        l.PrintDebug("Process completion range")
         range = ci.user_data.item.textEdit.range
       endif
-      l.PrintDebug("Completion range " .. json_encode(range))
       changes->add(tdce.TextDocumentContentChangeEvent.new(
         newText,
         range,
