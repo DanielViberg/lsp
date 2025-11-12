@@ -104,6 +104,9 @@ export def DidChange(server: abs.Server, bId: number, par: any): void
     var newBufState = bId->getbufline(1, '$')
     if has_key(CachedBufferContent, bId)
       var diffs = diff(CachedBufferContent[bId], newBufState, {output: 'indices'})
+      if diffs->len() == 0
+        return
+      endif
       for hunk in diffs->reverse()
         var change = tdcce.TextDocumentContentChangeEvent.new(
             join(newBufState[hunk.to_idx : hunk.to_idx + hunk.to_count], "\n") .. "\n", 

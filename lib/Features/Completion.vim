@@ -106,9 +106,11 @@ export class Completion extends ft.Feature implements if.IFeature
     
     var char = str.GetTriggerChar(server.serverCapabilites.completionProvider.triggerCharacters)
     if (index(server.serverCapabilites.completionProvider.triggerCharacters, char) != -1)
+      l.PrintDebug('Trigger kind char')
       return KIND_CHARACTER
     endif
 
+      l.PrintDebug('Trigger kind invoked')
     return KIND_INVOKED
   enddef
 
@@ -128,6 +130,8 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
   if sreqNr < reqNr
     return
   endif
+
+  l.PrintDebug('Triggers: ' .. json_encode(server.serverCapabilites.completionProvider.triggerCharacters))
 
   # TODO: handle itemDefaults
   if has_key(reply, 'result') && mode() == 'i'
@@ -155,27 +159,21 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
     var cursorCol = col('.') - 1
     var startCol = cursorCol - 1
     var endCol = startCol
-    var wordChar: string = '[a-zA-Z0-9_$@-]'
+    var wordChar: string = '[-]\?\(\d*\.\d\w*\|\w\+\|\$\+\)'
 
     while startCol > 0 && endCol > 0
+      endCol -= 1
       if !(line[endCol] =~ wordChar)
         endCol += 1
         break
       endif
-      endCol -= 1
     endwhile
-
 
     l.PrintDebug('Completion startCol:' .. startCol)
     l.PrintDebug('Completion endCol:' .. endCol)
 
     var word = trim(line[ endCol : startCol ])
     var query = word
-    var queryStartsWithTrigger = false
-    if query->len() > 0 && server.serverCapabilites.completionProvider.triggerCharacters->index(query[0]) != -1
-      queryStartsWithTrigger = true
-      query = query[ 1 : ]
-    endif
     l.PrintDebug('Completion query ' .. query)
 
     # Lsp dont want completion triggered
@@ -193,11 +191,17 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
         return v
       })
     ->filter((_, v) => {
-        #Ignore buffer words when query is empty
-        if (empty(query) || queryStartsWithTrigger) && v->get('is_buf')
+      l.PrintDebug('Filter item' .. v.filterText)
+        # Ignore buffer words when query is empty
+        if empty(query) && v->get('is_buf')
           return false
         endif
-        return v.filterText != query && v.filterText->stridx(query) >= 0
+        # Let lsp completion list if query is trigger char
+        if server.serverCapabilites.completionProvider.triggerCharacters->index(query) != -1 && 
+          !v->get('is_buf')
+          return true
+        endif
+        return v.filterText != query && query == v.filterText[ : len(query) - 1]
     })
     ->sort((_a, _b) => {
         if _a->get('is_buf') && !_b->get('is_buf')
@@ -328,9 +332,9 @@ def CompleteAccept(ci: any): void
       var changes: list<any> = []
       var newText = ci.user_data.item.textEdit.newText
       var range: any = {}
-      if ci.user_data.item.textEdit->has_key('replace')
-        l.PrintDebug("Process completion replace")
-        range = ci.user_data.item.textEdit.replace
+      if ci.user_data.item.textEdit->has_key('insert')
+        l.PrintDebug("Process completion insert")
+        range = ci.user_data.item.textEdit.insert
       elseif ci.user_data.item.textEdit->has_key('range')
         l.PrintDebug("Process completion range")
         range = ci.user_data.item.textEdit.range
