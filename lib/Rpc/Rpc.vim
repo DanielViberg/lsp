@@ -32,7 +32,6 @@ export def RpcAsync(server: serv.Server,
     return
   endif
 
-  l.PrintDebug('Request client state nr ' .. req.id)
   var request = req.ToJson()
   l.LogRpc(true, request)
   var Fn = function('RpcAsyncCb', [server, Cb, bnr])

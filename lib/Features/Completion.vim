@@ -312,7 +312,7 @@ enddef
 def CompleteAccept(ci: any): void
   if !ci->empty() && type(ci.user_data) == v:t_dict
 
-    if ci.user_data.item->get('is_buf')
+    if ci.user_data.item->get('is_buf') || ci.user_data.item->has_key('insertText')
       var word = ci->get('word')
       if ci.user_data.item->has_key('insertText')
         word = ci.user_data.item.insertText
@@ -321,77 +321,39 @@ def CompleteAccept(ci: any): void
       return
     endif
 
-    if !ci.user_data.item->has_key('additionalTextEdits')
-      ResolveCompletion(ci.user_data.server_id, bufnr(), ci.user_data.item)
-      return
-    else 
-      if has_key(ci.user_data.item, 'textEdit') && 
-         ci.user_data.item.textEdit != null_dict
-        l.PrintDebug("Process completion change")
-        var server = ses.GetSessionServerById(ci.user_data.server_id)
-        var changes: list<any> = []
-        changes->add(tdce.TextDocumentContentChangeEvent.new(
-          ci.user_data.item.textEdit.newText,
-          ci.user_data.item.textEdit.range,
-          server,
-          true))
-        if has_key(ci.user_data.item, 'additionalTextEdits')
-          for edit in ci.user_data.item->get('additionalTextEdits')
-            l.PrintDebug("Process additionalTextEdits")
-            changes->add(tdce.TextDocumentContentChangeEvent.new(
-              edit.newText,
-              edit.range,
-              server))
-          endfor
-        endif
-        CompletionChange(changes, server)
-        if ci.user_data.item->get('insertTextFormat') == 2
-          server.snippet.Handle()
-        endif
-      else
-        ResolveCompletion(ci.user_data.server_id, bufnr(), ci.user_data.item)
+    if has_key(ci.user_data.item, 'textEdit') && 
+       ci.user_data.item.textEdit != null_dict
+      l.PrintDebug("Process completion change")
+      l.PrintDebug("Completion text Edit " .. json_encode(ci.user_data.item.textEdit))
+      var server = ses.GetSessionServerById(ci.user_data.server_id)
+      var changes: list<any> = []
+      var newText = ci.user_data.item.textEdit.newText
+      var range: any = {}
+      if ci.user_data.item.textEdit->has_key('replace')
+        range = ci.user_data.item.textEdit.replace
+      elseif ci.user_data.item.textEdit->has_key('range')
+        range = ci.user_data.item.textEdit.range
+      endif
+      l.PrintDebug("Completion range " .. json_encode(range))
+      changes->add(tdce.TextDocumentContentChangeEvent.new(
+        newText,
+        range,
+        server,
+        true))
+      if has_key(ci.user_data.item, 'additionalTextEdits')
+        for edit in ci.user_data.item->get('additionalTextEdits')
+          l.PrintDebug("Process additionalTextEdits")
+          changes->add(tdce.TextDocumentContentChangeEvent.new(
+            edit.newText,
+            edit.range,
+            server))
+        endfor
+      endif
+      CompletionChange(changes, server)
+      if ci.user_data.item->get('insertTextFormat') == 2
+        server.snippet.Handle()
       endif
     endif
-  endif
-enddef
-
-def ResolveCompletion(sid: number, buf: number, item: any): void
-  l.PrintDebug("Resolve completion")
-  var server = ses.GetSessionServerById(sid)
-  if !server.serverCapabilites.completionProvider.resolveProvider
-    return
-  else
-    var compRes = cr.CompletionResolve.new(item)
-    r.RpcAsync(server, compRes, ResolveCompletionReply) 
-  endif
-enddef
-
-def ResolveCompletionReply(server: abs.Server, reply: dict<any>): void
-  var changes: list<any> = []
-  if has_key(reply.result, 'textEdit') && reply.result.textEdit != null_dict
-    l.PrintDebug("Process completion change")
-    l.PrintDebug('Range ' .. reply.result.textEdit.range)
-    changes->add(tdce.TextDocumentContentChangeEvent.new(
-      reply.result.textEdit.newText,
-      reply.result.textEdit.range,
-      server,
-      true))
-  endif
-
-  if has_key(reply.result, 'additionalTextEdits')
-    l.PrintDebug("Process additionalTextEdits")
-    for edit in reply.result->get('additionalTextEdits')
-      changes->add(tdce.TextDocumentContentChangeEvent.new(
-        edit.newText,
-        edit.range,
-        server))
-    endfor
-  endif
-
-  CompletionChange(changes, server)
-
-  if changes->len() == 0
-    CompleteAcceptBuf(reply.result.label)
   endif
 enddef
 
