@@ -15,7 +15,7 @@ export class TextDocumentContentChangeEvent implements j.JsonSerializable
   var moveCursor: bool = false
 
   def new(text: string, range: dict<any>, this.server = v:none, this.moveCursor = v:none) 
-    this.text = text
+    this.text = text->substitute('\r\n', '\n', 'g')
     if range != null_dict
       this.start = p.Position.new(this.server, range.start.line, range.start.character)
       this.end = p.Position.new(this.server, range.end.line, range.end.character)
