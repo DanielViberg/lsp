@@ -74,7 +74,7 @@ export const CC = {
         deprecatedSupport: false,
         preselectSupport: false,
         tagSupport: { valueSet: [] },
-        insertReplaceSupport: false,
+        insertReplaceSupport: true,
         resolveSupport: { properties: ['documentation', 'detail'] },
         insertTextModeSupport: { valueSet: [] },
         labelDetailsSupport: false

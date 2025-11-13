@@ -9,6 +9,9 @@ Perform lsp format on buffer pre write.
 g:lsp_autocomplete (bool)				      *lsp_autocomplete*
 Autocomplete when writing.
 
+g:lsp_comp_buf_cache_limit (bool)		      *lsp_comp_buf_cache_limit*
+How many buffer words are allowed to be cached
+
 g:lsp_diagnostics (bool)				       *lsp_diagnostics*
 Show lsp diagnostic.
 
