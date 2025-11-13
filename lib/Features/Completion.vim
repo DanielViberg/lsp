@@ -416,7 +416,7 @@ def ResolveCompletionDoc(sid: number, buf: number, item: any): void
   l.PrintDebug("Resolve completion doc")
   var server = ses.GetSessionServerById(sid)
 
-  if !server.isFeatInit
+  if !server.isFeatInit || item->get('is_buf')
     return
   endif
 
