@@ -26,7 +26,6 @@ export def ApplyTextEdits(bnr: number, changes: list<tdce.TextDocumentContentCha
   # create a list of buffer positions where the edits have to be applied.
   for c in changes
     # Adjust the start and end columns for multibyte characters
-
     startRow = c.start.line - 1
     startCol = c.start.character
     startLine = [c.start.line - 1, startLine]->min()
@@ -47,7 +46,6 @@ export def ApplyTextEdits(bnr: number, changes: list<tdce.TextDocumentContentCha
   # Reverse sort the edit operations by descending line and column numbers so
   # that they can be applied without interfering with each other.
   updateEdits->sort('EditSortFunc')
-
 
   var lines: list<string> = bnr->getbufline(startLine + 1, finishLine + 1)
   var fixEol: bool = bnr->getbufvar('&fixeol')
@@ -144,6 +142,7 @@ def SetLines(lines: list<string>,
     var msg = $"set_lines: Invalid range, A = {A->string()}"
     msg ..= $", B = {B->string()}, numlines = {numlines}"
     msg ..= $", new lines = {newLines->string()}"
+    l.PrintWarning(msg)
     #Warning
     return lines
   endif
@@ -154,6 +153,8 @@ def SetLines(lines: list<string>,
   if A[1] > 0
     prefix = lines[i0][0 : A[1] - 1]
   endif
+
+  l.PrintDebug('SUFFIX: ' .. suffix .. ' col:' .. B[1])
 
   var newLinesLen: number = newLines->len()
 
