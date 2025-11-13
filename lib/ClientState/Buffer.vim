@@ -50,8 +50,8 @@ export def IsAFileBuffer(): bool
   return filereadable(expand('%:p'))
 enddef 
 
-export def GetBuffersByUri(uri: string): list<number>
+export def GetBuffersByPath(path: string): list<number>
     return getbufinfo({ buflisted: 1, bufloaded: 1})
-      ->filter((_, buf) => str.Uri(buf.name) == uri)
+      ->filter((_, buf) => buf.name == path)
       ->map((_, buf) => buf.bufnr)
 enddef
