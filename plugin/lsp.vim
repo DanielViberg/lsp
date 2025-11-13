@@ -15,9 +15,10 @@ import "../lib/Features/Formatting.vim" as f
 g:loaded_lsp = true
 
 #Settings
-g:lsp_format_pre_save = true
-g:lsp_autocomplete    = true
-g:lsp_diagnostics     = true
+g:lsp_format_pre_save      = true
+g:lsp_autocomplete         = true
+g:lsp_comp_buf_cache_limit = 1000
+g:lsp_diagnostics          = true
 
 
 def InitServers()

@@ -32,22 +32,24 @@ export class PHP extends a.ATest implements i.ITest
 
   def CompletionStates(): list<tuple<string, list<string>>>
     return [
-      ("<?php\n class Test {\n\tp¤\n}", ["public", "private", "protected", "php"]),
+      ("<?php\n class Test {\n\tconst test = '';\n\tpublic function test()\n{\n\tself::¤\n\t}\n}", ["class", "test"]),
+      ("<?php\n class Test {\n\tpublic function myfunc()\n{\n\t$test = new Test();\n\t$test->¤\n\t}\n}", ["myfunc"]),
+      ("<?php\n class Test {\n\tp¤\n}", ["private", "protected", "public", "php"]),
       ("<?php\n class Test {\n\tpublic fu¤\n}", ["function"]),
-      ("<?php\n class Test {\n\tpublic function test()\n{\n\t $testVar = null;\n\t $te¤\n}\n}", ["$testVar", "test", "testVar"]),
-      ("<?php\n class Test {\n\tpublic function test()\n{\n\t $¤\n}\n}", ["$GLOBALS", 
-                                                                          "$_SERVER", 
-                                                                          "$_GET", 
-                                                                          "$_POST", 
-                                                                          "$_FILES", 
-                                                                          "$_REQUEST", 
-                                                                          "$_SESSION", 
-                                                                          "$_ENV", 
+      ("<?php\n class Test {\n\tpublic function test()\n{\n\t $testVar = null;\n\t $te¤\n}\n}", ["$testVar"]),
+      ("<?php\n class Test {\n\tpublic function test()\n{\n\t $¤\n}\n}", ["$this", 
                                                                           "$_COOKIE", 
-                                                                          "$php_errormsg", 
+                                                                          "$_ENV",
+                                                                          "$_FILES", 
+                                                                          "$_GET",
+                                                                          "$_POST", 
+                                                                          "$_REQUEST",
+                                                                          "$_SERVER", 
+                                                                          "$_SESSION", 
+                                                                          "$GLOBALS", 
                                                                           "$HTTP_RAW_POST_DATA", 
                                                                           "$http_response_header", 
-                                                                          "$this"])
+                                                                          "$php_errormsg"]),
                                                                           ]
   enddef
 
@@ -68,16 +70,16 @@ export class PHP extends a.ATest implements i.ITest
                                                     ["public", "public"]]),
 
       ("<?php\n class Test {\n\tpublic function test()\n{\n\t$longVariable = 1;\n\t$lo¤\n}\n}\n", "ngVariable", [
-                                                    ["$longVariable", "longVariable"],
-                                                    ["$longVariable", "longVariable"],
-                                                    ["$longVariable", "longVariable"],
-                                                    ["$longVariable", "longVariable"],
-                                                    ["$longVariable", "longVariable"],
-                                                    ["$longVariable", "longVariable"],
-                                                    ["$longVariable", "longVariable"],
-                                                    ["$longVariable", "longVariable"],
-                                                    ["$longVariable", "longVariable"],
-                                                    ["$longVariable", "longVariable"],
+                                                    ["$longVariable"],
+                                                    ["$longVariable"],
+                                                    ["$longVariable"],
+                                                    ["$longVariable"],
+                                                    ["$longVariable"],
+                                                    ["$longVariable"],
+                                                    ["$longVariable"],
+                                                    ["$longVariable"],
+                                                    ["$longVariable"],
+                                                    ["$longVariable"],
                                                     ]),
 
     ("<?php\n noValidVar\n class Test {\n\tpublic function test()\n{\n\tnoV¤\n}\n}\n", "alidVar", [

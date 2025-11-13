@@ -52,6 +52,7 @@ export abstract class ATest
     # Completion
     var states = this.CompletionStates()
     for state in states
+      comp.bufferWords = []
       appendbufline(bufnr(), 0, split(state[0], '\n'))
       :doautocmd TextChangedI
       execute "normal! /¤\<CR>" 
