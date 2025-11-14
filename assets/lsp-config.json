@@ -66,10 +66,19 @@
     {
       "name": "mscs-ls",
       "filetype": ["cs"],
-      "path": ["dotnet","Microsoft.CodeAnalysis.LanguageServer.dll"],
-      "args": ["--logLevel", "Information", "--extensionLogDirectory", "/tmp/ms-cs-ls", "--stdio"],
+      "path": ["dotnet"],
+      "args": ["Microsoft.CodeAnalysis.LanguageServer.dll",
+               "--logLevel", 
+               "Information", 
+               "--extensionLogDirectory", 
+               "/tmp/ms-cs-ls", 
+               "--stdio"],
       "initializationOptions": {},
-      "workspaceConfig": {}
+      "workspaceConfig": {
+        "projects": {
+          "dotnet_binary_log_path": "C:/Temp/binlogs"
+         }
+      }
     },
     {
       "name": "rust-ls",
