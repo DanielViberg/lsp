@@ -66,7 +66,7 @@
     {
       "name": "mscs-ls",
       "filetype": ["cs"],
-      "path": ["dotnet"],
+      "path": "dotnet",
       "args": ["Microsoft.CodeAnalysis.LanguageServer.dll",
                "--logLevel", 
                "Information", 
