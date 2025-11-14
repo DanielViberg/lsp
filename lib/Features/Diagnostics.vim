@@ -24,6 +24,8 @@ export class Diagnostics extends ft.Feature implements if.IFeature
     if !initOnce
       initOnce = true
 
+      autocmd CursorMoved * call CheckEchoDiag()
+
       :highlight LError ctermfg=Red guifg=#cf4c4c
       :highlight LIError ctermbg=Red guifg=#ecb55d
       :highlight LWarning ctermfg=Yellow guifg=#ecb55d
@@ -136,6 +138,7 @@ export class Diagnostics extends ft.Feature implements if.IFeature
       endif
 
       var line = diag.range.start.line + 1
+      echomsg 'set line: ' .. line
       if line > bufLines
         line = bufLines
       endif
@@ -157,3 +160,32 @@ export class Diagnostics extends ft.Feature implements if.IFeature
   enddef
 
 endclass
+
+def CheckEchoDiag(): void
+  var messages = prop_list(line('.'), {type: ['error', 'warning', 'info', 'hint'], bufnr: bufnr()})
+  if messages->len() > 0
+    var message: string 
+    var type: string = 'info'
+    for m in messages
+      type = m.type
+      if m->has_key('text') && strlen(m.text) > 0
+        message = strlen(message) > 0 ? message .. ';' .. m.text : m.text
+      endif
+    endfor
+
+    if type == 'info'
+      echohl LIInfo
+    elseif type == 'warning'
+      echohl LIWarning
+    elseif type == 'error'
+      echohl LIError
+    else
+      echohl LIHint
+    endif
+
+    echo message
+    echohl None
+  else
+    :echo ''
+  endif
+enddef
