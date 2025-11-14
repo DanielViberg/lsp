@@ -1,7 +1,7 @@
 # Vim 9 Language Server Protocol Client
 
 
-### ⚠️ Note! Early alpha status, lots of things are hard coded and many things dont work yet.
+### ⚠️ Note! Beta status, lots of things are hard coded and many things dont work yet.
 
 ### TL;DR
 A pure vim9script, lightweight lsp client. 
@@ -24,6 +24,7 @@ A pure vim9script, lightweight lsp client.
 ### Requirements
 - Vim version 9.0 or higher
 - Linux
+- Windows
 
 ### Installation
 Install using [vim-plug](https://github.com/junegunn/vim-plug). Add the following lines to your `.vimrc` file:
