@@ -245,6 +245,7 @@ def CacheBufferWords(): void
   var lines = getbufline(bufnr(), 1, '$')
   for l in lines
     var words = split(l, '\v[^a-zA-Z0-9_-]+')
+      ->filter((_, v) => v =~ '\v^[^-].*[a-zA-Z0-9]$')
     for w in words
       if bufferWords->index(w) == -1 && # Dont already exists
          mode() != 'i' &&               # Check only finished words

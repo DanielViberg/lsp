@@ -25,7 +25,8 @@ export class VIM extends a.ATest implements i.ITest
   enddef
 
   def CompletionStates(): list<tuple<string, list<string>>>
-    return []
+    return [
+    ]
   enddef
 
   def CompletionAccepts(): list<tuple<string, string, string>>

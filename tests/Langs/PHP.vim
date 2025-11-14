@@ -33,6 +33,7 @@ export class PHP extends a.ATest implements i.ITest
   def CompletionStates(): list<tuple<string, list<string>>>
     return [
       ("<?php\n class Test {\n\tconst test = '';\n\tpublic function test()\n{\n\tself::¤\n\t}\n}", ["class", "test"]),
+      ("<?php\n class Test {\n\tconst test_variable = '';\n\tpublic function test()\n{\n\ttest_var¤\n\t}\n}", ["test_variable"]),
       ("<?php\n class Test {\n\tpublic function myfunc()\n{\n\t$test = new Test();\n\t$test->¤\n\t}\n}", ["myfunc"]),
       ("<?php\n class Test {\n\tp¤\n}", ["private", "protected", "public", "php"]),
       ("<?php\n class Test {\n\tpublic fu¤\n}", ["function"]),
