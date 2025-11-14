@@ -138,7 +138,6 @@ export class Diagnostics extends ft.Feature implements if.IFeature
       endif
 
       var line = diag.range.start.line + 1
-      echomsg 'set line: ' .. line
       if line > bufLines
         line = bufLines
       endif
