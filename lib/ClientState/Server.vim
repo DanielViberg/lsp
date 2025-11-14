@@ -49,11 +49,6 @@ export class Server extends serv.Server
     var bin: any = this.config.path
     var cmd: any = [bin]
 
-    if type(bin) == v:t_list 
-      cmd = bin
-      bin = bin[0]
-    endif
-
     if !executable(bin)
       l.PrintError("Binary for " .. this.config.path .. " is missing")
       return
@@ -62,7 +57,6 @@ export class Server extends serv.Server
     if has_key(this.config, 'args')
       cmd->extend(this.config.args)
     endif
-    echomsg cmd
     this.job = cmd->job_start(opts)
 
     this.isRunning = true

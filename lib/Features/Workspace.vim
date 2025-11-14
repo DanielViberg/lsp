@@ -33,6 +33,8 @@ export class Workspace extends ft.Feature implements if.IFeature
       var response = res.ResponseMessage.new(data, items)
       r.RpcAsyncMes(server, response)
     endif
+    if has_key(data, 'method') && data.method == 'workspace/applyEdit'
+    endif
   enddef
 
   def ProcessNotification(server: any, data: any)
