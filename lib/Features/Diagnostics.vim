@@ -24,14 +24,14 @@ export class Diagnostics extends ft.Feature implements if.IFeature
     if !initOnce
       initOnce = true
 
-      :highlight LError ctermfg=Red
-      :highlight LIError ctermbg=Red
-      :highlight LWarning ctermfg=Yellow
-      :highlight LIWarning ctermbg=Yellow
-      :highlight LInfo ctermfg=Blue
-      :highlight LIInfo ctermbg=Blue
-      :highlight LHint ctermfg=Magenta
-      :highlight LIHint ctermbg=Magenta
+      :highlight LError ctermfg=Red guifg=#cf4c4c
+      :highlight LIError ctermbg=Red guifg=#ecb55d
+      :highlight LWarning ctermfg=Yellow guifg=#ecb55d
+      :highlight LIWarning ctermbg=Yellow guifg=#ecb55d
+      :highlight LInfo ctermfg=Blue guifg=#3465a4
+      :highlight LIInfo ctermbg=Blue guifg=#3465a4
+      :highlight LHint ctermfg=Magenta guifg=#c061cb
+      :highlight LIHint ctermbg=Magenta guifg=#c061cb
 
 	    call prop_type_add('error', {'highlight': 'LError'})
 	    call prop_type_add('errorI', {'highlight': 'LIError'})
