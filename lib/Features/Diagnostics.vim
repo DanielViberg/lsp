@@ -174,13 +174,13 @@ def CheckEchoDiag(): void
     endfor
 
     if type == 'info'
-      echohl LIInfo
+      echohl LInfo
     elseif type == 'warning'
-      echohl LIWarning
+      echohl LWarning
     elseif type == 'error'
-      echohl LIError
-    else
-      echohl LIHint
+      echohl LError
+    elseif type == 'hint'
+      echohl LHint
     endif
 
     echo message
