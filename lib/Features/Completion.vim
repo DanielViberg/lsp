@@ -198,14 +198,7 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
         endif
 
         # Servers dont send correct filterTexts
-        if server.fileType == 'php'
-          v.filterText = substitute(v.filterText, '\$', '', 'g')
-        endif
-
-        if server.fileType == 'vue'
-          v.filterText = substitute(v.filterText, 'v-', '', 'g')
-        endif
-
+        v.filterText = substitute(v.filterText, '^\(\$\|\::\|v-\)', '', '')
         return v
       })
     ->filter((_, v) => {
