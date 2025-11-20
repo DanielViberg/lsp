@@ -126,7 +126,7 @@ enddef
 def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
   waiting = false
 
-  # Skip intermediat requests
+  # Skip intermediate requests
   if sreqNr < reqNr
     return
   endif
@@ -159,14 +159,22 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
     var cursorCol = col('.') - 1
     var startCol = cursorCol - 1
     var endCol = startCol
-    var wordChar: string = '[-]\?\(\d*\.\d\w*\|\w\+\|\$\+\)'
+    var wordChar: string = '[a-zA-Z0-9_-]'
+    var startWithTriggerChar: bool = false
 
-    while startCol > 0 && endCol > 0
-      endCol -= 1
-      if !(line[endCol] =~ wordChar)
+    while startCol > 0 && endCol >= 0
+      if server.serverCapabilites.completionProvider.triggerCharacters->index(line[endCol]) != -1
+        l.PrintDebug('Is trigger char')
+        startWithTriggerChar = true
         endCol += 1
         break
       endif
+      if !(line[endCol] =~ wordChar)
+        l.PrintDebug('Is not word char')
+        endCol += 1
+        break
+      endif
+      endCol -= 1
     endwhile
 
     l.PrintDebug('Completion startCol:' .. startCol)
@@ -188,6 +196,16 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
         if v->get('filterText')->empty()
           v.filterText = v.label
         endif
+
+        # Servers dont send correct filterTexts
+        if server.fileType == 'php'
+          v.filterText = substitute(v.filterText, '\$', '', 'g')
+        endif
+
+        if server.fileType == 'vue'
+          v.filterText = substitute(v.filterText, 'v-', '', 'g')
+        endif
+
         return v
       })
     ->filter((_, v) => {
@@ -195,12 +213,9 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
         if empty(query) && v->get('is_buf')
           return false
         endif
-        # Let lsp completion list if query is trigger char
-        if server.serverCapabilites.completionProvider.triggerCharacters->index(query) != -1 && 
-          !v->get('is_buf')
-          return true
-        endif
-        return v.filterText != query && query == v.filterText[ : len(query) - 1]
+        echomsg 'checking ' .. v.filterText
+        return (empty(query) && startWithTriggerChar) || 
+          v.filterText != query && query == v.filterText[ : len(query) - 1]
     })
     ->sort((_a, _b) => {
         if _a->get('is_buf') && !_b->get('is_buf')
