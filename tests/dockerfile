@@ -1,13 +1,31 @@
 FROM alpine:3.22.1
 
-RUN apk add --no-cache vim nodejs npm
-RUN apk add --no-cache clang-dev
+RUN apk add --no-cache vim nodejs npm clang-dev curl unzip
 
 RUN npm install -g intelephense@1.14.4
 RUN npm install -g @vue/language-server@2.2.10
 RUN npm install -g typescript@5.8.3
 RUN npm install -g vim-language-server@2.3.1
 RUN npm install -g typescript-language-server@4.3.3
+
+RUN wget -O dotnet.tar.gz https://dotnet.microsoft.com/download/dotnet-core/scripts/v1/dotnet-install.sh && \
+    chmod +x dotnet-install.sh && \
+    ./dotnet-install.sh --channel 9.0 --runtime aspnetcore --install-dir /usr/share/dotnet && \
+    ./dotnet-install.sh --channel 9.0 --install-dir /usr/share/dotnet && \
+    rm dotnet-install.sh && \
+    ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
+
+RUN mkdir -p tools/cslsp
+
+RUN curl -L https://github.com/Crashdummyy/roslynLanguageServer/releases/v5.3.0-2.25569.12/download/microsoft.codeanalysis.languageserver.linux-x64.zip \
+    -o /tmp/cslsp.zip && \
+    unzip /tmp/cslsp.zip -d /tools/cslsp && \
+    rm /tmp/cslsp.zip && \
+    chmod +x /tools/cslsp/Microsoft.CodeAnalysis.LanguageServer
+
+RUN echo '#!/bin/sh' > /usr/local/bin/cslsp && \
+    echo 'exec dotnet /tools/cslsp/Microsoft.CodeAnalysis.LanguageServer.dll "$@"' >> /usr/local/bin/cslsp && \
+    chmod +x /usr/local/bin/cslsp
 
 WORKDIR /app
 VOLUME /app

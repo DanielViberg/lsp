@@ -26,7 +26,7 @@ enddef
 
 #RunCheck(ts.TS.new())
 #RunCheck(c.C.new())
-#RunCheck(cs.CS.new())
+RunCheck(cs.CS.new())
 RunCheck(blade.BLADE.new())
 RunCheck(txt.TXT.new())
 RunCheck(php.PHP.new())

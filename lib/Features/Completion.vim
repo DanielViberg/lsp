@@ -206,7 +206,6 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
         if empty(query) && v->get('is_buf')
           return false
         endif
-        echomsg 'checking ' .. v.filterText
         return (empty(query) && startWithTriggerChar) || 
           v.filterText != query && query == v.filterText[ : len(query) - 1]
     })

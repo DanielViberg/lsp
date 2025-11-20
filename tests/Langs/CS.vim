@@ -9,7 +9,7 @@ export class CS extends a.ATest implements i.ITest
     return {
       name: "mscs-ls",
       filetype: ["cs"],
-      path: ["dotnet", "Microsoft.CodeAnalysis.LanguageServer.dll"],
+      path: ["cslsp"],
       args: ["--logLevel", "Information", "--extensionLogDirectory", "/tmp/ms-cs-ls", "--stdio"],
       initializationOptions: {},
       workspaceConfig: {}
