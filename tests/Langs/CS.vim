@@ -9,10 +9,20 @@ export class CS extends a.ATest implements i.ITest
     return {
       name: "mscs-ls",
       filetype: ["cs"],
-      path: ["cslsp"],
-      args: ["--logLevel", "Information", "--extensionLogDirectory", "/tmp/ms-cs-ls", "--stdio"],
+      path: "dotnet",
+      args: [
+      "/tools/cslsp/Microsoft.CodeAnalysis.LanguageServer.dll",
+      "--logLevel", 
+      "Information", 
+      "--extensionLogDirectory", 
+      "/tmp/ms-cs-ls", 
+      "--stdio"],
       initializationOptions: {},
-      workspaceConfig: {}
+      workspaceConfig: {
+        projects: {
+          dotnet_binary_log_path: "tmp/binlogs"
+         }
+      }
     }
   enddef
 
@@ -25,7 +35,9 @@ export class CS extends a.ATest implements i.ITest
   enddef
 
   def CompletionStates(): list<tuple<string, list<string>>>
-    return []
+    return [
+      ("Cons¤", ["Console"]),
+    ]
   enddef
 
   def CompletionAccepts(): list<tuple<string, string, string>>
