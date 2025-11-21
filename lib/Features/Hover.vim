@@ -42,7 +42,9 @@ export def HoverCmd(): void
       if (type(result) == v:t_dict && result->has_key('contents'))
         var info = result.contents.value->substitute('\r\n', '\n', 'g')->split("\n")
         popup_atcursor(info, {
-          pos: 'topleft'
+          pos: 'topleft',
+          padding: [0, 1, 0, 1],
+          highlight: 'PopupSelected'
         })
       endif
     endif

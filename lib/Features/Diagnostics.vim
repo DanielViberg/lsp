@@ -9,6 +9,7 @@ import "../Protocol/Objects/TextDocumentIdentifier.vim" as tdi
 import "../Rpc/Rpc.vim" as r
 import "../Utils/Log.vim" as l
 import "../Utils/Str.vim" as s
+import "../ClientState/Session.vim" as ses
 
 var initOnce = false
 
