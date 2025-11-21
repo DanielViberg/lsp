@@ -86,7 +86,7 @@ export const CC = {
     },
     hover: {
       dynamicRegistration: false,
-      contentFormat: []
+      contentFormat: ['plaintext']
     },
     signatureHelp: {
       dynamicRegistration: false,

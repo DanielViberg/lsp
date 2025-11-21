@@ -11,6 +11,7 @@ import "../lib/ClientState/Buffer.vim" as buf
 import "../lib/ClientState/Session.vim" as ses
 import "../lib/ClientState/Config.vim" as c
 import "../lib/Features/Formatting.vim" as f
+import "../lib/Features/Hover.vim" as h
 
 g:loaded_lsp = true
 
@@ -31,7 +32,8 @@ command! LspFormat call f.FormatCmd()
 command! LspRestart call Restart()
 command! LspDisable call Disable()
 command! LspEnable call Enable()
-command! LspGoToDefinition call
+command! LspHover call h.HoverCmd()
+#command! LspGoToDefinition call
 
 def Disable(): void
 	buf.disable = true
