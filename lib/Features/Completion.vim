@@ -193,11 +193,12 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
         if v->get('sortText')->empty() 
           v.sortText = v.label
         endif
+
         if v->get('filterText')->empty()
           v.filterText = v.label
         endif
 
-        # Servers dont send correct filterTexts
+        # Some servers dont send correct filterTexts
         v.filterText = substitute(v.filterText, '^\(\$\|\::\|v-\)', '', '')
         return v
       })
@@ -206,7 +207,7 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
         if empty(query) && v->get('is_buf')
           return false
         endif
-        return (empty(query) && startWithTriggerChar) || 
+        return (empty(query) && startWithTriggerChar) ||
           v.filterText != query && query == v.filterText[ : len(query) - 1]
     })
     ->sort((_a, _b) => {
