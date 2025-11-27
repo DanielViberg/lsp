@@ -171,7 +171,7 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
       endif
       if !(line[endCol] =~ wordChar) || endCol == 0
         l.PrintDebug('Is not word char')
-        endCol = endCol == 0 ? 0 : endCol + 1
+        endCol = endCol == 0 ? 1 : endCol + 1
         break
       endif
       endCol -= 1
