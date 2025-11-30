@@ -21,6 +21,7 @@ import "../Protocol/Objects/TextDocumentPosition.vim" as tdp
 var CachedBufferContent: dict<list<string>>
 var initOnce: bool = false
 var didOpenFiles: list<string> = []
+var isQuickFix: bool = false
 
 const KIND_NONE = 0
 const KIND_FULL = 1
@@ -36,6 +37,8 @@ export class DocumentSync extends ft.Feature implements if.IFeature
     if !initOnce
       initOnce = true
       autocmd BufReadPost * ft.FeatAu(DidOpen)
+      autocmd QuickFixCmdPre * isQuickFix = true
+      autocmd QuickFixCmdPost * isQuickFix = false
       autocmd BufUnload * ft.FeatAu(DidClose)
       autocmd BufWipeout * ft.FeatAu(DidClose)
       autocmd BufWritePre * ft.FeatAu(WillSave)
@@ -69,7 +72,11 @@ endclass
 
 export def DidOpen(server: abs.Server, bId: number, par: any): void
   l.PrintDebug('Trying to open ' .. expand('#' .. bId .. ':p'))
-  if !b.IsAFileBuffer(bId) || index(didOpenFiles, expand('#' .. bId .. ':p')) != -1
+  if isQuickFix
+    return
+  endif
+  if !b.IsAFileBuffer(bId) || 
+      index(didOpenFiles, expand('#' .. bId .. ':p')) != -1
     l.PrintDebug('s:' .. server.id .. 'b:' .. bId .. ' not a buffer or already open')
     return
   endif
