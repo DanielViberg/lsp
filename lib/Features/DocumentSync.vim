@@ -35,7 +35,7 @@ export class DocumentSync extends ft.Feature implements if.IFeature
   def AutoCmds()
     if !initOnce
       initOnce = true
-      autocmd BufAdd * ft.FeatAu(DidOpen)
+      autocmd BufReadPost * ft.FeatAu(DidOpen)
       autocmd BufUnload * ft.FeatAu(DidClose)
       autocmd BufWipeout * ft.FeatAu(DidClose)
       autocmd BufWritePre * ft.FeatAu(WillSave)
