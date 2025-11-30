@@ -14,6 +14,7 @@ import "./Langs/CS.vim" as cs
 
 e.TESTING = true
 e.DEBUG = true
+e.DEBUG_RPC = true
 
 var result = 1
 
@@ -26,12 +27,12 @@ enddef
 
 #RunCheck(ts.TS.new())
 #RunCheck(c.C.new())
-#RunCheck(cs.CS.new())
 RunCheck(blade.BLADE.new())
 RunCheck(txt.TXT.new())
 RunCheck(php.PHP.new())
 RunCheck(vue.VUE.new())
 RunCheck(vim.VIM.new())
+RunCheck(cs.CS.new())
 
 echomsg "ALL TEST OK, EXITING ..."
 e.DEBUG = false

@@ -86,7 +86,6 @@ export class Completion extends ft.Feature implements if.IFeature
         this.GetTriggerKind(server, bId),
         str.GetTriggerChar(server.serverCapabilites.completionProvider.triggerCharacters),
         tdpos)
-      l.PrintDebug('COMPREQ: ' .. json_encode(compReq.ToJson()))
       waiting = true
       reqNr += 1
       r.RpcAsync(server, compReq, RequestCompletionReply, reqNr)
@@ -163,17 +162,27 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
     var startWithTriggerChar: bool = false
 
     while startCol > 0 && endCol >= 0
-      if server.serverCapabilites.completionProvider.triggerCharacters->index(line[endCol]) != -1
+
+      if server.serverCapabilites.completionProvider
+         .triggerCharacters->index(line[endCol]) != -1
         l.PrintDebug('Is trigger char')
         startWithTriggerChar = true
         endCol += 1
         break
       endif
-      if !(line[endCol] =~ wordChar) || endCol == 0
-        l.PrintDebug('Is not word char')
-        endCol = endCol == 0 ? 0 : endCol + 1
+
+      if endCol == 0
+        l.PrintDebug('Is char 0')
+        endCol = !(line[endCol] =~ wordChar) ? 1 : 0
         break
       endif
+
+      if !(line[endCol] =~ wordChar)
+        l.PrintDebug('Is not word char')
+        endCol = endCol + 1
+        break
+      endif
+
       endCol -= 1
     endwhile
 
@@ -199,7 +208,9 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
         endif
 
         # Some servers dont send correct filterTexts
-        v.filterText = substitute(v.filterText, '^\(\$\|\::\|v-\)', '', '')
+        if v.filterText =~ '^\(\$\|\::\|v-\)'
+          v.filterText = substitute(v.filterText, '^\(\$\|\::\|v-\)', '', '')
+        endif
         return v
       })
     ->filter((_, v) => {
@@ -296,7 +307,6 @@ enddef
 
 def PumCallback(): string
   var info = complete_info(['completed', 'selected'])
-  l.PrintDebug("Pum callback: " .. json_encode(info))
   if has_key(info, 'completed') && 
      info.selected != -1 &&
      !noServer

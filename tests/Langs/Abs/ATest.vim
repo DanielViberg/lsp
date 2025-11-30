@@ -41,7 +41,7 @@ export abstract class ATest
 
     # Formatting
     appendbufline(bufnr(), 0, split(this.PreFormatString(), '\n'))
-    :doautocmd TextChangedI
+    doautocmd TextChangedI
     LspFormat
     if assert_equal(this.PostFormatString(), join(getline(1, '$'), "\n"))
       l.PrintError("Formatting failed")
@@ -54,14 +54,14 @@ export abstract class ATest
     for state in states
       comp.bufferWords = []
       appendbufline(bufnr(), 0, split(state[0], '\n'))
-      :doautocmd TextChangedI
+      doautocmd TextChangedI
       execute "normal! /¤\<CR>" 
       var charBefore = getline('.')[col('.') - 2]
       cursor(line('.'), col('.') + 1)
       normal! hxx
       timer_start(1000, (_) => {
         var items = complete_info(["items"]).items->map((_, mi) => mi.word)
-        if assert_equal(items, state[1])
+        if assert_equal(items, state[1]) && !empty(state[1][0])
           echomsg items
           echomsg state[1]
           result = 1
@@ -84,7 +84,7 @@ export abstract class ATest
     var accepts = this.CompletionAccepts()
     for accept in accepts
       appendbufline(bufnr(), 0, split(accept[0], '\n'))
-      :doautocmd TextChangedI
+      doautocmd TextChangedI
       execute "normal! /¤\<CR>" 
       var charBefore = getline('.')[col('.') - 2]
       cursor(line('.'), col('.') + 1)
@@ -119,7 +119,7 @@ export abstract class ATest
     var incrEdits = this.CompletionIncrEdit()
     for iedit in incrEdits
       appendbufline(bufnr(), 0, split(iedit[0], '\n'))
-      :doautocmd TextChangedI
+      doautocmd TextChangedI
       execute "normal! /¤\<CR>"
       normal! x
       for c in range(0, len(iedit[1]) - 1)

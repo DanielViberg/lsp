@@ -25,8 +25,6 @@ export abstract class Server
   var userMiddleware: any
 
   def ProcessRequest(data: any): void 
-    l.PrintDebug('Server request ' .. data)
-
     if !this.isFeatInit
       l.PrintDebug('Features not init')
       return
@@ -45,8 +43,6 @@ export abstract class Server
   enddef
 
   def ProcessNotification(data: any): void 
-    l.PrintDebug('Server notification ' .. data)
-
     if data.method == 'window/logMessage'
       #l.PrintInfo(data.params.message)
     endif
