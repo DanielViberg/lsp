@@ -35,11 +35,24 @@ export class DocumentSync extends ft.Feature implements if.IFeature
   def AutoCmds()
     if !initOnce
       initOnce = true
-      autocmd BufReadPost * ft.FeatAu(DidOpen)
+      autocmd BufAdd * ft.FeatAu(DidOpen)
       autocmd BufUnload * ft.FeatAu(DidClose)
       autocmd BufWipeout * ft.FeatAu(DidClose)
       autocmd BufWritePre * ft.FeatAu(WillSave)
       autocmd BufWritePost * ft.FeatAu(DidSave)
+
+      var bIds = getbufinfo({buflisted: 1, bufloaded: 1})
+      for buf in bIds
+        var servers = ses.GetSessionServersByBuf(buf.bufnr)
+        for server in servers
+          while !server.isRunning || !server.isInit
+            l.PrintDebug('Waiting to send DidOpen for server: ' .. server.id)
+            sleep 1
+          endwhile
+          DidOpen(server, buf.bufnr, true)
+        endfor 
+      endfor
+
     endif
   enddef
   
@@ -55,6 +68,7 @@ endclass
 
 
 export def DidOpen(server: abs.Server, bId: number, par: any): void
+  l.PrintDebug('Trying to open ' .. expand('#' .. bId .. ':p'))
   if !b.IsAFileBuffer(bId) || index(didOpenFiles, expand('#' .. bId .. ':p')) != -1
     l.PrintDebug('s:' .. server.id .. 'b:' .. bId .. ' not a buffer or already open')
     return

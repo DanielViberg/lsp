@@ -89,10 +89,6 @@ export class Server extends serv.Server
     ses.RemoveSessionServer(this)
     ses.SetSessionServer(this)
 
-    l.PrintDebug('Ready and do open')
-
-    dc.DidOpen(this, bnr, null)
-
     this.workspace.SendWorkspaceConfig(this, this.config->get('workspaceConfig', null_dict))
     this.userMiddleware = m.UserMiddleware.new()
   enddef

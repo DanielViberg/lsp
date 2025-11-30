@@ -33,8 +33,8 @@ export def GetSessionServersByFt(ft: string): list<ser.Server>
   return servers
 enddef
 
-export def GetSessionServersByBuf(bufnr: number): list<ser.Server>
-  var ft = fnamemodify(bufname(bufnr()), ':e')
+export def GetSessionServersByBuf(bId: number): list<ser.Server>
+  var ft = fnamemodify(bufname(bId), ':e')
   return GetSessionServersByFt(ft)
 enddef
 
