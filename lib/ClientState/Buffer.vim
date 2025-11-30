@@ -14,7 +14,7 @@ export class Buffer
     l.PrintDebug('New buffer')
     conf.Init()
   
-    if !IsAFileBuffer() || disable
+    if !IsAFileBuffer(bufnr()) || disable
       l.PrintDebug('Not a file buffer or disabled')
       return
     endif
@@ -46,8 +46,8 @@ export class Buffer
   enddef
 endclass
 
-export def IsAFileBuffer(): bool
-  return filereadable(expand('%:p'))
+export def IsAFileBuffer(bId: number): bool
+  return filereadable(expand('#' .. bId .. ':p'))
 enddef 
 
 export def GetBuffersByPath(path: string): list<number>
