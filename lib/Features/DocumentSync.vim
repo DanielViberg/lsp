@@ -20,7 +20,7 @@ import "../Protocol/Objects/TextDocumentPosition.vim" as tdp
 
 var CachedBufferContent: dict<list<string>>
 var initOnce: bool = false
-var didOpenBuffers: list<number> = []
+var didOpenFiles: list<string> = []
 
 const KIND_NONE = 0
 const KIND_FULL = 1
@@ -35,7 +35,8 @@ export class DocumentSync extends ft.Feature implements if.IFeature
   def AutoCmds()
     if !initOnce
       initOnce = true
-      autocmd BufEnter * ft.FeatAu(DidOpen)
+      autocmd BufReadPost * ft.FeatAu(DidOpen)
+      autocmd BufUnload * ft.FeatAu(DidClose)
       autocmd BufWipeout * ft.FeatAu(DidClose)
       autocmd BufWritePre * ft.FeatAu(WillSave)
       autocmd BufWritePost * ft.FeatAu(DidSave)
@@ -54,11 +55,11 @@ endclass
 
 
 export def DidOpen(server: abs.Server, bId: number, par: any): void
-  if !b.IsAFileBuffer() || index(didOpenBuffers, bId) != -1
+  if !b.IsAFileBuffer(bId) || index(didOpenFiles, expand('#' .. bId .. ':p')) != -1
     l.PrintDebug('s:' .. server.id .. 'b:' .. bId .. ' not a buffer or already open')
     return
   endif
-  didOpenBuffers->add(bId)
+  didOpenFiles->add(expand('#' .. bId .. ':p'))
 
   listener_add((_bnr: number, start: number, end: number, added: number, changes: list<dict<number>>) => {
     DidChange(server, bId, true)
@@ -77,8 +78,8 @@ export def DidOpen(server: abs.Server, bId: number, par: any): void
 enddef
 
 export def DidClose(server: abs.Server, bId: number, par: any): void
-  if index(didOpenBuffers, bId) != -1
-    remove(didOpenBuffers, index(didOpenBuffers, bId))
+  if index(didOpenFiles, expand('#' .. bId .. ':p')) != -1
+    remove(didOpenFiles, index(didOpenFiles, expand('#' .. bId .. ':p')))
     listener_remove(bId)
     l.PrintDebug("Did close sid: " .. server.id .. " bId " .. bId )
     var didCloseNotif = ddcl.DocumentDidClose.new(s.Uri(expand('%:p')))
