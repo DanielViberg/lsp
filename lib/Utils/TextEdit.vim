@@ -154,8 +154,6 @@ def SetLines(lines: list<string>,
     prefix = lines[i0][0 : A[1] - 1]
   endif
 
-  l.PrintDebug('SUFFIX: ' .. suffix .. ' col:' .. B[1])
-
   var newLinesLen: number = newLines->len()
 
   var n: number = in - i0 + 1
