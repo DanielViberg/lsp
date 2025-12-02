@@ -8,6 +8,7 @@ import "../Rpc/Rpc.vim" as r
 import "../Utils/Log.vim" as l
 import "../Protocol/Objects/Position.vim" as p
 import "../Protocol/Objects/Location.vim" as lo
+import "../ClientState/Session.vim" as ses
 
 var initOnce: bool = false
   
@@ -34,6 +35,13 @@ export class GoToDefinition extends ft.Feature implements if.IFeature
   enddef
 
 endclass
+
+export def GoToCmd(): void
+  var servers = ses.GetSessionServersByBuf(bufnr())
+  if servers->len() > 0
+    GoTo(servers[0], bufnr(), false)
+  endif
+enddef
 
 def GoTo(server: any, bId: number, par: any): void
   if mode() == 'n' && 
