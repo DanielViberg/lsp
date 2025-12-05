@@ -12,6 +12,7 @@ import "../lib/ClientState/Session.vim" as ses
 import "../lib/ClientState/Config.vim" as c
 import "../lib/Features/Formatting.vim" as f
 import "../lib/Features/Hover.vim" as h
+import "../lib/Features/GoToDefinition.vim" as g
 
 g:loaded_lsp = true
 
@@ -20,7 +21,6 @@ g:lsp_format_pre_save      = true
 g:lsp_autocomplete         = true
 g:lsp_comp_buf_cache_limit = 1000
 g:lsp_diagnostics          = true
-
 
 def InitServers()
   buf.Buffer.new()
@@ -33,7 +33,7 @@ command! LspRestart call Restart()
 command! LspDisable call Disable()
 command! LspEnable call Enable()
 command! LspHover call h.HoverCmd()
-#command! LspGoToDefinition call
+command! LspGoToD call g.GoToCmd()
 
 def Disable(): void
 	buf.disable = true
