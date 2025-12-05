@@ -99,7 +99,8 @@ export def DidOpen(server: abs.Server, bId: number, par: any): void
 enddef
 
 export def DidClose(server: abs.Server, bId: number, par: any): void
-  if index(didOpenFiles, expand('#' .. bId .. ':p')) != -1
+  if index(didOpenFiles, expand('#' .. bId .. ':p')) != -1 &&
+      getbufinfo({bufloaded: 1})->filter((_, buf) => buf.name == expand('#' .. bId .. ':p'))->len() <= 1
     remove(didOpenFiles, index(didOpenFiles, expand('#' .. bId .. ':p')))
     listener_remove(bId)
     l.PrintDebug("Did close sid: " .. server.id .. " bId " .. bId )
