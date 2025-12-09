@@ -40,6 +40,7 @@ var isIncomplete: bool = false
 var noServer: bool = false
 var waiting: bool = false
 var reqNr: number = 0
+var complIx: number = 0
 
 export class Completion extends ft.Feature implements if.IFeature
 
@@ -197,7 +198,6 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
     if empty(query) && lspItemCount == 0
       return
     endif
-    
     items->map((_, v) => {
         if v->get('sortText')->empty() 
           v.sortText = v.label
@@ -249,7 +249,7 @@ def CompleteNoServer()
   endif
   var items: list<any> = GetCacheBufferW()
   var compItems = items->map((_, i) => LspItemToCompItem(i, -1))
-  var match = complete_match()
+  var match = CompleteMatch(&iskeyword, ',')
   var [col, trigger] = match->len() > 0 ? match[0] : [null, null_string]
   if mode() == 'i' && strlen(trigger) > 0
     compItems->filter((_, v) => {
@@ -258,6 +258,18 @@ def CompleteNoServer()
     })
     compItems->complete(col('.'))
   endif
+enddef
+
+def CompleteMatch(triggers: string, sep: string): list<any>
+  var line = getline('.')->strpart(0, col('.') - 1)
+  var result = []
+  for trig in split(triggers, sep)
+    var idx = strridx(line, trig)
+    if idx >= 0
+      call add(result, [idx + 1, trig])
+    endif
+  endfor
+  return result
 enddef
 
 def CacheBufferWords(): void
