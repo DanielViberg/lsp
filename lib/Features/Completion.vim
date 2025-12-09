@@ -249,8 +249,7 @@ def CompleteNoServer()
   endif
   var items: list<any> = GetCacheBufferW()
   var compItems = items->map((_, i) => LspItemToCompItem(i, -1))
-  var match = CompleteMatch(&iskeyword, ',')
-  var [col, trigger] = match->len() > 0 ? match[0] : [null, null_string]
+  var trigger = CompleteMatch()
   if mode() == 'i' && strlen(trigger) > 0
     compItems->filter((_, v) => {
         var labelName = trim(v.word)
@@ -258,18 +257,6 @@ def CompleteNoServer()
     })
     compItems->complete(col('.'))
   endif
-enddef
-
-def CompleteMatch(triggers: string, sep: string): list<any>
-  var line = getline('.')->strpart(0, col('.') - 1)
-  var result = []
-  for trig in split(triggers, sep)
-    var idx = strridx(line, trig)
-    if idx >= 0
-      call add(result, [idx + 1, trig])
-    endif
-  endfor
-  return result
 enddef
 
 def CacheBufferWords(): void
@@ -477,11 +464,9 @@ def ResolveCompletionDocReply(server: abs.Server, reply: dict<any>): void
 	endif
 enddef
 
-
 def CompleteAcceptBuf(word: string): void
   l.PrintDebug("Completion Accept Buf")
-  var match = complete_match()
-  var [_, trigger] = match->len() > 0 ? match[0] : [null, null_string]
+  var trigger = CompleteMatch()
   var lineText = getline(line('.'))
   var cursorIndex = col('.') - 1
   var compIndex = cursorIndex - trigger->len()
@@ -489,6 +474,25 @@ def CompleteAcceptBuf(word: string): void
   var startText = startIndex == 0 ? '' : lineText[ : startIndex - 1]
   setline(line('.'), startText .. word .. lineText[ col('.') - 1 : ])
   cursor(line('.'), col('.') + len(word) - trigger->len())
+enddef
+
+def CompleteMatch(): string
+    var line = getline('.')
+    var startCol = col('.') - 2
+    var endCol = startCol
+    var wordChar: string = '[a-zA-Z0-9_-]'
+    while startCol > 0 && endCol >= 0
+      if endCol == 0
+        endCol = !(line[endCol] =~ wordChar) ? 1 : 0
+        break
+      endif
+      if !(line[endCol] =~ wordChar)
+        endCol = endCol + 1
+        break
+      endif
+      endCol -= 1
+    endwhile
+    return line->strpart(endCol, startCol - endCol + 1)
 enddef
 
 def CompletionChange(changes: list<any>, server: any): void
