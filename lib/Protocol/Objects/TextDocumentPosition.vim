@@ -8,12 +8,13 @@ import "../../Utils/Str.vim" as s
 export class TextDocumentPosition implements j.JsonSerializable
   var textDocument: any
   var position: any
+  var defCol: number
 
-  def new(server: any, bId: number)
+  def new(server: any, bId: number, this.defCol = v:none)
     this.textDocument = ti.TextDocumentIdentifier.new(bId)
     var line = line(".", bufwinid(bId))
     var ltext = getline(line)
-    var column = col(".", bufwinid(bId))
+    var column = this.defCol == 0 ? col(".", bufwinid(bId)) : this.defCol
     this.position = p.Position.new(server, line, column)
   enddef
 

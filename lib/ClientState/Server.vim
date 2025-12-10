@@ -4,6 +4,7 @@ import "../Features/Diagnostics.vim" as diag
 import "../Features/Completion.vim" as comp
 import "../Features/Snippet.vim" as sn
 import "../Features/Formatting.vim" as for
+import "../Features/Hover.vim" as hov
 import "../Features/UserMiddleware.vim" as m
 import "../Features/GoToDefinition.vim" as gtd
 import "../Features/DocumentSync.vim" as dc
@@ -82,6 +83,7 @@ export class Server extends serv.Server
       this.completion = comp.Completion.new(false)
     endif
     this.snippet = sn.Snippet.new()
+    this.hover = hov.Hover.new()
     this.formatting = for.Formatting.new()
     this.goToDefinition = gtd.GoToDefinition.new()
     this.isFeatInit = true

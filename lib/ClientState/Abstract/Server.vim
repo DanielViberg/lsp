@@ -19,6 +19,7 @@ export abstract class Server
   var workspace: any
   var diagnostics: any
   var completion: any
+  var hover: any
   var snippet: any
   var formatting: any
   var goToDefinition: any
