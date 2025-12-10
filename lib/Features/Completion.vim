@@ -39,8 +39,8 @@ var initOnce: bool = false
 var isIncomplete: bool = false
 var noServer: bool = false
 var waiting: bool = false
-var reqNr: number = 0
-var complIx: number = 0
+var debounce: bool = false
+var debounceTimer: number
 
 export class Completion extends ft.Feature implements if.IFeature
 
@@ -80,23 +80,25 @@ export class Completion extends ft.Feature implements if.IFeature
 		if !g:lsp_autocomplete
 			return
 		endif
-    l.PrintDebug('Request completion')
-    if mode() == 'i' || e.TESTING 
-      var tdpos = tdp.TextDocumentPosition.new(server, bId)
-      var compReq = c.Completion.new(
-        this.GetTriggerKind(server, bId),
-        str.GetTriggerChar(server.serverCapabilites.completionProvider.triggerCharacters),
-        tdpos)
-      waiting = true
-      reqNr += 1
-      r.RpcAsync(server, compReq, RequestCompletionReply, reqNr)
-    endif
-    # Dont spam pum if using fast servers
-    timer_start(400, (_) => {
-      if waiting
-        CompleteNoServer()
+    if mode() == 'i' || e.TESTING
+      timer_stop(debounceTimer)
+      debounceTimer = timer_start(200, (_) => {
+        l.PrintDebug('Request completion')
+        var tdpos = tdp.TextDocumentPosition.new(server, bId)
+        var compReq = c.Completion.new(
+          this.GetTriggerKind(server, bId),
+          str.GetTriggerChar(server.serverCapabilites.completionProvider.triggerCharacters),
+          tdpos)
+        waiting = true
+        r.RpcAsync(server, compReq, RequestCompletionReply)
+      })
+      # Dont spam pum if using fast servers
+      timer_start(100, (_) => {
+        if waiting
+          CompleteNoServer()
+        endif
+      })
       endif
-    })
   enddef
 
   def GetTriggerKind(server: abs.Server, bId: number): number
@@ -123,15 +125,8 @@ def PumShowDoc(): void
   endif
 enddef
 
-def RequestCompletionReply(server: abs.Server, reply: dict<any>, sreqNr: any)
+def RequestCompletionReply(server: abs.Server, reply: dict<any>)
   waiting = false
-
-  # Skip intermediate requests
-  if sreqNr < reqNr
-    return
-  endif
-
-  l.PrintDebug('Triggers: ' .. json_encode(server.serverCapabilites.completionProvider.triggerCharacters))
 
   # TODO: handle itemDefaults
   if has_key(reply, 'result') && mode() == 'i'
