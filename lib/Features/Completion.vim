@@ -82,7 +82,7 @@ export class Completion extends ft.Feature implements if.IFeature
 		endif
     if mode() == 'i' || e.TESTING
       timer_stop(debounceTimer)
-      debounceTimer = timer_start(200, (_) => {
+      debounceTimer = timer_start(150, (_) => {
         l.PrintDebug('Request completion')
         var tdpos = tdp.TextDocumentPosition.new(server, bId)
         var compReq = c.Completion.new(
