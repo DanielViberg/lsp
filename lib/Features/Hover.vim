@@ -20,8 +20,8 @@ export class Hover extends ft.Feature implements if.IFeature
     if !initOnce
       initOnce = true
       echomsg 'init'
-      autocmd TextChangedI * call AutoHover(false)
-      autocmd CursorMoved * call AutoHover(true)
+      autocmd TextChangedI * call ft.FeatAu(AutoHover, false)
+      autocmd CursorMoved * call ft.FeatAu(AutoHover, true)
     endif
   enddef
 
@@ -38,28 +38,24 @@ export class Hover extends ft.Feature implements if.IFeature
   enddef
 endclass
 
-export def AutoHover(atCol: bool): void
+export def AutoHover(server: any, bId: number, atCol: bool): void
   timer_stop(timer)
   timer = timer_start(1000, (_) => {
     popup_close(autoHoverId)
-    var bId = bufnr()
-    var servers = ses.GetSessionServersByBuf(bId)
-    if servers->len() > 0
-      var col = atCol ? col('.') : col('.') - 2
-      var tdpos = tdp.TextDocumentPosition.new(servers[0], bId, col)
-      var hov = h.Hover.new(tdpos)
-      var reply = r.RpcSync(servers[0], hov)
-      if reply->has_key('result')
-        var result = reply.result
-        if (type(result) == v:t_dict && result->has_key('contents'))
-          var info = result.contents.value->substitute('\r\n', '\n', 'g')->split("\n")
-          autoHoverId = popup_create(info, {
-            line: 2, 
-            col: &columns, 
-            pos: 'topright', 
-            maxwidth: &columns / 3, 
-            padding: [1, 1, 1, 1]})
-        endif
+    var col = atCol ? col('.') : col('.') - 2
+    var tdpos = tdp.TextDocumentPosition.new(server, bId, col)
+    var hov = h.Hover.new(tdpos)
+    var reply = r.RpcSync(server, hov)
+    if reply->has_key('result')
+      var result = reply.result
+      if (type(result) == v:t_dict && result->has_key('contents'))
+        var info = result.contents.value->substitute('\r\n', '\n', 'g')->split("\n")
+        autoHoverId = popup_create(info, {
+          line: 2, 
+          col: &columns, 
+          pos: 'topright', 
+          maxwidth: &columns / 3, 
+          padding: [1, 1, 1, 1]})
       endif
     endif
   })
