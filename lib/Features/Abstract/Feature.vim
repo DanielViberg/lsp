@@ -8,7 +8,7 @@ export abstract class Feature
 endclass
 
 export def FeatAu(Featcmd: func, par = v:none): void
-  var bId = bufnr()
+  var bId = expand('<abuf>')->str2nr()
   if !bufloaded(bId)
     return
   endif

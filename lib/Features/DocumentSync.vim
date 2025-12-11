@@ -36,11 +36,10 @@ export class DocumentSync extends ft.Feature implements if.IFeature
   def AutoCmds()
     if !initOnce
       initOnce = true
-      autocmd BufReadPost * ft.FeatAu(DidOpen)
+      autocmd BufReadPost,BufNewFile * ft.FeatAu(DidOpen)
       autocmd QuickFixCmdPre * isQuickFix = true
       autocmd QuickFixCmdPost * isQuickFix = false
       autocmd BufUnload * ft.FeatAu(DidClose)
-      autocmd BufWipeout * ft.FeatAu(DidClose)
       autocmd BufWritePre * ft.FeatAu(WillSave)
       autocmd BufWritePost * ft.FeatAu(DidSave)
 
@@ -99,6 +98,7 @@ export def DidOpen(server: abs.Server, bId: number, par: any): void
 enddef
 
 export def DidClose(server: abs.Server, bId: number, par: any): void
+  l.PrintDebug("Check close sid: " .. server.id .. " bId " .. bId )
   if index(didOpenFiles, expand('#' .. bId .. ':p')) != -1 &&
       getbufinfo({bufloaded: 1})->filter((_, buf) => buf.name == expand('#' .. bId .. ':p'))->len() <= 1
     remove(didOpenFiles, index(didOpenFiles, expand('#' .. bId .. ':p')))
