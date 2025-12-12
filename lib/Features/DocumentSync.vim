@@ -39,7 +39,7 @@ export class DocumentSync extends ft.Feature implements if.IFeature
       autocmd BufReadPost,BufNewFile * ft.FeatAu(DidOpen)
       autocmd QuickFixCmdPre * isQuickFix = true
       autocmd QuickFixCmdPost * isQuickFix = false
-      autocmd BufUnload * ft.FeatAu(DidClose)
+      autocmd BufWipeout * ft.FeatAu(DidClose)
       autocmd BufWritePre * ft.FeatAu(WillSave)
       autocmd BufWritePost * ft.FeatAu(DidSave)
 
