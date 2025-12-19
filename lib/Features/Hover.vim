@@ -19,9 +19,8 @@ export class Hover extends ft.Feature implements if.IFeature
   def AutoCmds()
     if !initOnce
       initOnce = true
-      echomsg 'init'
-      autocmd TextChangedI * call ft.FeatAu(AutoHover, false)
-      autocmd CursorMoved * call ft.FeatAu(AutoHover, true)
+      #autocmd TextChangedI * call ft.FeatAu(AutoHover, false)
+      #autocmd CursorMoved * call ft.FeatAu(AutoHover, true)
     endif
   enddef
 

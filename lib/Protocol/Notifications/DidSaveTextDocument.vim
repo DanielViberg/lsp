@@ -1,13 +1,14 @@
 vim9script
 
 import "./Abstract/Notification.vim" as an
+import "../Objects/TextDocumentIdentifier.vim" as tdi
 
 export class DidSaveTextDocument extends an.Notification
 
-  def new(uri: string, text: string)
+  def new(t: tdi.TextDocumentIdentifier, text: string)
       this.method = "textDocument/didSave"
       this.params = {
-        textDocument: uri,
+        textDocument: t.ToJson(),
         text: text
       }
   enddef
