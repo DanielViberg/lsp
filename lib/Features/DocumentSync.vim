@@ -17,6 +17,7 @@ import "../Protocol/Notifications/DidSaveTextDocument.vim" as dstd
 import "../Protocol/Objects/VersionedTextDocumentIdentifier.vim" as vtdi
 import "../Protocol/Objects/TextDocumentContentChangeEvent.vim" as tdcce
 import "../Protocol/Objects/TextDocumentPosition.vim" as tdp
+import "../Protocol/Objects/TextDocumentIdentifier.vim" as tdi
 
 var CachedBufferContent: dict<list<string>>
 var initOnce: bool = false
@@ -39,7 +40,6 @@ export class DocumentSync extends ft.Feature implements if.IFeature
       autocmd BufReadPost * ft.FeatAu(DidOpen)
       autocmd QuickFixCmdPre * isQuickFix = true
       autocmd QuickFixCmdPost * isQuickFix = false
-      autocmd BufUnload * ft.FeatAu(DidClose)
       autocmd BufWipeout * ft.FeatAu(DidClose)
       autocmd BufWritePre * ft.FeatAu(WillSave)
       autocmd BufWritePost * ft.FeatAu(DidSave)
@@ -99,6 +99,7 @@ export def DidOpen(server: abs.Server, bId: number, par: any): void
 enddef
 
 export def DidClose(server: abs.Server, bId: number, par: any): void
+  l.PrintDebug("Check close sid: " .. server.id .. " bId " .. bId )
   if index(didOpenFiles, expand('#' .. bId .. ':p')) != -1 &&
       getbufinfo({bufloaded: 1})->filter((_, buf) => buf.name == expand('#' .. bId .. ':p'))->len() <= 1
     remove(didOpenFiles, index(didOpenFiles, expand('#' .. bId .. ':p')))
@@ -190,7 +191,7 @@ export def DidSave(server: abs.Server, bId: number, par: any): void
     type(server.serverCapabilites.textDocumentSync) == v:t_dict &&
       server.serverCapabilites.textDocumentSync->has_key('save')
     var path = fnamemodify(bufname(bId), ':p')
-    var ds = dstd.DidSaveTextDocument.new(s.Uri(path), join(getbufline(bId, 1, '$'), "\n"))
+    var ds = dstd.DidSaveTextDocument.new(tdi.TextDocumentIdentifier.new(bId), join(getbufline(bId, 1, '$'), "\n"))
     r.RpcAsyncMes(server, ds)
   endif
 enddef
