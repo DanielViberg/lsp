@@ -37,7 +37,6 @@ export class CS extends a.ATest implements i.ITest
   def CompletionStates(): list<tuple<string, list<string>>>
     return [
       ("Conso¤", [""]), #C sharp server is slow to read buffer state
-      ("Conso¤", [""]),
       ("Conso¤", ["Console", 
                   "ConsoleCancelEventArgs", 
                   "ConsoleCancelEventHandler", 
@@ -45,8 +44,7 @@ export class CS extends a.ATest implements i.ITest
                   "ConsoleKey",
                   "ConsoleKeyInfo",
                   "ConsoleModifiers",
-                  "ConsoleSpecialKey",
-                  "ConsoleTraceListener"]),
+                  "ConsoleSpecialKey"]),
     ]
   enddef
 
