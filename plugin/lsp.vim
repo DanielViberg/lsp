@@ -17,10 +17,10 @@ import "../lib/Features/GoToDefinition.vim" as g
 g:loaded_lsp = true
 
 #Settings
-g:lsp_format_pre_save      = true
-g:lsp_autocomplete         = true
-g:lsp_comp_buf_cache_limit = 1000
-g:lsp_diagnostics          = true
+g:lsp_format_pre_save      = exists('g:lsp_format_pre_save') ? g:lsp_format_pre_save : true
+g:lsp_autocomplete         = exists('g:lsp_autocomplete') ? g:lsp_autocomplete : true
+g:lsp_comp_buf_cache_limit = exists('g:lsp_comp_buf_cache_limit') ? g:lsp_comp_buf_cache_limit : 1000
+g:lsp_diagnostics          = exists('g:lsp_diagnostics') ? g:lsp_diagnostics : true
 
 def InitServers()
   buf.Buffer.new()
