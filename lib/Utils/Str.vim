@@ -2,16 +2,11 @@ vim9script
 
 import "../Protocol/Objects/Position.vim" as p
 
-export def Uri(path: string): string
-  var osPath = path
-  if has('win32')
-   osPath = '/' .. osPath 
-   osPath = substitute(osPath, '\', '\/', 'g')
-  endif
-  return 'file://' .. osPath
-enddef 
+export def ToFileUri(uri: string): string
+  return 'file://' .. uri
+enddef
 
-export def FromUri(uri: string): string
+export def FromFileUri(uri: string): string 
   return has('win32') ? substitute(uri, '^file:///', '', '') : 
                         substitute(uri, '^file://', '', '')
 enddef

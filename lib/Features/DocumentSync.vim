@@ -22,7 +22,6 @@ import "../Protocol/Objects/TextDocumentIdentifier.vim" as tdi
 var CachedBufferContent: dict<list<string>>
 var initOnce: bool = false
 var didOpenFiles: list<string> = []
-var isQuickFix: bool = false
 
 const KIND_NONE = 0
 const KIND_FULL = 1
@@ -38,8 +37,6 @@ export class DocumentSync extends ft.Feature implements if.IFeature
     if !initOnce
       initOnce = true
       autocmd BufReadPost * ft.FeatAu(DidOpen)
-      autocmd QuickFixCmdPre * isQuickFix = true
-      autocmd QuickFixCmdPost * isQuickFix = false
       autocmd BufWipeout,BufUnload * ft.FeatAu(DidClose)
       autocmd BufWritePre * ft.FeatAu(WillSave)
       autocmd BufWritePost * ft.FeatAu(DidSave)
@@ -71,11 +68,11 @@ endclass
 
 
 export def DidOpen(server: abs.Server, bId: number, par: any): void
-  l.PrintDebug('Trying to open ' .. uri_encode(expand('#' .. bId .. ':p')))
-  if isQuickFix
-    l.PrintDebug('Is quickfix')
+  if b.isQuickFix
     return
   endif
+
+  l.PrintDebug('Trying to open ' .. uri_encode(expand('#' .. bId .. ':p')))
 
   if !b.IsAFileBuffer(bId) || 
       index(didOpenFiles, uri_encode(expand('#' .. bId .. ':p'))) != -1
@@ -93,7 +90,7 @@ export def DidOpen(server: abs.Server, bId: number, par: any): void
   l.PrintDebug("Server is running: " .. server.isRunning)
   l.PrintDebug("Server is init: " .. server.isInit)
   l.PrintDebug("Server is featInit: " .. server.isFeatInit)
-  var didOpenNotif = ddo.DocumentDidOpen.new(uri_encode(expand('#' .. bId .. ':p')), server.fileType, bId)
+  var didOpenNotif = ddo.DocumentDidOpen.new(s.ToFileUri(expand('#' .. bId .. ':p')), server.fileType, bId)
   r.RpcAsyncMes(server, didOpenNotif)
   if GetSyncKind(server) == KIND_INC
     l.PrintDebug("Cache buffer" .. bId)
@@ -102,6 +99,11 @@ export def DidOpen(server: abs.Server, bId: number, par: any): void
 enddef
 
 export def DidClose(server: abs.Server, bId: number, par: any): void
+
+  if b.isQuickFix
+    return
+  endif
+
   l.PrintDebug("Check close sid: " .. server.id .. " bId " .. bId )
 
   if index(didOpenFiles, uri_encode(expand('#' .. bId .. ':p'))) != -1 &&
@@ -110,7 +112,7 @@ export def DidClose(server: abs.Server, bId: number, par: any): void
     remove(didOpenFiles, index(didOpenFiles, uri_encode(expand('#' .. bId .. ':p'))))
     listener_remove(bId)
     l.PrintDebug("Did close sid: " .. server.id .. " bId " .. bId )
-    var didCloseNotif = ddcl.DocumentDidClose.new(uri_encode(expand('%:p')))
+    var didCloseNotif = ddcl.DocumentDidClose.new(s.ToFileUri(expand('%:p')))
     r.RpcAsyncMes(server, didCloseNotif)
     if has_key(CachedBufferContent, bId)
       unlet CachedBufferContent[bId]
@@ -119,7 +121,13 @@ export def DidClose(server: abs.Server, bId: number, par: any): void
 enddef
 
 export def DidChange(server: abs.Server, bId: number, par: any): void
+
+  if b.isQuickFix
+    return
+  endif
+
   l.PrintDebug("Did change sid: " .. server.id .. " bId " .. bId )
+
   var changes: list<tdcce.TextDocumentContentChangeEvent>
   if GetSyncKind(server) == KIND_FULL
     changes->add(tdcce.TextDocumentContentChangeEvent.new(
@@ -182,7 +190,7 @@ export def WillSave(server: abs.Server, bId: number, par: any): void
     if has_key(server.serverCapabilites.textDocumentSync, 'willSave') &&
       server.serverCapabilites.textDocumentSync.willSave
       var path = fnamemodify(bufname(bId), ':p')
-      var ws = wstd.WillSaveTextDocument.new(s.Uri(path))
+      var ws = wstd.WillSaveTextDocument.new(s.ToFileUri(path))
       r.RpcAsyncMes(server, ws)
     endif
   endif

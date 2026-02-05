@@ -92,7 +92,7 @@ export class Diagnostics extends ft.Feature implements if.IFeature
   enddef
 
   def PushDiagnostics(data: any): void
-    var buffers = b.GetBuffersByPath(uri_decode(s.FromUri(data.params.uri)))
+    var buffers = b.GetBuffersByPath(uri_decode(s.FromFileUri(data.params.uri)))
     for buf in buffers
       this.PublishDiagnostics(buf, data.params.diagnostics)
     endfor

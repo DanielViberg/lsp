@@ -8,7 +8,7 @@ export class TextDocumentIdentifier implements j.JsonSerializable
   var uri: string = null_string
 
   def new(bId: number): void
-    this.uri = s.Uri(expand('#' .. bId .. ':p'))
+    this.uri = s.ToFileUri(expand('#' .. bId .. ':p'))
   enddef
 
   def ToJson(): dict<any>

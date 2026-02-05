@@ -9,13 +9,13 @@ export class Location
   
   def new(uri: string, pos: p.Position)
     this.position = pos
-    this.uri = s.FromUri(uri) 
+    this.uri = s.FromFileUri(uri) 
   enddef
 
   def GoTo(): void
     # Unopened buffer
-    if expand('%:p') != fnamemodify(uri_decode(this.uri), ':p')
-      execute 'edit' uri_decode(this.uri)
+    if expand('%:p') != fnamemodify(s.FromFileUri(uri_decode(this.uri)), ':p')
+      execute 'edit' s.FromFileUri(uri_decode(this.uri))
     endif
 
     # Same buffer

@@ -8,16 +8,21 @@ import "../Utils/Log.vim" as l
 import "../Features/Completion.vim" as c
 
 export var disable: bool = false
+export var isQuickFix: bool = false
+
+autocmd QuickFixCmdPre * isQuickFix = true
+autocmd QuickFixCmdPost * isQuickFix = false
 
 export class Buffer
   def new()
-    l.PrintDebug('New buffer')
-    conf.Init()
-  
-    if !IsAFileBuffer(bufnr()) || disable
-      l.PrintDebug('Not a file buffer or disabled')
+
+    if !IsAFileBuffer(bufnr()) || disable || isQuickFix
+      l.PrintDebug('Not a file buffer, disabled or a quickfix')
       return
     endif
+
+    l.PrintDebug('New buffer')
+    conf.Init()
 
     var ft = expand('%:e')
     l.PrintDebug('Filetype ' .. ft)
