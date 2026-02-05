@@ -52,4 +52,4 @@ enddef
 def Restart(): void
 enddef
 
-au BufEnter * call InitServers()
+au BufReadPost * call InitServers()

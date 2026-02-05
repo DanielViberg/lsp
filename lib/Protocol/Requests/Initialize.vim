@@ -33,7 +33,7 @@ export class Initialize extends req.RequestMessage
       endif
     endif
 
-    rootUri = str.Uri(rootUri)
+    rootUri = uri_encode(rootUri)
 
     l.PrintDebug('Root uri: ' .. rootUri)
 

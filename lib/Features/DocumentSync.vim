@@ -40,7 +40,7 @@ export class DocumentSync extends ft.Feature implements if.IFeature
       autocmd BufReadPost * ft.FeatAu(DidOpen)
       autocmd QuickFixCmdPre * isQuickFix = true
       autocmd QuickFixCmdPost * isQuickFix = false
-      autocmd BufWipeout * ft.FeatAu(DidClose)
+      autocmd BufWipeout,BufUnload * ft.FeatAu(DidClose)
       autocmd BufWritePre * ft.FeatAu(WillSave)
       autocmd BufWritePost * ft.FeatAu(DidSave)
 
@@ -71,16 +71,19 @@ endclass
 
 
 export def DidOpen(server: abs.Server, bId: number, par: any): void
-  l.PrintDebug('Trying to open ' .. expand('#' .. bId .. ':p'))
+  l.PrintDebug('Trying to open ' .. uri_encode(expand('#' .. bId .. ':p')))
   if isQuickFix
+    l.PrintDebug('Is quickfix')
     return
   endif
-  if !b.IsAFileBuffer(bId) #|| 
-      #index(didOpenFiles, expand('#' .. bId .. ':p')) != -1
+
+  if !b.IsAFileBuffer(bId) || 
+      index(didOpenFiles, uri_encode(expand('#' .. bId .. ':p'))) != -1
     l.PrintDebug('s:' .. server.id .. 'b:' .. bId .. ' not a buffer or already open')
     return
   endif
-  didOpenFiles->add(expand('#' .. bId .. ':p'))
+
+  didOpenFiles->add(uri_encode(expand('#' .. bId .. ':p')))
 
   listener_add((_bnr: number, start: number, end: number, added: number, changes: list<dict<number>>) => {
     DidChange(server, bId, true)
@@ -90,7 +93,7 @@ export def DidOpen(server: abs.Server, bId: number, par: any): void
   l.PrintDebug("Server is running: " .. server.isRunning)
   l.PrintDebug("Server is init: " .. server.isInit)
   l.PrintDebug("Server is featInit: " .. server.isFeatInit)
-  var didOpenNotif = ddo.DocumentDidOpen.new(s.Uri(expand('#' .. bId .. ':p')), server.fileType, bId)
+  var didOpenNotif = ddo.DocumentDidOpen.new(uri_encode(expand('#' .. bId .. ':p')), server.fileType, bId)
   r.RpcAsyncMes(server, didOpenNotif)
   if GetSyncKind(server) == KIND_INC
     l.PrintDebug("Cache buffer" .. bId)
@@ -100,12 +103,14 @@ enddef
 
 export def DidClose(server: abs.Server, bId: number, par: any): void
   l.PrintDebug("Check close sid: " .. server.id .. " bId " .. bId )
-  if index(didOpenFiles, expand('#' .. bId .. ':p')) != -1 &&
+
+  if index(didOpenFiles, uri_encode(expand('#' .. bId .. ':p'))) != -1 &&
       getbufinfo({bufloaded: 1})->filter((_, buf) => buf.name == expand('#' .. bId .. ':p'))->len() <= 1
-    remove(didOpenFiles, index(didOpenFiles, expand('#' .. bId .. ':p')))
+
+    remove(didOpenFiles, index(didOpenFiles, uri_encode(expand('#' .. bId .. ':p'))))
     listener_remove(bId)
     l.PrintDebug("Did close sid: " .. server.id .. " bId " .. bId )
-    var didCloseNotif = ddcl.DocumentDidClose.new(s.Uri(expand('%:p')))
+    var didCloseNotif = ddcl.DocumentDidClose.new(uri_encode(expand('%:p')))
     r.RpcAsyncMes(server, didCloseNotif)
     if has_key(CachedBufferContent, bId)
       unlet CachedBufferContent[bId]
