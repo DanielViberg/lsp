@@ -11,28 +11,6 @@ export def Uri(path: string): string
   return 'file://' .. osPath
 enddef 
 
-export def UrlEncode(str: string): string
-  var result = ''
-  for ch in split(str, '\zs')
-    if ch =~# '^[A-Za-z0-9_.~-]$'
-      result ..= ch
-    else
-      result ..= printf('%%%02X', char2nr(ch))
-    endif
-  endfor
-  return result
-enddef
-
-export def UrlDecode(str: string): string
-    var osPath = substitute(str, '%\(\x\x\)', '\=nr2char(str2nr(submatch(1), 16))', 'g')
-    if has('win32')
-      osPath = substitute(osPath, '/', '\\', 'g')
-      # Make c: to C:
-      return toupper(osPath[0]) .. strpart(osPath, 1)
-    endif
-    return osPath
-enddef
-
 export def FromUri(uri: string): string
   return has('win32') ? substitute(uri, '^file:///', '', '') : 
                         substitute(uri, '^file://', '', '')
