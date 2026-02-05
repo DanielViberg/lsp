@@ -75,8 +75,8 @@ export def DidOpen(server: abs.Server, bId: number, par: any): void
   if isQuickFix
     return
   endif
-  if !b.IsAFileBuffer(bId) || 
-      index(didOpenFiles, expand('#' .. bId .. ':p')) != -1
+  if !b.IsAFileBuffer(bId) #|| 
+      #index(didOpenFiles, expand('#' .. bId .. ':p')) != -1
     l.PrintDebug('s:' .. server.id .. 'b:' .. bId .. ' not a buffer or already open')
     return
   endif

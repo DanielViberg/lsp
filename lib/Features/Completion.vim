@@ -50,7 +50,7 @@ export class Completion extends ft.Feature implements if.IFeature
   enddef
 
   def AutoCmds()
-    if !initOnce
+    if !initOnce && g:lsp_autocomplete
       initOnce = true
       set completeopt+=noinsert,noselect,menuone,popuphidden
       set shortmess+=cC
@@ -81,6 +81,9 @@ export class Completion extends ft.Feature implements if.IFeature
 			return
 		endif
     if mode() == 'i' || e.TESTING
+      timer_start(0, (_) => {
+        []->complete(col('.')) # Clear earlier pum before promting new
+      })
       timer_stop(debounceTimer)
       debounceTimer = timer_start(150, (_) => {
         l.PrintDebug('Request completion')
@@ -242,6 +245,9 @@ def CompleteNoServer()
   if b.disable
     return
   endif
+  if !g:lsp_autocomplete
+		return
+	endif
   var items: list<any> = GetCacheBufferW()
   var compItems = items->map((_, i) => LspItemToCompItem(i, -1))
   var trigger = CompleteMatch()
@@ -510,17 +516,16 @@ def CompletionChange(changes: list<any>, server: any): void
   var newCol = 0
   for change in changes
     change.VimDecode(bufnr())
-    if change.end.line < line('.')
-      cursorLineDelta = change.text->split("\n")->len()
+    if change.start.line < line('.') - 1
+      cursorLineDelta = change.text->split("\n")->filter((_, line) => line =~ '\S')->len()
     endif
-    if change.start.line == line('.')
-      newCol = change.start.character + strlen(change.text) + 1
-    endif
+    newCol = change.start.character + strlen(change.text) + 1
   endfor
 
   l.PrintDebug('Apply Text Edits')
+  var cursorOldLine = line('.')
   t.ApplyTextEdits(bufnr(), changes)
-  cursor(line('.') + cursorLineDelta, newCol)
+  cursor(cursorOldLine + cursorLineDelta, newCol)
   
   d.DidChange(server, bufnr(), false)
 enddef

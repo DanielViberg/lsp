@@ -7,7 +7,7 @@ import "../Utils/Str.vim" as s
 
 export def ApplyTextEdits(bnr: number, changes: list<tdce.TextDocumentContentChangeEvent>): void
   if changes->empty()
-    return
+    return 
   endif
 
   :silent! bnr->bufload()
