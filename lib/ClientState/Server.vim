@@ -64,7 +64,7 @@ export class Server extends serv.Server
 
     var initReq = reqI.Initialize.new(this.config)
     r.RpcAsync(this, initReq, this.InitResponse, bnr)
-    l.PrintInfo("Server " .. get(this.config, 'name') .. " init")
+    l.PrintDebug("Server " .. get(this.config, 'name') .. " init")
   enddef
 
   def InitResponse(server: Server, reply: dict<any>, bnr: any): void
