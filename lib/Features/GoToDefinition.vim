@@ -45,7 +45,7 @@ enddef
 
 def GoTo(server: any, bId: number, par: any): void
   if mode() == 'n' && 
-    v:char == "\r" && # TODO: unhardcode this
+    v:char == "\r" &&
     expand('<cword>') =~ '^\k\+$'
     var tdpos = tdp.TextDocumentPosition.new(server, bId)
     var dt = def.Definition.new(tdpos)

@@ -111,8 +111,8 @@ export def DidClose(server: abs.Server, bId: number, par: any): void
 
     remove(didOpenFiles, index(didOpenFiles, uri_encode(expand('#' .. bId .. ':p'))))
     listener_remove(bId)
-    l.PrintDebug("Did close sid: " .. server.id .. " bId " .. bId )
-    var didCloseNotif = ddcl.DocumentDidClose.new(s.ToFileUri(expand('%:p')))
+    l.PrintDebug("Did close sid: " .. server.id .. " bId " .. bId .. " uri " .. uri_encode(expand('#' .. bId .. ':p')))
+    var didCloseNotif = ddcl.DocumentDidClose.new(s.ToFileUri(expand('#' .. bId .. ':p')))
     r.RpcAsyncMes(server, didCloseNotif)
     if has_key(CachedBufferContent, bId)
       unlet CachedBufferContent[bId]
