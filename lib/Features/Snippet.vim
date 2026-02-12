@@ -3,6 +3,8 @@ vim9script
 import "./Abstract/Feature.vim" as ft
 import "./Interfaces/IFeature.vim" as if
 
+# https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#snippet_syntax
+
 export class Snippet extends ft.Feature implements if.IFeature
   def new()
     this.AutoCmds()

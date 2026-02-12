@@ -50,15 +50,15 @@ export class VUE extends a.ATest implements i.ITest
   def CompletionAccepts(): list<tuple<string, string, string>>
     return [
       ("<script setup>\nconst value = ref();\nvalue.val¤\n</script>", "value", "<script setup>\nconst value = ref();\nvalue.value\n</script>\n"),
-      ("<style>\n.item {\n\tdis¤\n}\n</style>\n", "display", "<style>\n.item {\n\tdisplay: $0;\n}\n</style>\n"),
+      ("<style>\n.item {\n\tdis¤\n}\n</style>\n", "display", "<style>\n.item {\n\tdisplay: ;\n}\n</style>\n"),
       ("<script setup>\nconst testVar = ref(\"\")\n</script>\n<template>\n<div :class=\"tes¤\">\n</div></template>\n", 
       "testVar", 
       "<script setup>\nconst testVar = ref(\"\")\n</script>\n<template>\n<div :class=\"testVar\">\n</div></template>\n"),
       ("<script setup>\nconst testVar = ref(\"\")\n</script>\n<template>\n<div :class=\"!tes¤\">\n</div></template>\n", 
       "testVar", 
       "<script setup>\nconst testVar = ref(\"\")\n</script>\n<template>\n<div :class=\"!testVar\">\n</div></template>\n"),
-      ("<template>\n<div :cl¤>\n</div>\n</template>\n", "class", "<template>\n<div class=\"$1\">\n</div>\n</template>\n"),
-      ("<template>\n\ttexta¤\n</template>\n", "textarea", "<template>\n\t<textarea name=\"\${2}\" id=\"\${4}\">\${0}</textarea>\n</template>\n"),
+      ("<template>\n<div :cl¤>\n</div>\n</template>\n", "class", "<template>\n<div class=\"\">\n</div>\n</template>\n"),
+      ("<template>\n\ttexta¤\n</template>\n", "textarea", "<template>\n\t<textarea name=\"\" id=\"\"></textarea>\n</template>\n"),
     ]
   enddef
 

@@ -350,7 +350,8 @@ def CompleteAccept(ci: any): void
       l.PrintDebug("Process completion change")
       var server = ses.GetSessionServerById(ci.user_data.server_id)
       var changes: list<any> = []
-      var newText = ci.user_data.item.textEdit.newText
+      # TODO: Dont filter out snippets
+      var newText = ci.user_data.item.textEdit.newText->substitute('\$[0-9]\+\|\${\%(\\.\|[^}]\)\+}', '', 'g')
       var range: any = {}
 
       if ci.user_data.item.textEdit->has_key('insert')
