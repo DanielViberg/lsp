@@ -9,12 +9,6 @@ A pure vim9script, lightweight lsp client.
 2. Utilizes as much of the default features vim can provide.
 3. Tested and expected to work in vim -u DEFAULTS
 
-### WIP
-- Configurable commands and features
-- Vim documentation
-- Testing
-- More lsp features
-
 ### Features
 - Completion
 - GoToDefinition (Hardcoded to "\<Enter>")
@@ -22,7 +16,7 @@ A pure vim9script, lightweight lsp client.
 - Formatting (Hardcoded to BufPreWrite event)
 
 ### Requirements
-- Vim version 9.0 or higher
+- Vim version 9.2 or higher
 - Linux
 - Windows
 
