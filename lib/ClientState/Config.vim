@@ -71,7 +71,7 @@ export def GetConfigServerById(id: number): dict<any>
 enddef
 
 export def GetConfigItem(server: any, configItem: dict<any>): any
-  if server.config.workspaceConfig->empty()
+  if !server.config->has_key('workspaceConfig') || server.config.workspaceConfig->empty()
     return {}
   endif
   if !configItem->has_key('section') || configItem.section->empty()

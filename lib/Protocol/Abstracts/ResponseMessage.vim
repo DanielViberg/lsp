@@ -5,7 +5,6 @@ import "./Message.vim" as mes
 export class ResponseMessage extends mes.Message
   var id: number
   var result: any
-  var error: number
 
   def new(request: any, result: any)
     if (request.id->type() == v:t_string
@@ -22,7 +21,6 @@ export class ResponseMessage extends mes.Message
     return extend(super.ToJson(), {
        id: this.id,
        result: this.result,
-       error: this.error
     })
   enddef
 endclass

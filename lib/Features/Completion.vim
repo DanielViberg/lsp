@@ -403,7 +403,7 @@ enddef
 def ResolveCompletion(sid: number, buf: number, item: any): void
   l.PrintDebug("Resolve completion")
   var server = ses.GetSessionServerById(sid)
-  if !server.serverCapabilites.completionProvider.resolveProvider
+  if !server.serverCapabilites.completionProvider->get('resolveProvider')
     return
   else
     var compRes = cr.CompletionResolve.new(item)
@@ -442,7 +442,7 @@ def ResolveCompletionDoc(sid: number, buf: number, item: any): void
     return
   endif
 
-  if !server.serverCapabilites.completionProvider.resolveProvider
+  if !server.serverCapabilites.completionProvider->get('resolveProvider')
     return
   else
     var compRes = cr.CompletionResolve.new(item)

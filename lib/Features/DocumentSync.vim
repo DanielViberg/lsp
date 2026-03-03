@@ -149,11 +149,11 @@ export def DidChange(server: abs.Server, bId: number, par: any): void
             join(newBufState[hunk.to_idx : hunk.to_idx + hunk.to_count], "\n") .. "\n", 
             {
                 start: {
-                  line: hunk.from_idx + 1,
+                  line: hunk.from_idx + 1, # Current line
                   character: 1
                 },
                 end: {
-                  line: hunk.from_idx + hunk.from_count + 1,
+                  line: hunk.from_idx + hunk.from_count + 2, # Start two lines town
                   character: 1
                 }
             },
