@@ -94,8 +94,10 @@ export def RpcOutCb(server: serv.Server, chan: channel, msg: any): void
   endif
 
   if msg->has_key('id') && msg->has_key('method')
+    l.PrintDebug('SERVER REQUEST ' .. string(msg))
     server.ProcessRequest(msg)
   elseif msg->has_key('method')
+    l.PrintDebug('SERVER NOTIFICATION ' .. string(msg))
     server.ProcessNotification(msg)
   endif
 enddef
