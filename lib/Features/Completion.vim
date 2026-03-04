@@ -52,7 +52,7 @@ export class Completion extends ft.Feature implements if.IFeature
   def AutoCmds()
     if !initOnce && g:lsp_autocomplete
       initOnce = true
-      set completeopt+=noinsert,noselect,menuone,popuphidden
+      set completeopt+=noinsert,noselect,menuone,popup
       set shortmess+=cC
       inoremap <expr> <CR> pumvisible() ? PumCallback() : "\<CR>"
       autocmd CompleteChanged * call PumShowDoc()
@@ -295,6 +295,11 @@ enddef
 
 def LspItemToCompItem(item: dict<any>, sId: number): dict<any>
   var info: string = " "
+
+  if has_key(item, 'documentation')
+    info = item.documentation->substitute('\r\n', '\n', 'g')
+  endif
+
   return {
     word: item.label, 
     kind: has_key(item, 'is_buf') ? '[buf]' : '[lsp]',
@@ -445,6 +450,8 @@ def ResolveCompletionDoc(sid: number, buf: number, item: any): void
   if !server.serverCapabilites.completionProvider->get('resolveProvider')
     return
   else
+    set completeopt-=popup
+    set completeopt+=popuphidden
     var compRes = cr.CompletionResolve.new(item)
     r.RpcAsync(server, compRes, ResolveCompletionDocReply) 
   endif
