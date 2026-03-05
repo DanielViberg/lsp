@@ -294,10 +294,10 @@ def GetCacheBufferW(): list<dict<any>>
 enddef
 
 def LspItemToCompItem(item: dict<any>, sId: number): dict<any>
-  var info: string = " "
+  var info: string = null_string
 
   if has_key(item, 'documentation')
-    if has_key(item.documentation, 'value')
+    if item.documentation->type() == v:t_dict && has_key(item.documentation, 'value')
       info = item.documentation.value->substitute('\r\n', '\n', 'g')
     else
       info = item.documentation->substitute('\r\n', '\n', 'g')
