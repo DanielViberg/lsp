@@ -297,7 +297,11 @@ def LspItemToCompItem(item: dict<any>, sId: number): dict<any>
   var info: string = " "
 
   if has_key(item, 'documentation')
-    info = item.documentation->substitute('\r\n', '\n', 'g')
+    if has_key(item.documentation, 'value')
+      info = item.documentation.value->substitute('\r\n', '\n', 'g')
+    else
+      info = item.documentation->substitute('\r\n', '\n', 'g')
+    endif
   endif
 
   return {
