@@ -11,6 +11,7 @@ import "./Langs/JS.vim" as js
 import "./Langs/TS.vim" as ts
 import "./Langs/C.vim" as c
 import "./Langs/CS.vim" as cs
+import "./Langs/BASH.vim" as bs
 
 e.TESTING = true
 e.DEBUG = true
@@ -32,6 +33,7 @@ RunCheck(txt.TXT.new())
 RunCheck(php.PHP.new())
 RunCheck(vue.VUE.new())
 RunCheck(vim.VIM.new())
+RunCheck(bs.BASH.new())
 RunCheck(cs.CS.new())
 
 echomsg "ALL TEST OK, EXITING ..."

@@ -62,8 +62,4 @@ export class VUE extends a.ATest implements i.ITest
     ]
   enddef
 
-  def CompletionIncrEdit(): list<tuple<string, string, list<list<string>>>>
-    return []
-  enddef
-
 endclass

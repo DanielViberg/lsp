@@ -16,26 +16,10 @@ export class TXT extends a.ATest implements i.ITest
     }
   enddef
 
-  def PreFormatString(): string
-    return ""
-  enddef
-
-  def PostFormatString(): string
-    return ""
-  enddef
-
-  def CompletionStates(): list<tuple<string, list<string>>>
-    return []
-  enddef
-
   def CompletionAccepts(): list<tuple<string, string, string>>
     return [
       ("completionWord\ncompl¤", "completionWord", "completionWord\ncompletionWord\n"),
     ]
-  enddef
-
-  def CompletionIncrEdit(): list<tuple<string, string, list<list<string>>>>
-    return []
   enddef
 
 endclass

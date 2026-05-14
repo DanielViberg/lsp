@@ -345,7 +345,9 @@ enddef
 def CompleteAccept(ci: any): void
   if !ci->empty() && type(ci.user_data) == v:t_dict
 
-    if ci.user_data.item->get('is_buf') || ci.user_data.item->has_key('insertText')
+    if ci.user_data.item->get('is_buf') || 
+       ci.user_data.item->has_key('insertText') ||
+       !ci.user_data.item->has_key('textEdit')
       var word = ci->get('word')
       if ci.user_data.item->has_key('insertText')
         word = ci.user_data.item.insertText

@@ -150,5 +150,34 @@ export abstract class ATest
     return 0
   enddef
 
+
+  # Formatting
+  def PreFormatString(): string
+    return ""
+  enddef
+
+  # Completion
+  def PostFormatString(): string
+    return ""
+  enddef
+
+  def CompletionStates(): list<tuple<string, list<string>>>
+    return []
+  enddef
+
+  def CompletionAccepts(): list<tuple<string, string, string>>
+    return []
+  enddef
+
+  def CompletionIncrEdit(): list<tuple<string, string, list<list<string>>>>
+    return []
+  enddef
+
+  # Diagnostics
+
+  # GoToDefinition
+
+  # Workspace
+
 endclass
 

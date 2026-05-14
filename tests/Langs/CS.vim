@@ -26,14 +26,6 @@ export class CS extends a.ATest implements i.ITest
     }
   enddef
 
-  def PreFormatString(): string
-    return ""
-  enddef
-
-  def PostFormatString(): string
-    return ""
-  enddef
-
   def CompletionStates(): list<tuple<string, list<string>>>
     return [
       ("Conso¤", [""]), #C sharp server is slow to read buffer state
@@ -46,14 +38,6 @@ export class CS extends a.ATest implements i.ITest
                   "ConsoleModifiers",
                   "ConsoleSpecialKey"]),
     ]
-  enddef
-
-  def CompletionAccepts(): list<tuple<string, string, string>>
-    return []
-  enddef
-
-  def CompletionIncrEdit(): list<tuple<string, string, list<list<string>>>>
-    return []
   enddef
 
 endclass

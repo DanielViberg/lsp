@@ -16,27 +16,10 @@ export class VIM extends a.ATest implements i.ITest
     }
   enddef
 
-  def PreFormatString(): string
-    return ""
-  enddef
-
-  def PostFormatString(): string
-    return ""
-  enddef
-
-  def CompletionStates(): list<tuple<string, list<string>>>
-    return [
-    ]
-  enddef
-
   def CompletionAccepts(): list<tuple<string, string, string>>
     return [
       ("vim9script\nappend\n app¤\n", "append", "vim9script\nappend\n append\n"),
     ]
-  enddef
-
-  def CompletionIncrEdit(): list<tuple<string, string, list<list<string>>>>
-    return []
   enddef
 
 endclass
