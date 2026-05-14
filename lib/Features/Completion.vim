@@ -165,7 +165,8 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>)
     while startCol > 0 && endCol >= 0
 
       if server.serverCapabilites.completionProvider
-         .triggerCharacters->index(line[endCol]) != -1
+         .triggerCharacters->index(line[endCol]) != -1 &&
+         !(line[endCol] =~ wordChar)
         l.PrintDebug('Is trigger char')
         startWithTriggerChar = true
         endCol += 1
@@ -208,8 +209,8 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>)
         endif
 
         # Some servers dont send correct filterTexts
-        if v.filterText =~ '^\(\$\|\::\|v-\)'
-          v.filterText = substitute(v.filterText, '^\(\$\|\::\|v-\)', '', '')
+        if v.filterText =~ '^\(\$\|\::\)'
+          v.filterText = substitute(v.filterText, '^\(\$\|\::\)', '', '')
         endif
         return v
       })
