@@ -128,7 +128,7 @@ export def DidChange(server: abs.Server, bId: number, par: any): void
 
   l.PrintDebug("Did change sid: " .. server.id .. " bId " .. bId )
 
-  var changes: list<tdcce.TextDocumentContentChangeEvent>
+  var changes: list<tdcce.TextDocumentContentChangeEvent> = []
   if GetSyncKind(server) == KIND_FULL
     changes->add(tdcce.TextDocumentContentChangeEvent.new(
       bId->getbufline(1, '$')->join("\n") .. "\n",
