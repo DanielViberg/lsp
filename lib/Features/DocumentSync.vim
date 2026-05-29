@@ -19,7 +19,7 @@ import "../Protocol/Objects/TextDocumentContentChangeEvent.vim" as tdcce
 import "../Protocol/Objects/TextDocumentPosition.vim" as tdp
 import "../Protocol/Objects/TextDocumentIdentifier.vim" as tdi
 
-var CachedBufferContent: dict<list<string>>
+var CachedBufferContent: dict<list<string>> = {}
 var initOnce: bool = false
 var didOpenFiles: list<string> = []
 
