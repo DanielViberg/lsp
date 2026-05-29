@@ -1,0 +1,19 @@
+[PENDING] 1 - Syntax error: vim9scrip typo prevents module loading
+[PENDING] 2 - Uninitialized changes variable crashes DidChange()
+[PENDING] 3 - Uninitialized CachedBufferContent dict causes crash
+[PENDING] 4 - Incorrect buffer path resolution using expand('#' pattern
+[PENDING] 5 - Enable() function disables instead of enabling
+[PENDING] 6 - Restart() command is a no-op
+[PENDING] 7 - SessionServers initialized as null_list instead of []
+[PENDING] 8 - GetSessionServerById() returns empty server on not-found
+[PENDING] 9 - Hover popup crashes on non-MarkupContent contents
+[PENDING] 10 - InitResponse() accesses capabilities without error check
+[PENDING] 11 - CachedConfig initialized as null_list instead of []
+[PENDING] 12 - GetTriggerCharIdx() mutates caller's triggerChars argument
+[PENDING] 13 - Completion filter logic excludes exact matches
+[PENDING] 14 - debounceTimer not initialized before timer_stop() call
+[PENDING] 15 - DocumentDidClose hardcodes version: 0
+[PENDING] 16 - GetTriggerChar() can index out of bounds at column 1
+[PENDING] 17 - Location.vim abstract class has orphaned enddef
+[PENDING] 18 - ProcessNotification() accesses data.method without null check
+[PENDING] 19 - FormattingOptions.toJson() omits declared fields
