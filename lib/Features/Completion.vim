@@ -81,11 +81,6 @@ export class Completion extends ft.Feature implements if.IFeature
 			return
 		endif
     if mode() == 'i' || e.TESTING
-      timer_start(0, (_) => {
-        if mode() == 'i'
-          []->complete(col('.')) # Clear earlier pum before promting new
-        endif
-      })
       timer_stop(debounceTimer)
       debounceTimer = timer_start(150, (_) => {
         l.PrintDebug('Request completion')
