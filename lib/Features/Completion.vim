@@ -319,7 +319,7 @@ def PumCallback(): string
      !noServer
     l.PrintDebug("Accept completion")
     timer_start(0, (_) => CompleteAccept(info.completed))
-    return ""
+    return "\<C-E>"
   endif
   if noServer
     var comp = info->get('completed')
@@ -329,7 +329,7 @@ def PumCallback(): string
     endif
     if !word->empty()
       timer_start(0, (_) => CompleteAcceptBuf(word))
-      return ""
+      return "\<C-E>"
     else
       return "\n"
     endif
