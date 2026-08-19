@@ -215,7 +215,7 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>)
           return false
         endif
         return (empty(query) && startWithTriggerChar) ||
-          v.filterText != query && query == v.filterText[ : len(query) - 1]
+          query == v.filterText[ : len(query) - 1]
     })
     ->sort((_a, _b) => {
         if _a->get('is_buf') && !_b->get('is_buf')
