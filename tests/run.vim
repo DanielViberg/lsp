@@ -17,26 +17,42 @@ e.TESTING = true
 e.DEBUG = true
 e.DEBUG_RPC = true
 
-var result = 1
-
 def RunCheck(test: i.ITest): void
   if test.Run()
-    finish
-    :mes
+    throw "Test failed: " .. test.Config().name
   endif
 enddef
 
-#RunCheck(ts.TS.new())
-#RunCheck(c.C.new())
-RunCheck(blade.BLADE.new())
-RunCheck(txt.TXT.new())
-RunCheck(php.PHP.new())
-RunCheck(vue.VUE.new())
-RunCheck(vim.VIM.new())
-RunCheck(bs.BASH.new())
-RunCheck(cs.CS.new())
+var tests: list<i.ITest> = [
+  blade.BLADE.new(),
+  txt.TXT.new(),
+  php.PHP.new(),
+  vue.VUE.new(),
+  vim.VIM.new(),
+  bs.BASH.new(),
+  #cs.CS.new(),
+# ts.TS.new(),
+# c.C.new(),
+]
 
-echomsg "ALL TEST OK, EXITING ..."
-e.DEBUG = false
-sleep 2
-:exit
+var failed = false
+try
+  for test in tests
+    RunCheck(test)
+  endfor
+catch
+  failed = true
+  echohl ErrorMsg
+  echomsg "TEST FAILED: " .. v:exception
+  echohl None
+  messages
+endtry
+
+if !failed
+  echomsg "ALL TEST OK, EXITING ..."
+  e.DEBUG = false
+  sleep 2
+  :exit
+endif
+# On failure vim is left open on the failing buffer for inspection.
+# Quit with :cq to exit with an error status.

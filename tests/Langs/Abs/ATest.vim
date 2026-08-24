@@ -14,6 +14,7 @@ export abstract class ATest
   var noServer: bool = false
 
   def Run(): number
+    result = 0
     comp.bufferWords = []
     comp.cacheWords = []
     writefile([json_encode({ servers: [ this.Config() ]})], e.TESTING_CONF_FILE)
@@ -25,7 +26,7 @@ export abstract class ATest
     var servers = ses.GetSessionServersByBuf(bufnr())
     if servers->len() == 0 && !this.noServer
       l.PrintError("No server found")
-      return 0
+      return 1
     endif
 
     var maxWait = 5
