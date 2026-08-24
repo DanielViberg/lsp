@@ -78,6 +78,7 @@ export class Diagnostics extends ft.Feature implements if.IFeature
     for buf in getbufinfo({ buflisted: 1, bufloaded: 1})
       bufLines = len(getbufline(buf.bufnr, 1, '$'))
       prop_clear(1, bufLines, {'bufnr': buf.bufnr})
+      sign_unplace('s_g', { buffer: buf.bufnr })
     endfor
   enddef
 
