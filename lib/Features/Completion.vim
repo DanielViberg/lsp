@@ -194,6 +194,7 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>)
     if empty(query) && lspItemCount == 0
       return
     endif
+
     items->map((_, v) => {
         if v->get('sortText')->empty() 
           v.sortText = v.label
@@ -358,7 +359,8 @@ def CompleteAccept(ci: any): void
       var server = ses.GetSessionServerById(ci.user_data.server_id)
       var changes: list<any> = []
       # TODO: Dont filter out snippets
-      var newText = ci.user_data.item.textEdit.newText->substitute('\$[0-9]\+\|\${\%(\\.\|[^}]\)\+}', '', 'g')
+      var newText = ci.user_data.item.textEdit.newText
+        ->substitute('\$[0-9]\+\|\${\%(\\.\|[^}]\)\+}', '', 'g')
       var range: any = {}
 
       if ci.user_data.item.textEdit->has_key('insert')

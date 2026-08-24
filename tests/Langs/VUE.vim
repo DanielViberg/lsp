@@ -44,12 +44,13 @@ export class VUE extends a.ATest implements i.ITest
       ("<script setup>\nconst testVar = ref();\n</script>\n<template>\n<div :class=\"testV¤\">\n</div>\n</template>", ["testVar", "testV", "testVar"]),
       ("<templ¤", ["template", "template lang=\"pug\""]),
       ("<template>\n\t<div v-sho¤\n</template>", ["v-show"]),
-      #TODO: ("<template>\n\t<div v-i¤\n</template>", ["v-if"]),
+      ("<template>\n\t<div v-i¤\n</template>", ["v-if"]),
     ]
   enddef
 
   def CompletionAccepts(): list<tuple<string, string, string>>
     return [
+      #TODO: ("<script setup>\nconst value = ref();\nvalue.¤\n</script>", "value", "<script setup>\nconst value = ref();\nvalue.value\n</script>\n"),
       ("<script setup>\nconst value = ref();\nvalue.val¤\n</script>", "value", "<script setup>\nconst value = ref();\nvalue.value\n</script>\n"),
       ("<style>\n.item {\n\tdis¤\n}\n</style>\n", "display", "<style>\n.item {\n\tdisplay: ;\n}\n</style>\n"),
       ("<script setup>\nconst testVar = ref(\"\")\n</script>\n<template>\n<div :class=\"tes¤\">\n</div></template>\n", 
