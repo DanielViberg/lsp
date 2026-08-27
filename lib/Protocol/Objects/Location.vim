@@ -9,16 +9,17 @@ export class Location
   
   def new(uri: string, pos: p.Position)
     this.position = pos
-    this.uri = s.FromFileUri(uri) 
+    this.uri = uri 
   enddef
 
   def GoTo(): void
-    # Unopened buffer
-    if expand('%:p') != fnamemodify(s.FromFileUri(uri_decode(this.uri)), ':p')
-      execute 'edit' s.FromFileUri(uri_decode(this.uri))
+    var path = s.FromFileUri(this.uri)
+    var cur = expand('%:p')
+    if has('win32') ? cur->tolower() != path->tolower()
+                    : cur != path
+      execute('edit ' .. fnameescape(path))
     endif
 
-    # Same buffer
     cursor(this.position.line, this.position.character)
   enddef
 

@@ -56,7 +56,14 @@ export def IsAFileBuffer(bId: number): bool
 enddef 
 
 export def GetBuffersByPath(path: string): list<number>
-    return getbufinfo({ buflisted: 1, bufloaded: 1})
-      ->filter((_, buf) => buf.name == path)
+    return getbufinfo({buflisted: 1, bufloaded: 1})
+      ->filter((_, buf) => {
+           if has('win32')
+             return buf.name->fnamemodify(':p')->tolower() == path->tolower() 
+           else
+             return buf.name->fnamemodify(':p') == path
+           endif
+        }
+      )
       ->map((_, buf) => buf.bufnr)
 enddef

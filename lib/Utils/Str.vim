@@ -7,8 +7,12 @@ export def ToFileUri(uri: string): string
 enddef
 
 export def FromFileUri(uri: string): string 
-  return has('win32') ? substitute(uri, '^file:///', '', '') : 
-                        substitute(uri, '^file://', '', '')
+  var path = uri_decode(substitute(uri, '^file:/*', '', ''))
+  if has('win32')
+    path = path->substitute('/', '\', 'g')
+    path = substitute(path, '[/\\]$', '', '') #pyright
+  endif
+  return path->fnamemodify(':p')
 enddef
 
 export def TempDir(): string

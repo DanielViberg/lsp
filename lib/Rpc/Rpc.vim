@@ -10,7 +10,6 @@ import "../../env.vim" as e
 export var serverReqNrState: dict<any> = {}
 
 export def RpcSync(server: serv.Server, req: rm.RequestMessage): any
-
   if !has_key(serverReqNrState, server.id)
     serverReqNrState[server.id] = 1
   elseif req.resetClientReqNr 
