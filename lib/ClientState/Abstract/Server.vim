@@ -78,4 +78,17 @@ export abstract class Server
     endif
   enddef
 
+  def PostDidOpen(bId: number): void
+     l.PrintDebug('Post did open')
+
+     if !this.isFeatInit
+       l.PrintDebug('Features not init')
+       return
+     endif
+
+     if has_key(this.serverCapabilites, 'diagnosticProvider')
+       this.diagnostics.RequestDiagnostics(this, bId)
+     endif
+  enddef
+
 endclass

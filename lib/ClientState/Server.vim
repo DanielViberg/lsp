@@ -91,9 +91,13 @@ export class Server extends serv.Server
     ses.RemoveSessionServer(this)
     ses.SetSessionServer(this)
 
-    dc.DidOpen(this, bnr, true)
-    
     this.workspace.SendWorkspaceConfig(this, this.config->get('workspaceConfig', null_dict))
+
+    var openBuffers = getbufinfo({buflisted: 1, bufloaded: 1})
+    for buf in openBuffers
+      dc.DidOpen(this, buf.bufnr, true)
+    endfor
+
     this.userMiddleware = m.UserMiddleware.new()
   enddef
   

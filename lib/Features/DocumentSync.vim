@@ -74,9 +74,14 @@ export def DidOpen(server: abs.Server, bId: number, par: any): void
 
   l.PrintDebug('Trying to open ' .. uri_encode(expand('#' .. bId .. ':p')))
 
-  if !b.IsAFileBuffer(bId) || 
-      index(didOpenFiles, uri_encode(expand('#' .. bId .. ':p'))) != -1
-    l.PrintDebug('s:' .. server.id .. 'b:' .. bId .. ' not a buffer or already open')
+  if !b.IsAFileBuffer(bId)
+    l.PrintDebug('s: ' .. server.id .. 'b: ' .. bId .. ' not a buffer')
+    return
+  endif
+
+  if index(didOpenFiles, uri_encode(expand('#' .. bId .. ':p'))) != -1
+    l.PrintDebug('s: ' .. server.id .. 'b: ' .. bId .. ' already open')
+    server.PostDidOpen(bId)
     return
   endif
 
@@ -90,12 +95,17 @@ export def DidOpen(server: abs.Server, bId: number, par: any): void
   l.PrintDebug("Server is running: " .. server.isRunning)
   l.PrintDebug("Server is init: " .. server.isInit)
   l.PrintDebug("Server is featInit: " .. server.isFeatInit)
+
   var didOpenNotif = ddo.DocumentDidOpen.new(s.ToFileUri(expand('#' .. bId .. ':p')), server.fileType, bId)
+
   r.RpcAsyncMes(server, didOpenNotif)
+
   if GetSyncKind(server) == KIND_INC
     l.PrintDebug("Cache buffer" .. bId)
     CachedBufferContent[bId] = bId->getbufline(1, '$')
   endif
+
+  server.PostDidOpen(bId)
 enddef
 
 export def DidClose(server: abs.Server, bId: number, par: any): void

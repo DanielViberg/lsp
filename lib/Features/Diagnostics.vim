@@ -108,7 +108,9 @@ export class Diagnostics extends ft.Feature implements if.IFeature
 
   def RequestDiagnosticsResponse(server: any, reply: dict<any>, bId: number)
     l.PrintDebug('Response diagnostics')
-    this.PublishDiagnostics(bId, reply.result.items)
+    if reply->has_key('result')
+      this.PublishDiagnostics(bId, reply.result.items)
+    endif
   enddef
 
   def PublishDiagnostics(buf: number, diagnostics: list<dict<any>>)

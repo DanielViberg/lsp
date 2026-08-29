@@ -92,6 +92,14 @@ export def RpcOutCb(server: serv.Server, chan: channel, msg: any): void
     endif
   endif
 
+  if msg->has_key('method') && msg.method == 'window/logMessage' && e.TESTING == false
+    if msg->has_key('params') && 
+        msg.params->has_key('message') && 
+        type(msg.params.message) == v:t_string
+      echomsg $"[{server.config->get('name')}] " .. msg.params.message
+    endif
+  endif
+
   if msg->has_key('id') && msg->has_key('method')
     l.PrintDebug('SERVER REQUEST ' .. string(msg))
     server.ProcessRequest(msg)
