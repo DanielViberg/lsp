@@ -7,7 +7,7 @@ export def ToFileUri(uri: string): string
 enddef
 
 export def FromFileUri(uri: string): string 
-  var path = uri_decode(substitute(uri, '^file:/*', '', ''))
+  var path = uri_decode(substitute(uri, '^file:/*', '/', ''))
   if has('win32')
     path = path->substitute('/', '\', 'g')
     path = substitute(path, '[/\\]$', '', '') #pyright
