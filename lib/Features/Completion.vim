@@ -470,6 +470,8 @@ def ResolveCompletionDocReply(server: abs.Server, reply: dict<any>): void
 			var doc = item.documentation
 			if type(doc) == v:t_dict && has_key(doc, 'value')
         info = doc.value->substitute('\r\n', '\n', 'g')->split("\n")
+      elseif type(doc) == v:t_string
+        info = doc->substitute('\r\n', '\n', 'g')->split("\n")
 			endif
 		endif
 		if id > 0 && info->len() > 0
