@@ -96,6 +96,7 @@ export def RpcOutCb(server: serv.Server, chan: channel, msg: any): void
     if msg->has_key('params') && 
         msg.params->has_key('message') && 
         type(msg.params.message) == v:t_string
+      redraw
       echomsg $"[{server.config->get('name')}] " .. msg.params.message
     endif
   endif
