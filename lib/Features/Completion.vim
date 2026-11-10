@@ -61,9 +61,7 @@ export class Completion extends ft.Feature implements if.IFeature
       autocmd VimEnter * call CacheBufferWords()
       autocmd InsertLeave * call CacheBufferWords()
       autocmd InsertEnter * call CacheBufferWords()
-      if noServer
-        autocmd TextChangedI * call CompleteNoServer()
-      endif
+      autocmd TextChangedI * call CompleteNoServer()
     endif
   enddef
 
@@ -83,6 +81,9 @@ export class Completion extends ft.Feature implements if.IFeature
     if mode() == 'i' || e.TESTING
       timer_stop(debounceTimer)
       debounceTimer = timer_start(150, (_) => {
+        if bufnr() != bId || !bufloaded(bId)
+          return
+        endif
         l.PrintDebug('Request completion')
         var tdpos = tdp.TextDocumentPosition.new(server, bId)
         var compReq = c.Completion.new(
@@ -90,7 +91,7 @@ export class Completion extends ft.Feature implements if.IFeature
           str.GetTriggerChar(server.serverCapabilites.completionProvider.triggerCharacters),
           tdpos)
         waiting = true
-        r.RpcAsync(server, compReq, RequestCompletionReply)
+        r.RpcAsync(server, compReq, RequestCompletionReply, bId)
       })
       # Dont spam pum if using fast servers
       timer_start(100, (_) => {
@@ -125,8 +126,11 @@ def PumShowDoc(): void
   endif
 enddef
 
-def RequestCompletionReply(server: abs.Server, reply: dict<any>)
+def RequestCompletionReply(server: abs.Server, reply: dict<any>, bId: number)
   waiting = false
+  if bufnr() != bId || !bufloaded(bId)
+    return
+  endif
 
   # TODO: handle itemDefaults
   if has_key(reply, 'result') && mode() == 'i'

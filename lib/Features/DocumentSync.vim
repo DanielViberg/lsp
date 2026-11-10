@@ -155,15 +155,20 @@ export def DidChange(server: abs.Server, bId: number, par: any): void
         return
       endif
       for hunk in diffs->reverse()
+        var text = ''
+        if hunk.to_count > 0
+          text = newBufState[hunk.to_idx : hunk.to_idx + hunk.to_count - 1]
+            ->join("\n") .. "\n"
+        endif
         var change = tdcce.TextDocumentContentChangeEvent.new(
-            join(newBufState[hunk.to_idx : hunk.to_idx + hunk.to_count], "\n") .. "\n", 
+            text,
             {
                 start: {
-                  line: hunk.from_idx + 1, # Current line
+                  line: hunk.from_idx + 1,
                   character: 1
                 },
                 end: {
-                  line: hunk.from_idx + hunk.from_count + 2, # Start two lines town
+                  line: hunk.from_idx + hunk.from_count + 1,
                   character: 1
                 }
             },
