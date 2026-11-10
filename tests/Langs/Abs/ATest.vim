@@ -62,7 +62,14 @@ export abstract class ATest
       normal! hxx
       timer_start(1000, (_) => {
         var items = complete_info(["items"]).items->map((_, mi) => mi.word)
-        if assert_equal(items, state[1]) && !empty(state[1][0])
+        # The first completion can also initialize server plugins on demand.
+        var retries = 40
+        while items != state[1] && retries > 0
+          sleep 100m
+          retries -= 1
+          items = complete_info(["items"]).items->map((_, mi) => mi.word)
+        endwhile
+        if assert_equal(state[1], items) && !empty(state[1][0])
           echomsg items
           echomsg state[1]
           result = 1
@@ -106,8 +113,14 @@ export abstract class ATest
           endif
           feedkeys("\<Down>", "")
         endfor
+        result = 1
+        l.PrintError('Completion item not found: ' .. accept[1])
+        feedkeys("\<Esc>", "")
       })
       feedkeys("\<Left>\<Left>ei\<Right>" .. charBefore, "x!") #TODO: fails at short words
+      if result
+        return result
+      endif
       if assert_equal(join(getline(1, '$'), "\n"), accept[2])
         echomsg join(getline(1, '$'), "\n")
         echomsg accept[2]

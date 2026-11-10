@@ -24,6 +24,7 @@ def RunCheck(test: i.ITest): void
 enddef
 
 var tests: list<i.ITest> = [
+  c.C.new(),
   blade.BLADE.new(),
   txt.TXT.new(),
   php.PHP.new(),
@@ -32,7 +33,6 @@ var tests: list<i.ITest> = [
   bs.BASH.new(),
   #cs.CS.new(),
 # ts.TS.new(),
-# c.C.new(),
 ]
 
 var failed = false

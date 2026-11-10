@@ -18,7 +18,7 @@ export class C extends a.ATest implements i.ITest
 
   def CompletionAccepts(): list<tuple<string, string, string>>
     return [
-      ("#inc¤\n", "include", "#include\n"),
+      ("#inc¤\n", " include \"header\"", "#include\n"),
     ]
   enddef
 

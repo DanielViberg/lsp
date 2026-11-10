@@ -18,7 +18,7 @@ RUN wget -O dotnet-install.sh https://dotnet.microsoft.com/download/dotnet-core/
 
 RUN mkdir -p tools/cslsp
 
-RUN curl -L https://github.com/Crashdummyy/roslynLanguageServer/releases/download/5.8.0-1.26263.4/microsoft.codeanalysis.languageserver.linux-x64.zip \
+RUN curl -fL https://github.com/Crashdummyy/roslynLanguageServer/releases/download/5.14.0-1.26559.12/microsoft.codeanalysis.languageserver.linux-x64.zip \
     -o /tmp/cslsp.zip && \
     unzip /tmp/cslsp.zip -d /tools/cslsp && \
     rm /tmp/cslsp.zip && \

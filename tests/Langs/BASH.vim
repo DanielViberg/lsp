@@ -25,7 +25,7 @@ export class BASH extends a.ATest implements i.ITest
 
   def CompletionStates(): list<tuple<string, list<string>>>
     return [
-      ("fal¤", ["false"]),
+      ("fals¤", ["false"]),
     ]
   enddef
 
