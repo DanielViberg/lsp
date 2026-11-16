@@ -12,11 +12,13 @@ export abstract class Server
   public var serverCapabilites: dict<any> = null_dict
   public var clientCapabilites: dict<any> = null_dict
   public var fileType: string = null_string
+  public var rootUri: string = ''
 
   var id: number = -1
 
   var documentSync: any
   var workspace: any
+  var workspaceDiagnostics: any
   var diagnostics: any
   var completion: any
   var hover: any
@@ -33,6 +35,7 @@ export abstract class Server
 
     this.documentSync.ProcessRequest(this, data)
     this.workspace.ProcessRequest(this, data)
+    this.workspaceDiagnostics.ProcessRequest(this, data)
     this.diagnostics.ProcessRequest(this, data)
     if has_key(this.serverCapabilites, 'completionProvider')
       this.completion.ProcessRequest(this, data)
@@ -55,6 +58,7 @@ export abstract class Server
 
     this.documentSync.ProcessNotification(this, data)
     this.workspace.ProcessNotification(this, data)
+    this.workspaceDiagnostics.ProcessNotification(this, data)
     this.diagnostics.ProcessNotification(this, data)
     if has_key(this.serverCapabilites, 'completionProvider')
       this.completion.ProcessNotification(this, data)

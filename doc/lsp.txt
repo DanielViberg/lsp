@@ -52,4 +52,22 @@ Format current buffer.
 *:LspGoToDefinition*
 Go to definition of symbol under cursor.
 
+*:LspDiagnostics*
+Check solution-wide diagnostics using the language servers associated with open
+file buffers, including hidden buffers. Each server is queried once. Servers
+without workspace-diagnostic support are skipped.
+
+Results include unopened files and all severities: error, warning, information,
+and hint. They appear in the quickfix window with abbreviated solution-relative
+directory names, the full filename, severity, message, and line/column:
+>
+    "s/S/AccountService.cs" error: Unknown identifier (42:9)
+<
+Use <Enter>, :cnext, or :cprevious to jump to an issue. The shortened paths are
+only for display; navigation uses the full file path and diagnostic position.
+
+Checks run asynchronously. Run the command again to refresh results. Empty
+reports clear resolved issues. Failed requests or a two-minute timeout mark
+the list as incomplete; successfully returned results remain available.
+
 vim:tw=78:ts=8:ft=help:norl:

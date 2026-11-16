@@ -13,6 +13,7 @@ import "../lib/ClientState/Config.vim" as c
 import "../lib/Features/Formatting.vim" as f
 import "../lib/Features/Hover.vim" as h
 import "../lib/Features/GoToDefinition.vim" as g
+import "../lib/Features/WorkspaceDiagnostics.vim" as wd
 
 g:loaded_lsp = true
 
@@ -34,6 +35,7 @@ command! LspDisable call Disable()
 command! LspEnable call Enable()
 command! LspHover call h.HoverCmd()
 command! LspGoToD call g.GoToCmd()
+command! LspDiagnostics call wd.DiagnosticsCmd()
 
 def Disable(): void
 	buf.disable = true

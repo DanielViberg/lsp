@@ -9,6 +9,7 @@ import "../Features/UserMiddleware.vim" as m
 import "../Features/GoToDefinition.vim" as gtd
 import "../Features/DocumentSync.vim" as dc
 import "../Features/Workspace.vim" as w
+import "../Features/WorkspaceDiagnostics.vim" as wd
 import "../Protocol/Notifications/Notification.vim" as notif
 import "../Protocol/Requests/Initialize.vim" as reqI
 import "../Protocol/Requests/Shutdown.vim" as reqSu
@@ -63,6 +64,7 @@ export class Server extends serv.Server
     this.isRunning = true
 
     var initReq = reqI.Initialize.new(this.config)
+    this.rootUri = initReq.params.rootUri
     r.RpcAsync(this, initReq, this.InitResponse, bnr)
     l.PrintDebug("Server " .. get(this.config, 'name') .. " init")
   enddef
@@ -78,6 +80,7 @@ export class Server extends serv.Server
     l.PrintDebug('Init features ' .. this.id)
     this.documentSync = dc.DocumentSync.new()
     this.workspace = w.Workspace.new()
+    this.workspaceDiagnostics = wd.WorkspaceDiagnostics.new()
     this.diagnostics = diag.Diagnostics.new()
     if has_key(this.serverCapabilites, 'completionProvider')
       this.completion = comp.Completion.new(false)
@@ -105,6 +108,7 @@ export class Server extends serv.Server
   def Stop(): void
     this.documentSync.ServerPreStop()
     this.workspace.ServerPreStop()
+    this.workspaceDiagnostics.ServerPreStop()
     this.diagnostics.ServerPreStop()
     this.completion.ServerPreStop()
     this.snippet.ServerPreStop()

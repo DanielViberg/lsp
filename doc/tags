@@ -1,4 +1,5 @@
 :LspConfig	lsp.txt	/*:LspConfig*
+:LspDiagnostics	lsp.txt	/*:LspDiagnostics*
 :LspDisable	lsp.txt	/*:LspDisable*
 :LspEnable	lsp.txt	/*:LspEnable*
 :LspFormat	lsp.txt	/*:LspFormat*

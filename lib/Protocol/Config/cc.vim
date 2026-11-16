@@ -54,8 +54,8 @@ export const CC = {
       dynamicRegistration: false,
       resolveSupport: { properties: [] }
     },
-    diagnostics: { 
-      dynamicRegistration: false 
+    diagnostics: {
+      refreshSupport: false
     }
   },
   textDocument: {
