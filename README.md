@@ -52,10 +52,6 @@ WIP
 - :LspGoToDefinition (Go to symbol definition)
 - :LspDiagnostics    (Check solution-wide diagnostics for servers used by open buffers)
 
-`:LspDiagnostics` queries each supported language server once, including issues
-in unopened files. Servers without workspace-diagnostic support are skipped.
-Results open in Vim's quickfix window with abbreviated solution-relative paths:
-
 ```text
 "s/S/AccountService.cs" error: Unknown identifier (42:9)
 "s/C/Settings.cs" warning: Unused variable (18:5)
