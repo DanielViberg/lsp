@@ -1,7 +1,6 @@
 vim9script
 
 import "../../Utils/Json.vim" as j
-import "../../Utils/Str.vim" as s
 import "../../Utils/Log.vim" as l
 
 const KIND_UTF8  = 'utf-8'
@@ -42,22 +41,10 @@ export class Position implements j.JsonSerializable
     :silent! bId->bufload()
 
     var ltext: string = bId->getbufline(this.line)->get(0, '')
-    if ltext->empty()
-      return
-    endif
-
-    # Convert the character index that includes composing characters as separate
-    # characters to a byte index and then back to a character index ignoring the
-    # composing characters.
-    var byteIdx = ltext->byteidxcomp(this.character)
-    if byteIdx != -1
-      if byteIdx == ltext->strlen()
-        # Byte index points to the byte after the last byte.
-        this.character = ltext->strcharlen()
-      else
-        this.character = ltext->charidx(byteIdx, false)
-      endif
-    endif
+    var enc = this.GetServerEncoding()
+    var offset = enc == KIND_UTF8 ? this.character
+        : byteidxcomp(ltext, this.character, enc == KIND_UTF16)
+    this.character = offset < 0 ? strlen(ltext) : min([offset, strlen(ltext)])
   enddef
 
   # 1. Subract 1 char, then calculate byte offset
@@ -71,16 +58,13 @@ export class Position implements j.JsonSerializable
          character: 0
       }
     endif
-    var newChar: number = 0
+    var prefix = strpart(text, 0, char)
+    var newChar = strlen(prefix)
     var enc = this.GetServerEncoding()
-    if enc == KIND_UTF8
-      newChar = s.Utf8ToUtf8WithComp(text, char)
-    endif
     if enc == KIND_UTF16
-      newChar = s.Utf8ToUtf16WithComp(text, char)
-    endif
-    if enc == KIND_UTF32
-      newChar = s.Utf8ToUtf32WithComp(text, char)
+      newChar = strutf16len(prefix, true)
+    elseif enc == KIND_UTF32
+      newChar = strchars(prefix)
     endif
     return {
        line: line,

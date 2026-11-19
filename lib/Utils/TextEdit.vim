@@ -5,9 +5,10 @@ import "../Protocol/Objects/Position.vim" as p
 import "../Utils/Log.vim" as l
 import "../Utils/Str.vim" as s
 
-export def ApplyTextEdits(bnr: number, changes: list<tdce.TextDocumentContentChangeEvent>): void
+# Return a Vim cursor position if a completion edit requests one.
+export def ApplyTextEdits(bnr: number, changes: list<tdce.TextDocumentContentChangeEvent>): list<number>
   if changes->empty()
-    return 
+    return []
   endif
 
   :silent! bnr->bufload()
@@ -54,10 +55,23 @@ export def ApplyTextEdits(bnr: number, changes: list<tdce.TextDocumentContentCha
     lines->add('')
   endif
 
+  var endpoint: list<number> = []
   for e in updateEdits
     var A: list<number> = [e.A[0] - startLine, e.A[1]]
     var B: list<number> = [e.B[0] - startLine, e.B[1]]
     lines = SetLines(lines, A, B, e.lines)
+    var lastRow = e.A[0] + len(e.lines) - 1
+    var lastCol = strlen(e.lines[-1]) + (len(e.lines) == 1 ? e.A[1] : 0)
+    if changes[e.idx].moveCursor
+      endpoint = [lastRow, lastCol]
+    elseif !empty(endpoint)
+      # In descending order, remaining edits precede the primary edit.
+      # Preserve the suffix between this edit's old end and the endpoint.
+      if endpoint[0] == e.B[0]
+        endpoint[1] += lastCol - e.B[1]
+      endif
+      endpoint[0] += lastRow - e.B[0]
+    endif
   endfor
 
   # If the last line is empty and we need to set EOL, then remove it.
@@ -106,6 +120,7 @@ export def ApplyTextEdits(bnr: number, changes: list<tdce.TextDocumentContentCha
   if dellastline
     bnr->deletebufline(bnr->getbufinfo()[0].linecount)
   endif
+  return empty(endpoint) ? [] : [endpoint[0] + 1, endpoint[1] + 1]
 enddef
 
 # sort the list of edit operations in the descending order of line and column
@@ -148,11 +163,8 @@ def SetLines(lines: list<string>,
   endif
 
   # save the prefix and suffix text before doing the replacements
-  var prefix: string = ''
-  var suffix: string = lines[in][B[1] :]
-  if A[1] > 0
-    prefix = lines[i0][0 : A[1] - 1]
-  endif
+  var prefix = strpart(lines[i0], 0, A[1])
+  var suffix = strpart(lines[in], B[1])
 
   var newLinesLen: number = newLines->len()
 

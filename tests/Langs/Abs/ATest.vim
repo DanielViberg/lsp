@@ -107,6 +107,15 @@ export abstract class ATest
           if item.word == accept[1]
             feedkeys("\<Enter>", "")
             timer_start(500, (_) => {
+              # Optional marker in the expected text is the Insert-mode caret.
+              var expected = split(accept[2], "\n", true)
+              for i in range(len(expected))
+                var byte = stridx(expected[i], '¤')
+                if byte >= 0 && assert_equal([i + 1, byte + 1], [line('.'), col('.')], 'completion cursor')
+                  l.PrintError(v:errors[-1])
+                  result = 1
+                endif
+              endfor
               feedkeys("\<Esc>", "")
             })
             return
@@ -121,7 +130,7 @@ export abstract class ATest
       if result
         return result
       endif
-      if assert_equal(join(getline(1, '$'), "\n"), accept[2])
+      if assert_equal(substitute(accept[2], '¤', '', ''), join(getline(1, '$'), "\n"))
         echomsg join(getline(1, '$'), "\n")
         echomsg accept[2]
         l.PrintError("Failed completion accept")
@@ -194,4 +203,3 @@ export abstract class ATest
   # Workspace
 
 endclass
-

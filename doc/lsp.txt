@@ -15,6 +15,18 @@ How many buffer words are allowed to be cached
 g:lsp_diagnostics (bool)				       *lsp_diagnostics*
 Show lsp diagnostic.
 
+Snippet completions
+When you accept a snippet, Vim selects its first numbered placeholder. Type
+to replace the default, or press Tab to keep it and advance. Stops are
+visited in numeric order, ending at $0 (the end of the snippet if omitted).
+Tab is installed only if unmapped. To choose another key, map it in both
+Insert and Select mode, for example: >
+  imap <C-L> <Plug>(lsp-snippet-next)
+  smap <C-L> <Plug>(lsp-snippet-next)
+<
+Choices insert their first alternative. Repeated stops copy the initial
+default; edits are not mirrored. Regex transformations are not supported.
+
 ==============================================================================
 CONFIGURATION                                                *lsp-configuration*
 

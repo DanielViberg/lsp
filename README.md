@@ -11,6 +11,7 @@ A pure vim9script, lightweight lsp client.
 
 ### Features
 - Completion
+- Snippet completions: type to replace the selected placeholder, then press Tab to advance.
 - GoToDefinition (Hardcoded to "\<Enter>")
 - Diagnostics
 - Solution-wide diagnostics in the quickfix list

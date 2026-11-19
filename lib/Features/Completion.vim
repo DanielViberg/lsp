@@ -17,6 +17,7 @@ import "../Protocol/Objects/Position.vim" as p
 import "../Protocol/Objects/TextDocumentPosition.vim" as tdp
 import "../Protocol/Objects/TextDocumentContentChangeEvent.vim" as tdce
 import "../Utils/TextEdit.vim" as t
+import "../Utils/Snippet.vim" as sn
 import "../../env.vim" as e
 
 # Completion was triggered by typing an identifier (24x7 code
@@ -154,44 +155,10 @@ def RequestCompletionReply(server: abs.Server, reply: dict<any>, bId: number)
 
     l.PrintDebug('Completion item count ' .. items->len())
 
-    var line = getline('.')
-    var cursorCol = col('.') - 1
-    var startCol = cursorCol - 1
-    var endCol = startCol
-    var wordChar: string = '[a-zA-Z0-9_-]'
-    var startWithTriggerChar: bool = false
-
-    while startCol > 0 && endCol >= 0
-
-      if server.serverCapabilites.completionProvider
-         .triggerCharacters->index(line[endCol]) != -1 &&
-         !(line[endCol] =~ wordChar)
-        l.PrintDebug('Is trigger char')
-        startWithTriggerChar = true
-        endCol += 1
-        break
-      endif
-
-      if endCol == 0
-        l.PrintDebug('Is char 0')
-        endCol = !(line[endCol] =~ wordChar) ? 1 : 0
-        break
-      endif
-
-      if !(line[endCol] =~ wordChar)
-        l.PrintDebug('Is not word char')
-        endCol = endCol + 1
-        break
-      endif
-
-      endCol -= 1
-    endwhile
-
-    l.PrintDebug('Completion startCol:' .. startCol)
-    l.PrintDebug('Completion endCol:' .. endCol)
-
-    var word = trim(line[ endCol : startCol ])
-    var query = word
+    var query = CompleteMatch()
+    var before = strpart(getline('.'), 0, col('.') - 1 - strlen(query))
+    var startWithTriggerChar = server.serverCapabilites.completionProvider
+        .triggerCharacters->index(matchstr(before, '.$')) != -1
     l.PrintDebug('Completion query ' .. query)
 
     # Lsp dont want completion triggered
@@ -346,104 +313,43 @@ enddef
 def CompleteAccept(ci: any): void
   if !ci->empty() && type(ci.user_data) == v:t_dict
 
-    if ci.user_data.item->get('is_buf') || 
-       ci.user_data.item->has_key('insertText') ||
-       !ci.user_data.item->has_key('textEdit')
-      var word = ci->get('word')
-      if ci.user_data.item->has_key('insertText')
-        word = ci.user_data.item.insertText
-      endif
-      CompleteAcceptBuf(word)
+    var item = ci.user_data.item
+    if item->get('is_buf')
+      CompleteAcceptBuf(ci.word)
       return
     endif
 
-    if has_key(ci.user_data.item, 'textEdit') && 
-       ci.user_data.item.textEdit != null_dict
-      l.PrintDebug("Process completion change")
-      var server = ses.GetSessionServerById(ci.user_data.server_id)
-      var changes: list<any> = []
-      # TODO: Dont filter out snippets
-      var newText = ci.user_data.item.textEdit.newText
-        ->substitute('\$[0-9]\+\|\${\%(\\.\|[^}]\)\+}', '', 'g')
-      var range: any = {}
-
-      if ci.user_data.item.textEdit->has_key('insert')
-        l.PrintDebug("Process completion insert")
-        range = ci.user_data.item.textEdit.insert
-      elseif ci.user_data.item.textEdit->has_key('range')
-        l.PrintDebug("Process completion range")
-        range = ci.user_data.item.textEdit.range
-      endif
-
-      changes->add(tdce.TextDocumentContentChangeEvent.new(
-        newText,
-        range,
-        server,
-        true))
-
-      if has_key(ci.user_data.item, 'additionalTextEdits')
-        for edit in ci.user_data.item->get('additionalTextEdits')
-          l.PrintDebug("Process additionalTextEdits")
-          var anewText = edit.newText
-          var arange: any = {}
-
-          if edit->has_key('insert')
-            arange = edit.insert
-          elseif edit->has_key('range')
-            arange = edit.range
-          endif
-
-          changes->add(tdce.TextDocumentContentChangeEvent.new(
-            anewText,
-            arange,
-            server))
-
-        endfor
-      endif
-      CompletionChange(changes, server)
-
-      if ci.user_data.item->get('insertTextFormat') == 2
-        server.snippet.Handle()
-      endif
-
-      if !has_key(ci.user_data.item, 'additionalTextEdits')
-        ResolveCompletion(ci.user_data.server_id, bufnr(), ci.user_data.item)
+    var server = ses.GetSessionServerById(ci.user_data.server_id)
+    var edit = item->get('textEdit', {})
+    var range: dict<any>
+    if empty(edit)
+      var column = col('.')
+      range = {
+        start: p.Position.new(server, line('.'), column - strlen(CompleteMatch())).ToJson(),
+        end: p.Position.new(server, line('.'), column).ToJson(),
+      }
+    else
+      range = edit->has_key('insert') ? edit.insert : edit.range
+    endif
+    var text = edit->get('newText', item->get('insertText', ci.word))
+    var parsed: dict<any> = {}
+    if item->get('insertTextFormat') == 2
+      parsed = sn.Parse(text)
+      text = parsed.text
+    endif
+    var changes = [tdce.TextDocumentContentChangeEvent.new(text, range, server, true)]
+    var additional = item->get('additionalTextEdits', [])
+    if !has_key(item, 'additionalTextEdits') && server.serverCapabilites.completionProvider->get('resolveProvider')
+      # Resolved edits refer to the buffer before the completion was inserted.
+      var reply = r.RpcSync(server, cr.CompletionResolve.new(item))
+      if type(reply->get('result')) == v:t_dict
+        additional = reply.result->get('additionalTextEdits', [])
       endif
     endif
-  endif
-enddef
-
-def ResolveCompletion(sid: number, buf: number, item: any): void
-  l.PrintDebug("Resolve completion")
-  var server = ses.GetSessionServerById(sid)
-  if !server.serverCapabilites.completionProvider->get('resolveProvider')
-    return
-  else
-    var compRes = cr.CompletionResolve.new(item)
-    var reply = r.RpcSync(server, compRes) 
-    ResolveCompletionReply(server, reply)
-  endif
-enddef
-
-def ResolveCompletionReply(server: abs.Server, reply: dict<any>): void
-  if has_key(reply, 'result') && has_key(reply.result, 'additionalTextEdits')
-    var changes: list<any> = []
-    for edit in reply.result->get('additionalTextEdits')
-      var anewText = edit.newText
-      var arange: any = {}
-
-      if edit->has_key('insert')
-        arange = edit.insert
-      elseif edit->has_key('range')
-        arange = edit.range
-      endif
-
-      changes->add(tdce.TextDocumentContentChangeEvent.new(
-        anewText,
-        arange,
-        server))
+    for extra in additional
+      changes->add(tdce.TextDocumentContentChangeEvent.new(extra.newText, extra.range, server))
     endfor
-    CompletionChange(changes, server)
+    CompletionChange(changes, server, parsed)
   endif
 enddef
 
@@ -490,33 +396,16 @@ def CompleteAcceptBuf(word: string): void
   var trigger = CompleteMatch()
   var lineText = getline(line('.'))
   var cursorIndex = col('.') - 1
-  var compIndex = cursorIndex - trigger->len()
-  var startIndex = compIndex <= 0 && cursorIndex == 0 ? 0 : compIndex
-  var startText = startIndex == 0 ? '' : lineText[ : startIndex - 1]
-  setline(line('.'), startText .. word .. lineText[ col('.') - 1 : ])
-  cursor(line('.'), col('.') + len(word) - trigger->len())
+  var startIndex = cursorIndex - strlen(trigger)
+  setline(line('.'), strpart(lineText, 0, startIndex) .. word .. strpart(lineText, cursorIndex))
+  cursor(line('.'), startIndex + strlen(word) + 1)
 enddef
 
 def CompleteMatch(): string
-    var line = getline('.')
-    var startCol = col('.') - 2
-    var endCol = startCol
-    var wordChar: string = '[a-zA-Z0-9_-]'
-    while startCol > 0 && endCol >= 0
-      if endCol == 0
-        endCol = !(line[endCol] =~ wordChar) ? 1 : 0
-        break
-      endif
-      if !(line[endCol] =~ wordChar)
-        endCol = endCol + 1
-        break
-      endif
-      endCol -= 1
-    endwhile
-    return line->strpart(endCol, startCol - endCol + 1)
+  return matchstr(strpart(getline('.'), 0, col('.') - 1), '[a-zA-Z0-9_-]*$')
 enddef
 
-def CompletionChange(changes: list<any>, server: any): void
+def CompletionChange(changes: list<tdce.TextDocumentContentChangeEvent>, server: any, parsed: dict<any>): void
   if changes->len() == 0
     return
   endif
@@ -532,20 +421,19 @@ def CompletionChange(changes: list<any>, server: any): void
     }) == -1
   })
 
-  var cursorLineDelta = 0
-  var newCol = 0
   for change in changes
     change.VimDecode(bufnr())
-    if change.start.line < line('.') - 1
-      cursorLineDelta = change.text->split("\n")->filter((_, line) => line =~ '\S')->len()
-    endif
-    newCol = change.start.character + strlen(change.text) + 1
   endfor
 
   l.PrintDebug('Apply Text Edits')
-  var cursorOldLine = line('.')
-  t.ApplyTextEdits(bufnr(), changes)
-  cursor(cursorOldLine + cursorLineDelta, newCol)
+  var endpoint = t.ApplyTextEdits(bufnr(), changes)
+  if !empty(endpoint)
+    if empty(parsed)
+      cursor(endpoint)
+    else
+      server.snippet.Handle(parsed, endpoint)
+    endif
+  endif
   
   d.DidChange(server, bufnr(), false)
 enddef
